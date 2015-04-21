@@ -24,6 +24,8 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
 !  q(3) - sigma_zz
 ! ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 !
+    use regions_module, only: regions, num_regions
+
     implicit none
 
 
@@ -33,7 +35,9 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
     logical     allowflag
     external    allowflag
     real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t, level
-    integer :: mx, my, mz, mbc, meqn, maux, i, j, k, xcell, ycell, zcell
+
+    real (kind=8) :: xcell, ycell, zcell
+    integer :: mx, my, mz, mbc, meqn, maux, i, j, k, m, mreg, min_level, max_level
 
 !   # loop over interior points on this grid:
     do k = 1,mz
@@ -42,10 +46,32 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
             ycell = ylower + (j-0.5d0)*dy
             do i = 1,mx
                 xcell = xlower + (i-0.5d0)*dx
-
                 amrflags(i,j,k) = DONTFLAG
-                if (allowflag(xcell,ycell,zcell,t,level) .and. dabs(q(1,i,j,k) + q(2,i,j,k) &
-                    + q(3,i,j,k))/3.d0 .ge. tolsp) then
+
+!               # check which regions, if any, the point is in
+                mreg = -1
+                m = 1
+                min_level = 0
+                max_level = 1000
+                do while (mreg .eq. -1 .and. m .le. num_regions)
+                    if (regions(m)%t_low .le. t .and. t .le. regions(m)%t_hi .and. &
+                        regions(m)%x_low .le. xcell .and. xcell .le. regions(m)%x_hi .and. &
+                        regions(m)%y_low .le. ycell .and. ycell .le. regions(m)%y_hi .and. &
+                        regions(m)%z_low .le. zcell .and. zcell .le. regions(m)%z_hi) then
+                        mreg = m
+                        min_level = max(min_level, regions(m)%min_level)
+                        max_level = min(max_level, regions(m)%max_level)
+                    else
+                        m = m + 1
+                    end if
+                end do
+
+!               # if a region is found, check if the current level is valid
+!               # if no region is found, use allowflag and check the specified tolerance
+                if (mreg < num_regions .and. min_level .le. level .and. level .le. max_level) then
+                    amrflags(i,j,k) = DOFLAG
+                else if (mreg .eq. num_regions .and. allowflag(xcell,ycell,zcell,t,level) &
+                         .and. dabs(q(1,i,j,k) + q(2,i,j,k) + q(3,i,j,k))/3.d0 .ge. tolsp) then
                     amrflags(i,j,k) = DOFLAG
                 end if
             

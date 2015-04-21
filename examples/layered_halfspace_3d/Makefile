@@ -41,8 +41,8 @@ SEILIB = $(CLAW)/seismic/src/3d
 MODULES = \
   $(AMRLIB)/amr_module.f90 \
   $(AMRLIB)/gauges_module.f90 \
+  $(AMRLIB)/regions_module.f90
 #  $(AMRLIB)/slices_module.f90 \
-  $(AMRLIB)/regions_module.f90 \
 
 SOURCES = \
   ./qinit.f90 \

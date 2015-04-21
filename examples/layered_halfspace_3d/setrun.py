@@ -76,9 +76,9 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.upper[2] = 0.0     # zupper
         
     # Number of grid cells:
-    clawdata.num_cells[0] = 20 # mx
-    clawdata.num_cells[1] = 20 # my    
-    clawdata.num_cells[2] = 20 # mz
+    clawdata.num_cells[0] = 10 # mx
+    clawdata.num_cells[1] = 10 # my    
+    clawdata.num_cells[2] = 10 # mz
 
     # ---------------
     # Size of system:
@@ -133,7 +133,7 @@ def setrun(claw_pkg='amrclaw'):
  
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
-        clawdata.output_step_interval = 1
+        clawdata.output_step_interval = 2
         clawdata.total_steps = 10
         clawdata.output_t0 = True  # output at initial (or restart) time?
         
@@ -327,9 +327,10 @@ def setrun(claw_pkg='amrclaw'):
     # -------------------
     # Refinement Regions:
     # -------------------
-    #regions = rundata.regiondata.regions 
+    regions = rundata.regiondata.regions 
     # to specify regions of refinement append lines of the form
-    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,0,1e9,0.4,0.6,0.4,0.6,-0.6,-0.4])
 
 
     #  ----- For developers ----- 
