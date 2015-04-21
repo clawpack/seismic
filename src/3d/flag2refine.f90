@@ -27,21 +27,24 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
     implicit none
 
 
-    real (kind=8) :: q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
-    real (kind=8) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
-    real (kind=8) :: amrflags(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
+    real (kind=8), intent(in) :: q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
+    real (kind=8), intent(in) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
+    real (kind=8), intent(inout) :: amrflags(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
     logical     allowflag
     external    allowflag
-    real (kind=8) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t
-    integer :: mx, my, mz, mbc, meqn, maux, i, j, k
+    real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t, level
+    integer :: mx, my, mz, mbc, meqn, maux, i, j, k, xcell, ycell, zcell
 
 !   # loop over interior points on this grid:
     do k = 1,mz
+        zcell = zlower + (k-0.5d0)*dz
         do j = 1,my
+            ycell = ylower + (j-0.5d0)*dy
             do i = 1,mx
+                xcell = xlower + (i-0.5d0)*dx
 
                 amrflags(i,j,k) = DONTFLAG
-                if (allowflag(x,y,z,t,level) .and. dabs(q(1,i,j,k) + q(2,i,j,k) &
+                if (allowflag(xcell,ycell,zcell,t,level) .and. dabs(q(1,i,j,k) + q(2,i,j,k) &
                     + q(3,i,j,k))/3.d0 .ge. tolsp) then
                     amrflags(i,j,k) = DOFLAG
                 end if
