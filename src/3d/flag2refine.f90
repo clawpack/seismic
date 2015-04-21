@@ -36,7 +36,7 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
     external    allowflag
     real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t, level
 
-    real (kind=8) :: xcell, ycell, zcell
+    real (kind=8) :: xcell, ycell, zcell, max_stress
     integer :: mx, my, mz, mbc, meqn, maux, i, j, k, m, mreg, min_level, max_level
 
 !   # loop over interior points on this grid:
@@ -70,9 +70,14 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
 !               # if no region is found, use allowflag and check the specified tolerance
                 if (mreg < num_regions .and. min_level .le. level .and. level .le. max_level) then
                     amrflags(i,j,k) = DOFLAG
-                else if (mreg .eq. num_regions .and. allowflag(xcell,ycell,zcell,t,level) &
-                         .and. dabs(q(1,i,j,k) + q(2,i,j,k) + q(3,i,j,k))/3.d0 .ge. tolsp) then
-                    amrflags(i,j,k) = DOFLAG
+                else if (mreg .eq. num_regions .and. allowflag(xcell,ycell,zcell,t,level)) then
+                    max_stress = 0.d0
+                    do m = 1,6
+                        max_stress = max(max_stress, dabs(q(m,i,j,k)))  
+                    end do
+                    if (max_stress .ge. tolsp) then
+                        amrflags(i,j,k) = DOFLAG
+                    end if
                 end if
             
             end do
