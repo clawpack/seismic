@@ -51,8 +51,8 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('src_x',     0.5,  'x coordinate of source') 
     probdata.add_param('src_y',     0.5,  'y coordinate of source')
     probdata.add_param('src_z',     -0.5,  'z coordinate of source')
-    probdata.add_param('amplitude', 1.0e7,  'max amplitude of source')
-    probdata.add_param('t_span',    2.0e-0, 'time span of initial pulse')
+    probdata.add_param('amplitude', 1.0e2,  'max amplitude of source')
+    probdata.add_param('t_span',    2.0e-4, 'time span of initial pulse')
         
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -76,9 +76,9 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.upper[2] = 0.0     # zupper
         
     # Number of grid cells:
-    clawdata.num_cells[0] = 10 # mx
-    clawdata.num_cells[1] = 10 # my    
-    clawdata.num_cells[2] = 10 # mz
+    clawdata.num_cells[0] = 20 # mx
+    clawdata.num_cells[1] = 20 # my    
+    clawdata.num_cells[2] = 20 # mz
 
     # ---------------
     # Size of system:
@@ -133,8 +133,8 @@ def setrun(claw_pkg='amrclaw'):
  
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
-        clawdata.output_step_interval = 2
-        clawdata.total_steps = 10
+        clawdata.output_step_interval = 5
+        clawdata.total_steps = 50
         clawdata.output_t0 = True  # output at initial (or restart) time?
         
 
