@@ -60,8 +60,6 @@ subroutine src3(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux,t,dt)
             end if
         end do
 
-        write(6,*) dt/vol_cell*current_amp
-
     end if
 
 end subroutine src3
