@@ -35,33 +35,30 @@ FFLAGS ?=  -fopenmp
 # ---------------------------------
 
 AMRLIB = $(CLAW)/amrclaw/src/3d
+SEILIB = $(CLAW)/seismic/src/3d
 
 
 MODULES = \
   $(AMRLIB)/amr_module.f90 \
   $(AMRLIB)/gauges_module.f90 \
-  $(AMRLIB)/slices_module.f90 \
-#  $(AMRLIB)/regions_module.f90 \
+  $(AMRLIB)/regions_module.f90 
+#  $(AMRLIB)/slices_module.f90 
 
 SOURCES = \
+  ./bc3amr.f90 \
   ./qinit.f90 \
   ./setprob.f90 \
   ./setaux.f90 \
-  ./bc3amr.f90 \
-  ./flag2refine.f90 \
-  ./allowflag.f90 \
-  ./amr2_reload.f90 \
-  ./reload.f \
-  ./interp_reload.f \
-  ./mapc2p.f90 \
-  ../../rp/rpn3_vc_elasticity_cylindrical.f90 \
-  ../../rp/rpt3_vc_elasticity_cylindrical.f90 \
-  ../../rp/rptt3_vc_elasticity_cylindrical.f90 \
+  ./src3.f90 \
+  $(CLAW)/riemann/src/rpn3_vc_elasticity.f90 \
+  $(CLAW)/riemann/src/rpt3_vc_elasticity.f90 \
+  $(CLAW)/riemann/src/rptt3_vc_elasticity.f90 \
+  $(SEILIB)/flag2refine.f90 \
   $(AMRLIB)/amr3.f90 \
+  $(AMRLIB)/allowflag.f \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/qad.f \
-  $(AMRLIB)/src3.f90 \
   $(AMRLIB)/src1d.f90 \
   $(AMRLIB)/advanc.f \
   $(AMRLIB)/bound.f \
