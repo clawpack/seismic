@@ -25,8 +25,7 @@ RESTART ?= False                    # Should = clawdata.restart in setrun
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 
 # Compiler flags can be specified here or set as an environment variable
-#FFLAGS ?=  -fopenmp
-FFLAGS ?=  -fopenmp -W -Wall -fbounds-check -O -ffpe-trap=zero,overflow,underflow,invalid -g
+FFLAGS ?=  -fopenmp
 #FFLAGS ?=  -fopenmp -W -Wall -fbounds-check -pedantic-errors -std=f2003 -Wunderflow -O -ffpe-trap=zero,overflow,underflow,invalid -g
 
 
@@ -42,10 +41,11 @@ SEILIB = $(CLAW)/seismic/src/3d
 MODULES = \
   $(AMRLIB)/amr_module.f90 \
   $(AMRLIB)/gauges_module.f90 \
-  $(AMRLIB)/regions_module.f90 \
-  $(AMRLIB)/slices_module.f90 
+  $(AMRLIB)/regions_module.f90 
+#  $(AMRLIB)/slices_module.f90 
 
 SOURCES = \
+  ./bc3amr.f90 \
   ./qinit.f90 \
   ./setprob.f90 \
   ./setaux.f90 \
@@ -56,7 +56,6 @@ SOURCES = \
   $(SEILIB)/flag2refine.f90 \
   $(AMRLIB)/amr3.f90 \
   $(AMRLIB)/allowflag.f \
-  $(AMRLIB)/bc3amr.f90 \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/qad.f \

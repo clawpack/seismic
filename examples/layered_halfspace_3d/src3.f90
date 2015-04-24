@@ -5,8 +5,6 @@ subroutine src3(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux,t,dt)
     !
     ! This default version does nothing. 
  
-    use amr_module, only: lfine, hxposs, hyposs, hzposs
-
     implicit none
     integer, intent(in) :: meqn,mbc,mx,my,mz,maux
     real(kind=8), intent(in) :: xlower,ylower,zlower,dx,dy,dz,t,dt
@@ -21,9 +19,7 @@ subroutine src3(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux,t,dt)
 
     real (kind=8) :: tol = 1.0d-10
 
-    ! Only add source to finest grid
-    if (t .le. t_span .and. dabs(hxposs(lfine)-dx) < tol .and. dabs(hyposs(lfine)-dy) < tol .and. &
-        dabs(hzposs(lfine)-dz) < tol) then
+    if (t .le. t_span) then
         vol_cell = dx*dy*dz
         two_pi = 8.d0*datan(1.d0)
         current_amp = amplitude*(1.d0 - dcos(two_pi*t/t_span))/2.d0
@@ -41,17 +37,20 @@ subroutine src3(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux,t,dt)
                             relpos(1) = (src_x - (xcell - 0.5d0*dx))/dx
 
                             if (-tol < relpos(1) .and. relpos(1) < 1.d0+tol) then
+
+                                ! Check if the source is on a corner, edge, or face and
+                                ! distribute the source appropriately
                                 counter = 0
                                 do m=1,3
                                     if(dabs(relpos(m)) < tol .or. dabs(relpos(m)-1.d0) < tol) then
                                         counter = counter + 1
                                     end if
                                 end do
-
                                 adj_amp = current_amp/2.d0**counter
-                                q(1,i,j,k) = q(1,i,j,k) + dt/vol_cell*adj_amp
-                                q(2,i,j,k) = q(2,i,j,k) + dt/vol_cell*adj_amp
-                                q(3,i,j,k) = q(3,i,j,k) + dt/vol_cell*adj_amp
+
+                                q(1,i,j,k) = q(1,i,j,k) - dt/vol_cell*adj_amp
+                                q(2,i,j,k) = q(2,i,j,k) - dt/vol_cell*adj_amp
+                                q(3,i,j,k) = q(3,i,j,k) - dt/vol_cell*adj_amp
 
                             end if
                         end do
@@ -59,7 +58,6 @@ subroutine src3(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux,t,dt)
                 end do
             end if
         end do
-
     end if
 
 end subroutine src3

@@ -32,27 +32,37 @@ def setrun(claw_pkg='amrclaw'):
     num_dim = 3
     rundata = data.ClawRunData(claw_pkg, num_dim)
 
+    # Source parameters set here so they can be used in various locations
+    source_location = [0.0,0.0,-0.5]
+    source_tspan = 1.0e-4
+
+
     #------------------------------------------------------------------
     # Problem-specific parameters to be written to setprob.data:
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    # Lame parameters in top layer
+    # Lame parameters in top layer (water)
     probdata.add_param('rho1',      1000.0,  'density') #kg/m^3 ==> Speeds in m/s
     probdata.add_param('lambda1',   2202256000.0,  'Lame parameter lambda')
     probdata.add_param('mu1',       0.0,  'Lame parameter mu')
-    # Lame parameters in bottom layer
-    probdata.add_param('rho2',      7850.0,  'density') #kg/m^3 ==> Speeds in m/s
-    probdata.add_param('lambda2',   114540527500.0,  'Lame parameter lambda')
-    probdata.add_param('mu2',       82152016250.0,  'Lame parameter mu')
+    # Lame parameters in bottom layer (water)
+    probdata.add_param('rho2',      1000.0,  'density') #kg/m^3 ==> Speeds in m/s
+    probdata.add_param('lambda2',   2202256000.0,  'Lame parameter lambda')
+    probdata.add_param('mu2',       0.0,  'Lame parameter mu')
+    # Lame parameters in bottom layer (sandstone...ish)
+#    probdata.add_param('rho2',      2500.0,  'density') #kg/m^3 ==> Speeds in m/s
+#    probdata.add_param('lambda2',   7.5e9,  'Lame parameter lambda')
+#    probdata.add_param('mu2',       2.5e9,  'Lame parameter mu')
+    
     # Location of layer boundary
     probdata.add_param('layer_boundary', -0.25, 'z coordinate of layer boundary')
     # Source parameters
-    probdata.add_param('src_x',     0.5,  'x coordinate of source') 
-    probdata.add_param('src_y',     0.5,  'y coordinate of source')
-    probdata.add_param('src_z',     -0.5,  'z coordinate of source')
-    probdata.add_param('amplitude', 1.0e2,  'max amplitude of source')
-    probdata.add_param('t_span',    2.0e-4, 'time span of initial pulse')
+    probdata.add_param('src_x',     source_location[0],  'x coordinate of source') 
+    probdata.add_param('src_y',     source_location[1],  'y coordinate of source')
+    probdata.add_param('src_z',     source_location[2],  'z coordinate of source')
+    probdata.add_param('amplitude', 100.0,  'max amplitude of source')
+    probdata.add_param('t_span',    source_tspan, 'time span of initial pulse')
         
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -68,17 +78,17 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
     
     # Lower and upper edges of computational domain:
-    clawdata.lower[0] = 0.0     # xlower
-    clawdata.upper[0] = 1.0     # xupper
-    clawdata.lower[1] = 0.0     # ylower
-    clawdata.upper[1] = 1.0     # yupper
+    clawdata.lower[0] = -0.5     # xlower
+    clawdata.upper[0] = 0.5     # xupper
+    clawdata.lower[1] = -0.5     # ylower
+    clawdata.upper[1] = 0.5     # yupper
     clawdata.lower[2] = -1.0    # zlower
     clawdata.upper[2] = 0.0     # zupper
         
     # Number of grid cells:
-    clawdata.num_cells[0] = 20 # mx
-    clawdata.num_cells[1] = 20 # my    
-    clawdata.num_cells[2] = 20 # mz
+    clawdata.num_cells[0] = 10 # mx
+    clawdata.num_cells[1] = 10 # my    
+    clawdata.num_cells[2] = 10 # mz
 
     # ---------------
     # Size of system:
@@ -133,8 +143,8 @@ def setrun(claw_pkg='amrclaw'):
  
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
-        clawdata.output_step_interval = 5
-        clawdata.total_steps = 50
+        clawdata.output_step_interval = 2
+        clawdata.total_steps = 40
         clawdata.output_t0 = True  # output at initial (or restart) time?
         
 
@@ -238,7 +248,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.bc_upper[1] = 'extrap'   # at yupper
         
     clawdata.bc_lower[2] = 'extrap'   # at zlower
-    clawdata.bc_upper[2] = 'extrap'   # at zupper
+    clawdata.bc_upper[2] = 'user'     # at zupper
 
     # --------------
     # Checkpointing:
@@ -285,13 +295,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 3
     
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [4]
-    amrdata.refinement_ratios_y = [4]
-    amrdata.refinement_ratios_z = [4]
-    amrdata.refinement_ratios_t = [4]
+    amrdata.refinement_ratios_x = [2,4]
+    amrdata.refinement_ratios_y = [2,4]
+    amrdata.refinement_ratios_z = [2,4]
+    amrdata.refinement_ratios_t = [2,4]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
@@ -330,7 +340,14 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions 
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,0,1e9,0.4,0.6,0.4,0.6,-0.6,-0.4])
+    dh = max((clawdata.upper[0]-clawdata.lower[0])/clawdata.num_cells[0],
+             (clawdata.upper[1]-clawdata.lower[1])/clawdata.num_cells[1],
+             (clawdata.upper[2]-clawdata.lower[2])/clawdata.num_cells[2])
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
+                    0,source_tspan, 
+                    source_location[0]-dh,source_location[0]+dh, 
+                    source_location[1]-dh,source_location[1]+dh, 
+                    source_location[2]-dh,source_location[2]+dh])
 
 
     #  ----- For developers ----- 

@@ -90,8 +90,8 @@ PlotCubeEdges = [1 1 1 1 1 1];   % Plot edges of cube of refinement patch at
 % to be displayed for PlotType = 1,2,3.
 % Empty ==> no slices in that direction.
 
-xSliceCoords = [0.5];
-ySliceCoords = [0.5];
+xSliceCoords = [0.0];
+ySliceCoords = [0.0];
 zSliceCoords = [-0.5];
 
 % ---------------------------------------------------------------------

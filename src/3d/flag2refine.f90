@@ -77,6 +77,8 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
                     else
                         amrflags(i,j,k) = DONTFLAG
                     end if
+                else
+                    amrflags(i,j,k) = DONTFLAG
                 end if
             
             end do
