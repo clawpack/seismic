@@ -14,14 +14,12 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
 ! for all arguments.  Copy that routine to the application directory and
 ! modify it if needed to restrict the region where refinement is allowed.
 !
-! The trace of the stress is computed at points where refinement is
-! allowed.  If this value is over tolsp, the point is flagged for
-! refinement.  This function assumes the following stress tensor (sigma)
-! structure for q:
+! First, each point is checked against the min_level and max_level
+! requirements of any regions present.  If no changes need to be made,
+! the infinity norm of the stress tensor is checked against the user
+! specified tolsp value.  This function assumes the first 6 components of
+! q are the 6 stress tensor components.
 !
-!  q(1) - sigma_xx
-!  q(2) - sigma_yy
-!  q(3) - sigma_zz
 ! ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 !
     use regions_module, only: regions, num_regions
@@ -48,7 +46,7 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
             do i = 1,mx
                 xcell = xlower + (i-0.5d0)*dx
 
-!               # check which regions, if any, the point is in
+!               # obtain the overall min and max levels from any regions containing the point
                 min_level = 0
                 max_level = infinity
                 do m =1,num_regions
@@ -62,7 +60,7 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
                 end do
 
 !               # if point is in region, make sure that region is refined as specified
-!               # if no problems, use specified tolerance and stress
+!               # if nothing needs to be changed, use specified tolerance and stress
                 if (min_level > 0 .and. level < min_level) then
                     amrflags(i,j,k) = DOFLAG
                 else if (min_level > 0 .and. max_level < level) then
