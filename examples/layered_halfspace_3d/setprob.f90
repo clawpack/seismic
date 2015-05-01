@@ -5,8 +5,8 @@ subroutine setprob
     real (kind=8) :: rho1, lambda1, mu1, rho2, lambda2, mu2, layer_boundary
     common /cparam/  rho1, lambda1, mu1, rho2, lambda2, mu2, layer_boundary
 
-    real (kind=8) :: src_x, src_y, src_z, amplitude, t_span
-    common /csrc/    src_x, src_y, src_z, amplitude, t_span
+    real (kind=8) :: src_x, src_y, src_z, src_cell_radius, amplitude, t_span
+    common /csrc/    src_x, src_y, src_z, src_cell_radius, amplitude, t_span
 
     ! local variables:
     character*12 :: fname
@@ -29,6 +29,7 @@ subroutine setprob
     read(7,*) src_x
     read(7,*) src_y
     read(7,*) src_z
+    read(7,*) src_cell_radius
     read(7,*) amplitude
     read(7,*) t_span
 

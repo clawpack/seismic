@@ -61,7 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('src_x',     source_location[0],  'x coordinate of source') 
     probdata.add_param('src_y',     source_location[1],  'y coordinate of source')
     probdata.add_param('src_z',     source_location[2],  'z coordinate of source')
-    probdata.add_param('amplitude', 100.0,  'max amplitude of source')
+    probdata.add_param('src_cell_radius', 2.5, 'radius of spherical source in cell lengths')
+    probdata.add_param('amplitude', 1.0,  'max amplitude of source')
     probdata.add_param('t_span',    source_tspan, 'time span of initial pulse')
         
     #------------------------------------------------------------------
@@ -340,14 +341,11 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions 
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
-    dh = max((clawdata.upper[0]-clawdata.lower[0])/clawdata.num_cells[0],
-             (clawdata.upper[1]-clawdata.lower[1])/clawdata.num_cells[1],
-             (clawdata.upper[2]-clawdata.lower[2])/clawdata.num_cells[2])
     regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
                     0,source_tspan, 
-                    source_location[0]-dh,source_location[0]+dh, 
-                    source_location[1]-dh,source_location[1]+dh, 
-                    source_location[2]-dh,source_location[2]+dh])
+                    source_location[0]-0.01,source_location[0]+0.01, 
+                    source_location[1]-0.01,source_location[1]+0.01, 
+                    source_location[2]-0.01,source_location[2]+0.01])
 
 
     #  ----- For developers ----- 

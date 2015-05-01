@@ -46,20 +46,20 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
             do i = 1,mx
                 xcell = xlower + (i-0.5d0)*dx
 
-!               # obtain the overall min and max levels from any regions containing the point
+!               # obtain the overall min and max levels from any regions intersecting the cell
                 min_level = 0
                 max_level = infinity
                 do m =1,num_regions
                     if (regions(m)%t_low .le. t .and. t .le. regions(m)%t_hi .and. &
-                        regions(m)%x_low .le. xcell .and. xcell .le. regions(m)%x_hi .and. &
-                        regions(m)%y_low .le. ycell .and. ycell .le. regions(m)%y_hi .and. &
-                        regions(m)%z_low .le. zcell .and. zcell .le. regions(m)%z_hi) then
+                        regions(m)%x_low .le. xcell + 0.5d0*dx .and. xcell - 0.5d0*dx .le. regions(m)%x_hi .and. &
+                        regions(m)%y_low .le. ycell + 0.5d0*dy .and. ycell - 0.5d0*dy .le. regions(m)%y_hi .and. &
+                        regions(m)%z_low .le. zcell + 0.5d0*dz .and. zcell - 0.5d0*dz .le. regions(m)%z_hi) then
                         min_level = max(min_level, regions(m)%min_level)
                         max_level = min(max_level, regions(m)%max_level)
                     end if
                 end do
 
-!               # if point is in region, make sure that region is refined as specified
+!               # if the cell intersects any region, make sure that cell is refined as specified
 !               # if nothing needs to be changed, use specified tolerance and stress
                 if (min_level > 0 .and. level < min_level) then
                     amrflags(i,j,k) = DOFLAG
