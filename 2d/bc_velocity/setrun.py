@@ -233,7 +233,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.bc_upper[0] = 'extrap'   # at xupper
 
     clawdata.bc_lower[1] = 'user'   # at ylower
-    clawdata.bc_upper[1] = 'extrap'   # at yupper
+    clawdata.bc_upper[1] = 'user'   # at yupper
                   
 
                   
