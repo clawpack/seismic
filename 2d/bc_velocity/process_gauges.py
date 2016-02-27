@@ -39,5 +39,7 @@ for t in linspace(0.,2,9):
     plot(xc[:ngauges],ys,label='t = %6.3f' % t)
     title("vertical displacement")
 
-legend(loc='lower right')
+subplot(211)
+ylim(-0.008,.008)
+legend(loc='lower right', fontsize=10)
 
