@@ -293,7 +293,13 @@ c
 c
 
   400 continue
-c     # no stress bc for free surface
+c     # force applied to top surface with sig22 = s
+      if (time.lt.t0wall) then
+          s = amplitude*(1.d0 - cos(pi2*time/tperiod)) / 2.d0
+c         s = -1.d0
+        else
+          s = 0.d0
+        endif
 
 c     # zero-order extrapolation:
       do 405 m=1,meqn
@@ -305,8 +311,16 @@ c     # zero-order extrapolation:
 c     # adjust the stress:
       do 406 j=jbeg,ncol
          do 406 i=1,nrow
-            val(3,i,j) = -val(3,i,jbeg-1)
-            val(2,i,j) = -val(2,i,jbeg-1)
+            xcell = xlower_patch + (i-0.5d0)*hx
+            if (xcell.gt.0.995d0 .and. xcell.lt.1.005d0) then
+c               # portion of boundary where stress sig22 is applied:
+                val(3,i,j) = -val(3,i,jbeg-1)
+                val(2,i,j) = 2.d0*s - val(2,i,jbeg-1)
+              else
+c               # no-stress portion of boundary:
+                val(3,i,j) = -val(3,i,jbeg-1)
+                val(2,i,j) = -val(2,i,jbeg-1)
+              endif
   406    continue
       go to 499
 
