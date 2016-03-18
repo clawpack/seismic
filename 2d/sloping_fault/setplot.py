@@ -31,7 +31,7 @@ def setplot(plotdata):
     def plot_interfaces(current_data):
         from pylab import linspace, plot, sin, pi
         xl = linspace(0,50e3,100)
-        yl = linspace(-5e3,-13.6e3,100)
+        yl = linspace(-15e3,-23.6e3,100)
         #yl = -8e3 - sin(10*pi/180.)*xl
         plot(xl,yl,'k')
     
@@ -105,8 +105,8 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(211)'
-    plotaxes.xlimits = [-75e3, 125e3]
-    plotaxes.ylimits = [-50e3,0]
+    #plotaxes.xlimits = [-75e3, 125e3]
+    #plotaxes.ylimits = [-50e3,0]
     plotaxes.title = '-trace(sigma)'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces
@@ -115,10 +115,10 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
     plotitem.plot_var = sigmatr
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -5e6
-    plotitem.pcolor_cmax = 5e6
+    plotitem.pcolor_cmin = -1e6
+    plotitem.pcolor_cmax = 1e6
     plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0,0]
+    plotitem.amr_celledges_show = [1,0]
     plotitem.amr_patchedges_show = [0]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -127,18 +127,18 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(212)'
-    plotaxes.xlimits = [-75e3, 125e3]
-    plotaxes.ylimits = [-50e3,0]
-    plotaxes.title = 'x-velocity'
+    #plotaxes.xlimits = [-75e3, 125e3]
+    #plotaxes.ylimits = [-50e3,0]
+    plotaxes.title = 'y-velocity'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = 3
+    plotitem.plot_var = 4
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -0.5
-    plotitem.pcolor_cmax = 0.5
+    plotitem.pcolor_cmin = -0.1
+    plotitem.pcolor_cmax = 0.1
     plotitem.add_colorbar = False
     plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]

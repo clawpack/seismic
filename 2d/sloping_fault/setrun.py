@@ -39,8 +39,8 @@ def setrun(claw_pkg='amrclaw'):
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
     probdata.add_param('ylower_p', -50e3, 'ylower_p')
     probdata.add_param('yupper_p', 0., 'yupper_p')
-    probdata.add_param('yf1', -5e3, 'yf1')
-    probdata.add_param('yf2', -13.6e3, 'yf2')
+    probdata.add_param('yf1', -15e3, 'yf1')
+    probdata.add_param('yf2', -23.6e3, 'yf2')
     probdata.add_param('xf1', 0., 'xf1')
     probdata.add_param('xf2', 50e3, 'xf2')
     
@@ -59,13 +59,13 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
     
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -75.e3       # xlower
-    clawdata.upper[0] = 125.e3      # xupper
+    clawdata.lower[0] = -200.e3       # xlower
+    clawdata.upper[0] = 200.e3      # xupper
     clawdata.lower[1] = 0.0          # ylower
     clawdata.upper[1] = 1.0          # yupper
     
     # Number of grid cells:
-    clawdata.num_cells[0] = 40       # mx
+    clawdata.num_cells[0] = 80       # mx
     clawdata.num_cells[1] = 10      # my
     
 
@@ -108,13 +108,13 @@ def setrun(claw_pkg='amrclaw'):
     # Specify at what times the results should be written to fort.q files.
     # Note that the time integration stops after the final output time.
  
-    clawdata.output_style = 2
+    clawdata.output_style = 1
  
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 30
-        clawdata.tfinal = 60.0
+        clawdata.num_output_times = 50
+        clawdata.tfinal = 100.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
         
     elif clawdata.output_style == 2:
@@ -158,7 +158,7 @@ def setrun(claw_pkg='amrclaw'):
     
     # Initial time step for variable dt.  
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 1.000000e-02
+    clawdata.dt_initial = 1.5
     
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
@@ -242,8 +242,16 @@ def setrun(claw_pkg='amrclaw'):
     for gaugeno,x in enumerate(xgauges):
         gauges.append([gaugeno,x,0.999,0,1e10])
     # bottom edge:
-    #for gaugeno,x in enumerate(np.linspace(0.1,1.9,100)):
-    #    gauges.append([200+gaugeno,x,0.001,0,1e10])
+    for gaugeno,x in enumerate(xgauges):
+        gauges.append([200+gaugeno,x,0.001,0,1e10])
+
+    # above fault plane:
+    for gaugeno,x in enumerate(np.linspace(0,50e3,50)):
+        gauges.append([300+gaugeno,x,0.71,0,1e10])
+
+    # below fault plane:
+    for gaugeno,x in enumerate(np.linspace(0,50e3,50)):
+        gauges.append([400+gaugeno,x,0.69,0,1e10])
 
                   
     # --------------
@@ -253,7 +261,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 0
+    clawdata.checkpt_style = 1
 
     if clawdata.checkpt_style == 0:
       # Do not checkpoint at all
@@ -333,6 +341,9 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions 
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    regions.append([1,1, 0,1e9, -10.e4, 60e4, 0, 1])
+    regions.append([1,2, 0,1e9, -90e3, 140e3, 0, 1])
+    regions.append([1,4, 0,1e9, -75e3, 125e3, 0, 1])
     regions.append([4,4, 0,1, -10.e3, 60e3, 0.6, 1])
 
 

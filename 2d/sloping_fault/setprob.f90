@@ -27,7 +27,7 @@
     read(7,*) xf2
 
     ycf = 1 + (yf1+yf2)/(2*(yupper_p-ylower_p))
-    ycf = 0.8d0
+    ycf = 0.7d0
     write(6,*) '+++ ycf = ',ycf
 
     return
