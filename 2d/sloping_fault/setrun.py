@@ -37,7 +37,7 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    probdata.add_param('ylower_p', -50e3, 'ylower_p')
+    probdata.add_param('ylower_p', -200e3, 'ylower_p')
     probdata.add_param('yupper_p', 0., 'yupper_p')
     probdata.add_param('yf1', -15e3, 'yf1')
     probdata.add_param('yf2', -23.6e3, 'yf2')
@@ -66,7 +66,7 @@ def setrun(claw_pkg='amrclaw'):
     
     # Number of grid cells:
     clawdata.num_cells[0] = 80       # mx
-    clawdata.num_cells[1] = 10      # my
+    clawdata.num_cells[1] = 40      # my
     
 
     # ---------------
@@ -341,10 +341,10 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions 
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    regions.append([1,1, 0,1e9, -10.e4, 60e4, 0, 1])
-    regions.append([1,2, 0,1e9, -90e3, 140e3, 0, 1])
-    regions.append([1,4, 0,1e9, -75e3, 125e3, 0, 1])
-    regions.append([4,4, 0,1, -10.e3, 60e3, 0.6, 1])
+    regions.append([1,1, 0,1e9, -1.e9, 1e9, 0, 1])
+    regions.append([1,2, 0,1e9, -90e3, 140e3, 0.2, 1])
+    regions.append([1,4, 0,1e9, -75e3, 125e3, 0.5, 1])
+    regions.append([4,4, 0,1, -10.e3, 60e3, 0.85, 0.95])
 
 
     #  ----- For developers ----- 

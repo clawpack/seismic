@@ -1,15 +1,15 @@
 
 from pylab import *
 
-ylower = -50e3
+ylower = -200e3
 yupper = 0.
 yf1 = -15e3
 yf2 = -23.6e3
 #ycf = 1 + (yf1+yf2)/(2*(yupper-ylower))
-ycf = 0.7
+ycf = 0.9
 
-xlower = -50.e3
-xupper = 150e3
+xlower = -200.e3
+xupper = 200e3
 xf1 = 0e3
 xf2 = xf1 + 50e3
 

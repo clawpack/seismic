@@ -107,6 +107,8 @@ def setplot(plotdata):
     plotaxes.axescmd = 'subplot(211)'
     #plotaxes.xlimits = [-75e3, 125e3]
     #plotaxes.ylimits = [-50e3,0]
+    plotaxes.xlimits = [-200e3, 200e3]
+    plotaxes.ylimits = [-200e3,0]
     plotaxes.title = '-trace(sigma)'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces
@@ -118,7 +120,7 @@ def setplot(plotdata):
     plotitem.pcolor_cmin = -1e6
     plotitem.pcolor_cmax = 1e6
     plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [1,0]
+    plotitem.amr_celledges_show = [0,0]
     plotitem.amr_patchedges_show = [0]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -129,6 +131,8 @@ def setplot(plotdata):
     plotaxes.axescmd = 'subplot(212)'
     #plotaxes.xlimits = [-75e3, 125e3]
     #plotaxes.ylimits = [-50e3,0]
+    plotaxes.xlimits = [-200e3, 200e3]
+    plotaxes.ylimits = [-200e3,0]
     plotaxes.title = 'y-velocity'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces

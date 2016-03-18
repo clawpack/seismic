@@ -21,7 +21,7 @@ ngauges = 100;  goffset = 0; plot_okada = True  # top surface
 #ngauges = 50;  goffset = 400  # below fault plane
 
 #for t in linspace(0.,120,7):
-for t in linspace(0.,100,11):
+for t in [100]:   #linspace(0.,100,11):
     xs = zeros(ngauges)
     ys = zeros(ngauges)
     for j in range(ngauges):
