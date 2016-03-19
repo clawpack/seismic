@@ -247,11 +247,11 @@ def setrun(claw_pkg='amrclaw'):
 
     # above fault plane:
     for gaugeno,x in enumerate(np.linspace(0,50e3,50)):
-        gauges.append([300+gaugeno,x,0.71,0,1e10])
+        gauges.append([300+gaugeno,x,0.905,0,1e10])
 
     # below fault plane:
     for gaugeno,x in enumerate(np.linspace(0,50e3,50)):
-        gauges.append([400+gaugeno,x,0.69,0,1e10])
+        gauges.append([400+gaugeno,x,0.895,0,1e10])
 
                   
     # --------------
@@ -288,7 +288,7 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 3
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least
     # amr_level_max-1)
@@ -343,7 +343,8 @@ def setrun(claw_pkg='amrclaw'):
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
     regions.append([1,1, 0,1e9, -1.e9, 1e9, 0, 1])
     regions.append([1,2, 0,1e9, -90e3, 140e3, 0.2, 1])
-    regions.append([1,4, 0,1e9, -75e3, 125e3, 0.5, 1])
+    regions.append([1,3, 0,1e9, -75e3, 125e3, 0.6, 1])
+    regions.append([1,4, 0,1e9, -50e3, 105e3, 0.8, 1])
     regions.append([4,4, 0,1, -10.e3, 60e3, 0.85, 0.95])
 
 

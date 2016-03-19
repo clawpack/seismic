@@ -24,10 +24,11 @@ ngauges = 100;  goffset = 0; plot_okada = True  # top surface
 for t in [100]:   #linspace(0.,100,11):
     xs = zeros(ngauges)
     ys = zeros(ngauges)
+    xg = zeros(ngauges)
     for j in range(ngauges):
-        gaugeno = j            # at top of domain
-        gaugeno = goffset + j      # at bottom of domain
+        gaugeno = goffset + j
         g = plotdata.getgauge(gaugeno)
+        xg[j] = g.location[0]  # x-location of this gauge
         for k in range(1,len(g.t)):
             if g.t[k] > t:
                 break
@@ -38,10 +39,10 @@ for t in [100]:   #linspace(0.,100,11):
             ys[j] = ys[j] + dt*v
 
     subplot(211)
-    plot(xc[:ngauges],xs,label='t = %6.3f' % t)
+    plot(xg,xs,label='t = %6.3f' % t)
     title("horizontal displacement")
-    subplot(212)
-    plot(xc[:ngauges],ys,label='t = %6.3f' % t)
+    ax = subplot(212)
+    plot(xg,ys,label='t = %6.3f' % t)
     title("vertical displacement")
 
 subplot(212)
@@ -49,28 +50,7 @@ subplot(212)
 legend(loc='upper right', fontsize=8)
 
 if plot_okada:
-    from clawpack.geoclaw import dtopotools
-    fault = dtopotools.Fault()
-    subfault = dtopotools.SubFault()
-    subfault.mu = 3e10
-    subfault.depth = -15e3
-    subfault.dip = 9.9
-    subfault.width = sqrt(50e3**2 + 8.6e3**2)
-    subfault.slip = 1.
-    subfault.rake = 90
-    subfault.strike = 0
-    subfault.length = 1000e3
-    subfault.longitude = 0.
-    subfault.latitude = 0.
-    subfault.coordinate_specification = 'top center'
-    subfault.calculate_geometry()
-
-    fault.subfaults = [subfault] 
-    print "Mw = ", fault.Mw()
-
-    x = linspace(-1.0,1.5,1000)
-    y = array([0.])
-    dtopo = fault.create_dtopography(x,y,[1.])
-
-    plot(dtopo.x*111e3,dtopo.dZ[0,0,:],'k--')
+    from plot_okada import plot_okada_surface
+    plot_okada_surface(ax, 'r-')
+    legend()
 

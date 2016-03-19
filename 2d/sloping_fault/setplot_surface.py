@@ -9,8 +9,16 @@ function setplot is called to set the plot parameters.
 
 import numpy as np
 from mapc2p import mapc2p
+from plot_okada import plot_okada_surface
 
 cscale = 8 # scale color limits
+
+
+gdata = np.loadtxt('gauges.data',skiprows=7)
+ngauges = gdata.shape[0]
+print "Found %s gauges" % ngauges
+xc = gdata[:,1]
+yc = gdata[:,2]
 
 #--------------------------
 def setplot(plotdata):
@@ -27,6 +35,35 @@ def setplot(plotdata):
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
+
+    def afterframe(current_data):
+        from pylab import figure,subplot,plot,linspace,title,zeros,ylim,legend
+        from clawpack.visclaw.data import ClawPlotData
+        ngauges = 100;  goffset = 0
+        t = current_data.t
+
+        xs = zeros(ngauges)
+        ys = zeros(ngauges)
+        for j in range(ngauges):
+            gaugeno = goffset + j 
+            g = plotdata.getgauge(gaugeno)
+            for k in range(1,len(g.t)):
+                if g.t[k] > t:
+                    break
+                dt = g.t[k] - g.t[k-1]
+                u = g.q[3,k]
+                v = g.q[4,k]
+                xs[j] = xs[j] + dt*u
+                ys[j] = ys[j] + dt*v
+        figure(10)
+        ax = subplot(211)
+        plot(xc[:ngauges],ys,label="seismic")
+        title("surface displacement")
+        ylim(-0.5,0.5)
+        plot_okada_surface(ax, 'r-')
+        legend()
+
+    plotdata.afterframe = afterframe
     
     def plot_interfaces(current_data):
         from pylab import linspace, plot, sin, pi
@@ -100,11 +137,11 @@ def setplot(plotdata):
 
     # Figure for trace(sigma) 
     plotfigure = plotdata.new_plotfigure(name='trace', figno=10)
-    plotfigure.kwargs = {'figsize':(10,8)}
+    plotfigure.kwargs = {'figsize':(8,8)}
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(211)'
+    plotaxes.axescmd = 'subplot(212)'
     #plotaxes.xlimits = [-75e3, 125e3]
     #plotaxes.ylimits = [-50e3,0]
     plotaxes.xlimits = [-200e3, 200e3]
@@ -117,8 +154,8 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
     plotitem.plot_var = sigmatr
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -1e6
-    plotitem.pcolor_cmax = 1e6
+    plotitem.pcolor_cmin = -2e6
+    plotitem.pcolor_cmax = 2e6
     plotitem.add_colorbar = False
     plotitem.amr_celledges_show = [0,0]
     plotitem.amr_patchedges_show = [0]
@@ -126,28 +163,6 @@ def setplot(plotdata):
     plotitem.mapc2p = mapc2p
 
 
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(212)'
-    #plotaxes.xlimits = [-75e3, 125e3]
-    #plotaxes.ylimits = [-50e3,0]
-    plotaxes.xlimits = [-200e3, 200e3]
-    plotaxes.ylimits = [-200e3,0]
-    plotaxes.title = 'y-velocity'
-    plotaxes.scaled = True
-    plotaxes.afteraxes = plot_interfaces
-
-    # Set up for item on these axes:
-    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = 4
-    plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -0.1
-    plotitem.pcolor_cmax = 0.1
-    plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0]
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
 
 
     # Figure for trace(sigma) and sigma_12 side by side
@@ -293,6 +308,7 @@ def setplot(plotdata):
     plotfigure = plotdata.new_plotfigure(name='gauge plot', figno=300, \
                     type='each_gauge')
     #plotfigure.clf_each_gauge = False
+    plotfigure.show = False
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
