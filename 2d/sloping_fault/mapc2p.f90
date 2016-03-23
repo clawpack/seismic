@@ -1,37 +1,40 @@
   !=====================================================
   subroutine mapc2p(xc,yc,xp,yp)
   !=====================================================
-     ! Maps for sloping fault
-     ! on input,  (xc,yc) is a computational grid point
-     ! on output, (xp,yp) is corresponding point in physical space
+    ! Maps for sloping fault
+    ! on input,  (xc,yc) is a computational grid point
+    ! on output, (xp,yp) is corresponding point in physical space
 
-     implicit none
-     REAL (kind=8) :: xc,yc,xp,yp
+    implicit none
+    real (kind=8), intent(in) :: xc,yc
+    real (kind=8), intent(out) :: xp,yp
 
-     ! local variables
-     REAL (kind=8)   :: yf
-     
-     ! Variables from setprob:
-     REAL (kind=8) :: ylower_p, yupper_p, yf1, yf2, ycf, xf1, xf2
-        
-     common /mapped/  ylower_p, yupper_p, yf1, yf2, ycf, xf1, xf2
+    ! Variables from setprob:
+    real (kind=8) :: center(2), theta, xcb(2), mindepth
+    common /fault/  center, theta, xcb, mindepth
 
-          
-    xp = xc
+    ! Local variables
+    real (kind=8) :: ls, alpha, xrot, yrot
 
-    if (xc <= xf1) then
-        yf = yf1
-      else if (xc <= xf2) then
-        yf = yf1+(xc-xf1)*(yf2-yf1)/(xf2-xf1)
-      else
-        yf = yf2
-      endif
+    if (xc < xcb(1)) then
+      ls = dsqrt((xc-xcb(1))**2 + (yc-center(2))**2)
+    elseif (xc > xcb(2)) then
+      ls = dsqrt((xc-xcb(2))**2 + (yc-center(2))**2)
+    else
+      ls = dabs(yc - center(2))
+    end if
 
-    if (yc <= ycf) then
-        yp = ylower_p + yc*(yf-ylower_p)/ycf
-      else
-        yp = yf + (yc-ycf)*(yupper_p-yf)/(1.-ycf)
-      endif
-     
+    alpha = ls/mindepth
+    xrot = center(1) + dcos(theta)*(xc-center(1)) - dsin(theta)*(yc-center(2))
+    yrot = center(2) + dsin(theta)*(xc-center(1)) + dcos(theta)*(yc-center(2))
+
+    if (alpha < 1.d0) then
+      xp = (1.d0-alpha)*xrot + alpha*xc
+      yp = (1.d0-alpha)*yrot + alpha*yc
+    else
+      xp = xc
+      yp = yc
+    end if
+
     return
     end
