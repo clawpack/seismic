@@ -32,8 +32,8 @@
       xcb(1) = center(1) - 0.5*width
       xcb(2) = center(1) + 0.5*width
 
-      mindepth = dmin1(center(2) - 0.5*width*dsin(theta), &
-                      center(2) + 0.5*width*dsin(theta))
+      mindepth = dmin1(dabs(center(2) - 0.5*width*dsin(theta)), &
+                      dabs(center(2) + 0.5*width*dsin(theta)))
 
     return
     end

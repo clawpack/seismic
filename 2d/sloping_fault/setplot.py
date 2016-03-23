@@ -156,7 +156,7 @@ def setplot(plotdata):
     plotitem.pcolor_cmin = -0.1
     plotitem.pcolor_cmax = 0.1
     plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [1]
+    plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -285,17 +285,18 @@ def setplot(plotdata):
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = [0,2]
-    plotaxes.ylimits = [0,1]
-    plotaxes.title = 'Level 4 grid patches'
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
+    plotaxes.title = 'Level 3 grid patches'
     plotaxes.scaled = True
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_patch')
     plotitem.amr_patch_bgcolor = ['#ffeeee', '#eeeeff', '#eeffee', '#ffffff']
     plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0,0,0,1]
-
+    plotitem.amr_patchedges_show = [0,0,1]
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
 
     #-----------------------------------------
     # Figures for gauges

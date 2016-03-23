@@ -61,7 +61,9 @@ def setrun(claw_pkg='amrclaw'):
     # Number of grid cells:
     num_cells_fault = 10
     dx = probdata.fault_width/num_cells_fault
+    # adjust cell number above fault so cell edges line up with fault
     num_cells_above = np.ceil(probdata.fault_depth/dx)
+    # adjust dx to match
     dx = probdata.fault_depth/num_cells_above
     clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
     clawdata.num_cells[1] = int(np.ceil(probdata.domain_depth/dx)) # my
@@ -163,7 +165,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Initial time step for variable dt.
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 1.5
+    clawdata.dt_initial = 0.25
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
