@@ -121,7 +121,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
         if (ixy == 2) then
             ! add specified slip velocity (zero at most interfaces)
-            du = du + auxl(13,i)
+            du = du + ny*auxl(13,i)
+            dv = dv - nx*auxl(13,i)
             !if (auxl(13,i) > 0.d0) write(6,*) du
             endif
 
