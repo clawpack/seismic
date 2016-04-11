@@ -10,7 +10,7 @@ ndip = 50
 dlongitude = (50e3/111.e3) / ndip   # convert to degees and split up
 
 xx = arange(0,50e3,ndip)
-if 0:
+if 1:
     slip = exp(-((x-25e3)/12e3)**2)
 else:
     loadtxt('slip.txt')

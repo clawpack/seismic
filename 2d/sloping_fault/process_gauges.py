@@ -14,13 +14,20 @@ plotdata.outdir = '_output'
 
 
 
-def plot_gauges():
-    plot_okada = False
-    ngauges = 100;  goffset = 0; plot_okada = True  # top surface
-    #ngauges = 100;  goffset = 200  # bottom
-    #ngauges = 50;  goffset = 300  # above fault plane
-    #ngauges = 50;  goffset = 400  # below fault plane
+def plot_gauges(goffset=0):
+
+    if goffset == 0:
+        ngauges = 100 # top surface
+    elif goffset == 200:
+        ngauges = 100 # bottom of domain
+    elif goffset == 300:
+        ngauges = 50 # above fault plane
+    elif goffset == 400:
+        ngauges = 50 # below fault plane
+    plot_okada = (goffset==0)
     
+    figure()
+
     #for t in linspace(0.,120,7):
     for t in [100]:   #linspace(0.,100,11):
         xs = zeros(ngauges)
@@ -47,7 +54,6 @@ def plot_gauges():
         title("vertical displacement")
     
     if plot_okada:
-        figure()
         import plot_okada
         ax = subplot(211)
         plot_okada.plot_okada_horiz(ax, 'r-')
@@ -83,11 +89,10 @@ def fault_slip(t):
             ys_above[j] = ys_above[j] + dt*v_above
             xs_below[j] = xs_below[j] + dt*u_below
             ys_below[j] = ys_below[j] + dt*v_below
-            slip[j] = (xs_above[j] - xs_below[j])*cos(dip*pi/180.) \
-                      + (ys_above[j] - ys_below[j])*sin(dip*pi/180.)
+            
     dipdir_above = xs_above*cos(dip*pi/180.) - ys_above*sin(dip*pi/180.)
     orthog_above = xs_above*sin(dip*pi/180.) + ys_above*cos(dip*pi/180.)
     dipdir_below = xs_below*cos(dip*pi/180.) - ys_below*sin(dip*pi/180.)
     orthog_below = xs_below*sin(dip*pi/180.) + ys_below*cos(dip*pi/180.)
-    slip = dipdir_above - dipdir_below
+    slip = dipdir_below - dipdir_above
     return xg, slip
