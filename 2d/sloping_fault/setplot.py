@@ -1,40 +1,56 @@
 
-""" 
+"""
 Set up the plot figures, axes, and items to be done for each frame.
 
 This module is imported by the plotting routines and then the
 function setplot is called to set the plot parameters.
-    
-""" 
+
+"""
 
 import numpy as np
 from mapc2p import mapc2p
-
+from clawpack.clawutil.data import ClawData
 cscale = 8 # scale color limits
+
+probdata = ClawData()
+probdata.read('setprob.data',force=True)
+
+width = probdata.fault_width
+theta = probdata.fault_dip
+xcenter = probdata.fault_center
+ycenter = -probdata.fault_depth
+
+xp1 = xcenter - 0.5*width*np.cos(theta)
+xp2 = xcenter + 0.5*width*np.cos(theta)
+yp1 = ycenter - 0.5*width*np.sin(theta)
+yp2 = ycenter + 0.5*width*np.sin(theta)
+
+xlimits = [-0.5*probdata.domain_width,0.5*probdata.domain_width]
+ylimits = [-probdata.domain_depth,0.0]
 
 #--------------------------
 def setplot(plotdata):
 #--------------------------
-    
-    """ 
+
+    """
     Specify what is to be plotted at each frame.
     Input:  plotdata, an instance of clawpack.visclaw.data.ClawPlotData.
     Output: a modified version of plotdata.
-    
-    """ 
+
+    """
 
 
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
-    
+
     def plot_interfaces(current_data):
         from pylab import linspace, plot, sin, pi
-        xl = linspace(0,50e3,100)
-        yl = linspace(-15e3,-23.6e3,100)
+        xl = linspace(xp1,xp2,100)
+        yl = linspace(yp1,yp2,100)
         #yl = -8e3 - sin(10*pi/180.)*xl
         plot(xl,yl,'k')
-    
+
 
     def sigmatr(current_data):
         # return -trace(sigma)
@@ -56,17 +72,17 @@ def setplot(plotdata):
         ux = (u[I+1,:][:,J] - u[I-1,:][:,J]) / (2*dx)
         vy = (v[:,J+1][I,:] - v[:,J-1][I,:]) / (2*dy)
         dint = ux + vy
-        
+
         #zx = zeros((mx-2,1))
         #zy = zeros((1,my))
         #d = vstack((zy, hstack((zx, ux+vy, zx)), zy))
-        
+
         d0 = dint[:,0]
         d1 = dint[:,-1]
         d2 = vstack((d0, dint.T, d1)).T
         d0 = d2[0,:]
         d1 = d2[-1,:]
-        d = vstack((d0,d2,d1))      
+        d = vstack((d0,d2,d1))
         return d
 
     def curl(current_data):
@@ -90,7 +106,7 @@ def setplot(plotdata):
         c2 = vstack((c0, cint.T, c1)).T
         c0 = c2[0,:]
         c1 = c2[-1,:]
-        c = vstack((c0,c2,c1))      
+        c = vstack((c0,c2,c1))
 
         # to set curl to zero near patch edges...
         #c = zeros(u.shape)
@@ -98,17 +114,15 @@ def setplot(plotdata):
 
         return c
 
-    # Figure for trace(sigma) 
+    # Figure for trace(sigma)
     plotfigure = plotdata.new_plotfigure(name='trace', figno=10)
     plotfigure.kwargs = {'figsize':(10,8)}
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(211)'
-    #plotaxes.xlimits = [-75e3, 125e3]
-    #plotaxes.ylimits = [-50e3,0]
-    plotaxes.xlimits = [-200e3, 200e3]
-    plotaxes.ylimits = [-200e3,0]
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
     plotaxes.title = '-trace(sigma)'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces
@@ -120,7 +134,7 @@ def setplot(plotdata):
     plotitem.pcolor_cmin = -1e6
     plotitem.pcolor_cmax = 1e6
     plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0,0]
+    plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -129,10 +143,8 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(212)'
-    #plotaxes.xlimits = [-75e3, 125e3]
-    #plotaxes.ylimits = [-50e3,0]
-    plotaxes.xlimits = [-200e3, 200e3]
-    plotaxes.ylimits = [-200e3,0]
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
     plotaxes.title = 'y-velocity'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_interfaces
@@ -247,8 +259,8 @@ def setplot(plotdata):
     # Figure for y-velocity:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(515)'
-    plotaxes.xlimits = 'auto'
-    plotaxes.ylimits = 'auto'
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
     plotaxes.title = 'y-velocity'
     plotaxes.scaled = True
     #plotaxes.afteraxes = plot_interfaces
@@ -273,19 +285,18 @@ def setplot(plotdata):
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = [-200e3, 200e3]
-    plotaxes.ylimits = [-200e3,0]
-    plotaxes.title = 'Level 4 grid patches'
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
+    plotaxes.title = 'Level 3 grid patches'
     plotaxes.scaled = True
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_patch')
     plotitem.amr_patch_bgcolor = ['#ffeeee', '#eeeeff', '#eeffee', '#ffffff']
     plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0,0,0,1]
+    plotitem.amr_patchedges_show = [0,0,1]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
-
 
     #-----------------------------------------
     # Figures for gauges
@@ -330,8 +341,6 @@ def setplot(plotdata):
     plotdata.latex_figsperline = 2           # layout of plots
     plotdata.latex_framesperline = 1         # layout of plots
     plotdata.latex_makepdf = False           # also run pdflatex?
-    plotdata.parallel = True
+#    plotdata.parallel = True
 
     return plotdata
-
-    
