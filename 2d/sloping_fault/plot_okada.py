@@ -9,6 +9,12 @@ width = sqrt(50e3**2 + 8.6e3**2)
 ndip = 50
 dlongitude = (50e3/111.e3) / ndip   # convert to degees and split up
 
+xx = arange(0,50e3,ndip)
+if 0:
+    slip = exp(-((x-25e3)/12e3)**2)
+else:
+    loadtxt('slip.txt')
+
 for i in range(ndip):
     subfault = dtopotools.SubFault()
     subfault.mu = 3e10
@@ -16,7 +22,7 @@ for i in range(ndip):
     subfault.width = width / ndip
     x = i*50e3/ndip
     subfault.depth = +15e3 + x*sin(subfault.dip * pi/180.)
-    subfault.slip = exp(-((x-25e3)/12e3)**2)
+    subfault.slip = slip[i]
     subfault.rake = 90
     subfault.strike = 0
     subfault.length = 1000e3
