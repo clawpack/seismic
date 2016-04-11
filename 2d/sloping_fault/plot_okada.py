@@ -1,5 +1,6 @@
 from pylab import *
-from clawpack.geoclaw import dtopotools
+import dtopotools_horiz_okada as dtopotools
+reload(dtopotools)
 fault = dtopotools.Fault()
 fault.subfaults = []
 
@@ -30,15 +31,23 @@ print "Mw = ", fault.Mw()
 
 x = linspace(-1.5,1.5,1000)
 y = array([0.])
-dtopo = fault.create_dtopography(x,y,[1.])
+dtopo = fault.create_dtopography(x,y,[1.],y_disp=True)
 
 def plot_okada_surface(ax=None, plotstyle='k-'):
     if ax is None:
         figure()
         ax = subplot(111)
-    
-    #figure(501); subplot(212)
-    plot(dtopo.x*111e3,dtopo.dZ[0,0,:],plotstyle,label="Okada")
+    ax.plot(dtopo.x*111e3,dtopo.dZ[0,0,:],plotstyle,label="Okada")
+
+def plot_okada_horiz(ax=None, plotstyle='k-'):
+    if ax is None:
+        figure()
+        ax = subplot(111)
+    ax.plot(dtopo.x*111e3,dtopo.dY[0,0,:],plotstyle,label="Okada")
 
 if __name__=='__main__':
-    plot_okada_surface()
+    figure()
+    ax = subplot(211)
+    plot_okada_surface(ax)
+    ax = subplot(212)
+    plot_okada_horiz(ax)

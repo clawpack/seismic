@@ -11,8 +11,10 @@ yc = gdata[:,2]
 plotdata = ClawPlotData()
 plotdata.outdir = '_output'
 
-figure(501)
-clf()
+#figure(501)
+#clf()
+
+figure()
 
 plot_okada = False
 ngauges = 100;  goffset = 0; plot_okada = True  # top surface
@@ -50,7 +52,39 @@ subplot(212)
 legend(loc='upper right', fontsize=8)
 
 if plot_okada:
-    from plot_okada import plot_okada_surface
-    plot_okada_surface(ax, 'r-')
+    import plot_okada
+    ax = subplot(211)
+    plot_okada.plot_okada_horiz(ax, 'r-')
     legend()
 
+    ax = subplot(212)
+    plot_okada.plot_okada_surface(ax, 'r-')
+    legend()
+
+def fault_slip(t):
+    ngauges = 50
+    xs_above = zeros(ngauges)
+    ys_above = zeros(ngauges)
+    xs_below = zeros(ngauges)
+    ys_below = zeros(ngauges)
+    xg = zeros(ngauges)
+    slip = zeros(ngauges)
+    for j in range(ngauges):
+        g_above = plotdata.getgauge(j + 300)
+        g_below = plotdata.getgauge(j + 400)
+        xg[j] = g_above.location[0]  # x-location of this gauge
+        for k in range(1,len(g_above.t)):
+            if g_above.t[k] > t:
+                break
+            dt = g_above.t[k] - g_above.t[k-1]
+            u_above = g_above.q[3,k]
+            v_above = g_above.q[4,k]
+            u_below = g_below.q[3,k]
+            v_below = g_below.q[4,k]
+            xs_above[j] = xs_above[j] + dt*u_above
+            ys_above[j] = ys_above[j] + dt*v_above
+            xs_below[j] = xs_below[j] + dt*u_below
+            ys_below[j] = ys_below[j] + dt*v_below
+            slip[j] = (xs_above[j] - xs_below[j])*cos(dip*pi/180.) \
+                      + (ys_above[j] - ys_below[j])*sin(dip*pi/180.)
+    return xg, slip
