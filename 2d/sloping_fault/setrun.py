@@ -350,14 +350,11 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    #regions.append([1,1, 0,1e9, -1.e9, 1e9, 0, 1])
-    #regions.append([1,2, 0,1e9, -90e3, 140e3, 0.2, 1])
-    #regions.append([1,3, 0,1e9, -75e3, 125e3, 0.6, 1])
-    #regions.append([1,4, 0,1e9, -50e3, 105e3, 0.8, 1])
+    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 0.])
+    regions.append([1,2, 0,1e9, -90e3, 140e3, -150e3, 0.])
+    regions.append([1,3, 0,1e9, -75e3, 125e3, -80e3, 0.])
+    regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 0.])
     #regions.append([4,4, 0,1, -10.e3, 60e3, 0.85, 0.95])
-#    regions.append([1,1, 0,1e9, -1.e9, 1e9, 0, 1])
-#    regions.append([1,2, 0,1e9, -90e3, 140e3, 0.2, 1])
-#    regions.append([1,4, 0,1e9, -75e3, 125e3, 0.5, 1])
     regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
                     0,1, probdata.fault_center-0.5*probdata.fault_width-2*dx,
                     probdata.fault_center+0.5*probdata.fault_width+2*dx,

@@ -9,9 +9,9 @@ width = sqrt(50e3**2 + 8.6e3**2)
 ndip = 50
 dlongitude = (50e3/111.e3) / ndip   # convert to degees and split up
 
-xx = arange(0,50e3,ndip)
+xx = arange(0,50e3,50e3/ndip)
 if 1:
-    slip = exp(-((x-25e3)/12e3)**2)
+    slip = exp(-((xx-25e3)/12e3)**2)
 else:
     loadtxt('slip.txt')
 
@@ -57,3 +57,6 @@ if __name__=='__main__':
     plot_okada_surface(ax)
     ax = subplot(212)
     plot_okada_horiz(ax)
+    savefig('okada.png')
+    print "Created okada.png"
+
