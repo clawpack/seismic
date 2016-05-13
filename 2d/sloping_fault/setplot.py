@@ -25,7 +25,7 @@ xp2 = xcenter + 0.5*width*np.cos(theta)
 yp1 = ycenter - 0.5*width*np.sin(theta)
 yp2 = ycenter + 0.5*width*np.sin(theta)
 
-xlimits = [-0.5*probdata.domain_width,0.5*probdata.domain_width]
+xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
 ylimits = [-probdata.domain_depth,0.0]
 
 #--------------------------
@@ -287,14 +287,14 @@ def setplot(plotdata):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.xlimits = xlimits
     plotaxes.ylimits = ylimits
-    plotaxes.title = 'Level 3 grid patches'
+    plotaxes.title = 'Level 4 grid patches'
     plotaxes.scaled = True
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_patch')
     plotitem.amr_patch_bgcolor = ['#ffeeee', '#eeeeff', '#eeffee', '#ffffff']
     plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0,0,1]
+    plotitem.amr_patchedges_show = [0,0,0,1]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 

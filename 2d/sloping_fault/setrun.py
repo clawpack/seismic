@@ -61,17 +61,18 @@ def setrun(claw_pkg='amrclaw'):
     # Number of grid cells:
     num_cells_fault = 10
     dx = probdata.fault_width/num_cells_fault
-    # adjust cell number above fault so cell edges line up with fault
-    num_cells_above = np.ceil(probdata.fault_depth/dx)
-    # adjust dx to match
-    dx = probdata.fault_depth/num_cells_above
-    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
-    clawdata.num_cells[1] = int(np.ceil(probdata.domain_depth/dx)) # my
+    ## specify dy using dx
+    num_cells_above = np.rint(probdata.fault_depth/dx)
+    dy = probdata.fault_depth/num_cells_above
+    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx))
+    clawdata.num_cells[1] = int(np.ceil(probdata.domain_depth/dy)) # my
 
     # Lower and upper edge of computational domain:
-    clawdata.lower[0] = -0.5*clawdata.num_cells[0]*dx   # xlower
-    clawdata.upper[0] = 0.5*clawdata.num_cells[0]*dx     # xupper
-    clawdata.lower[1] = -clawdata.num_cells[1]*dx       # ylower
+    ## note the size of domain is likely expanded here
+    num_cells_remain = clawdata.num_cells[0] - num_cells_fault
+    clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - np.floor(num_cells_remain/2.0)*dx   # xlower
+    clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
+    clawdata.lower[1] = -clawdata.num_cells[1]*dy       # ylower
     clawdata.upper[1] = 0.0          # yupper
     probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
     probdata.domain_depth = clawdata.upper[1] - clawdata.lower[1]

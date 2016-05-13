@@ -6,36 +6,40 @@ from math import atan2
 probdata = ClawData()
 probdata.read('setprob.data',force=True)
 
-width = probdata.fault_width
+fault_width = probdata.fault_width
 theta = probdata.fault_dip
 xcenter = probdata.fault_center
 ycenter = -probdata.fault_depth
 
-xcl = xcenter - 0.5*width
-xcr = xcenter + 0.5*width
+xcl = xcenter - 0.5*fault_width
+xcr = xcenter + 0.5*fault_width
 
-xp1 = xcenter - 0.5*width*cos(theta)
-xp2 = xcenter + 0.5*width*cos(theta)
-yp1 = ycenter - 0.5*width*sin(theta)
-yp2 = ycenter + 0.5*width*sin(theta)
+xp1 = xcenter - 0.5*fault_width*cos(theta)
+xp2 = xcenter + 0.5*fault_width*cos(theta)
+yp1 = ycenter - 0.5*fault_width*sin(theta)
+yp2 = ycenter + 0.5*fault_width*sin(theta)
 
 tol = min(abs(yp1),abs(yp2))
 
 def mapc2p(xc,yc):
     """
-    map computational rectangle (xlower,xupper) x (0,1) to
-    (xlower,xupper) x (ylower,yupper) with piecewise linear fault.
-    The line yc=ycf maps to yp=yf1 where x<xf1 and to yp=yf2 where x>xf2,
-    linear in between.
+    map computational grid to physical grid that rotates near the fault
+    so cell edges match the fault line.  Linear interpolation is used to
+    adjust the rotation angle based on distance from fault in computational space.
+    The variable tol ensures the physical grid also lines up with a horizontal sea floor
     """
 
+    # constucted signed distance function in computational domain
     ls = numpy.abs(yc - ycenter)
     ls = numpy.where(xc < xcl, numpy.sqrt((xc-xcl)**2 + (yc-ycenter)**2), ls)
     ls = numpy.where(xc > xcr, numpy.sqrt((xc-xcr)**2 + (yc-ycenter)**2), ls)
 
+    # define grid that is rotated to line up with fault
     xrot = xcenter + numpy.cos(theta)*(xc-xcenter) - numpy.sin(theta)*(yc-ycenter)
     yrot = ycenter + numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
 
+    # Interpolate between roated grid and cartesian grid near the fault,
+    # using cartesian grid far away from fault.
     xp = xc
     yp = yc
     xp = numpy.where(ls < tol, (tol-ls)/tol*xrot + ls/tol*xc, xp)
@@ -43,14 +47,23 @@ def mapc2p(xc,yc):
 
     return xp,yp
 
-def test(mx,my):
-    ratio = probdata.fault_depth/probdata.domain_depth
-    num_cells_above = numpy.ceil(ratio*my)
-    y = linspace(0.0,probdata.fault_depth,num_cells_above)
-    y = numpy.append(y,linspace(probdata.fault_depth,probdata.domain_depth,my - num_cells_above))
-    y = -y
+def test(mfault):
 
-    x = linspace(-0.5*probdata.domain_width,0.5*probdata.domain_width,mx)
+    domain_depth = probdata.domain_depth
+    domain_width = probdata.domain_width
+    fault_depth = probdata.fault_depth
+
+    # num of cells here determined in an identical fashion to that in setrun.py
+    # additional comments can be found there
+    dx = fault_width/mfault
+    num_cells_above = numpy.rint(fault_depth/dx)
+    dy = fault_depth/num_cells_above
+    mx = int(numpy.ceil(domain_width/dx)) # mx
+    my = int(numpy.ceil(domain_depth/dy)) # my
+    mr = mx - mfault
+
+    x = linspace(xcenter-0.5*fault_width - numpy.floor(mr/2.0)*dx, xcenter+0.5*fault_width + numpy.ceil(mr/2.0)*dx, mx+1)
+    y = linspace(-my*dy, 0.0, my+1)
     xc,yc = meshgrid(x,y)
     xp,yp = mapc2p(xc,yc)
     figure()
