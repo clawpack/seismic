@@ -131,7 +131,7 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
           yccorn(1) = ylower + float(j-1)*dy
           if ((abs(yccorn(1)-center(2)) < 0.5d0*dy) .and. &
               (xccorn(1) >= xcb(1)) .and. (xccorn(1) <= xcb(2))) then
-!                aux(13,i,j) = exp(-((xccorn(1)-center(1))/(xcenter-xcb(1))**2)
+!                aux(13,i,j) = exp(-((xccorn(1)-center(1))/(center(1)-xcb(1))**2)
                 aux(13,i,j) = 1.d0
             else
                 aux(13,i,j) = 0.d0
