@@ -323,7 +323,7 @@ def setrun(claw_pkg='amrclaw'):
     # This must be a list of length num_aux, each element of which is one
     # of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-    amrdata.aux_type = ['center', 'center', 'center', 'center', 'xleft', 'xleft', 'xleft', 'yleft', 'yleft', 'yleft', 'zleft','capacity']
+    amrdata.aux_type = ['center', 'center', 'center', 'center', 'center', 'xleft', 'yleft', 'zleft', 'zleft','zleft','zleft','capacity']
 
     # Flag for refinement based on Richardson error estimater:
     amrdata.flag_richardson = False    # use Richardson?
