@@ -7,3 +7,6 @@ _plots
 plots_*
 *.png
 *.log
+*.pyc
+.output
+.plots
