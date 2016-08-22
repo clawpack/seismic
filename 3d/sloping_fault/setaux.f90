@@ -92,6 +92,18 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
           mag = 0.5d0*(zmax - zmin + dmin1(zpcorn(1),zpcorn(2),zpcorn(3),zpcorn(4)) - mag)
           aux(13,i,j,k) = mag/dz
 
+          ! set fault slip:
+          if ((abs(zcell+0.5d0*dz - center(3)) < 0.5d0*dz) .and. &
+              (xcb(1) <= xcell) .and. (xcell <= xcb(2)) .and. &
+              (ycb(1) <= ycell) .and. (ycell <= ycb(2))) then
+                aux(14,i,j,k) = exp(-( &
+                              ((xcell-center(1))/(center(1)-xcb(1)))**2 &
+                              + ((ycell-center(2))/(center(2)-ycb(1)))**2 &
+                              ))
+          else
+              aux(14,i,j,k) = 0.d0
+          endif
+
         end do
       end do
     end do

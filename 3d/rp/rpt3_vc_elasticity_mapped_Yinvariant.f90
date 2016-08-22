@@ -73,8 +73,8 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
     double precision :: lam, mu, bulk, cp, cs
     double precision :: det, a1, a2, a3, a4, a5, a6
 
-    ! Variables for the mapping in the xy plane
-    double precision :: nxa, nya, nxb, nyb, arearatioa, arearatiob
+    ! Variables for the mapping in the xz plane
+    double precision :: nxa, nza, nxb, nzb, arearatioa, arearatiob
 
 !   These are just for readability
     sig_xx = 1
@@ -109,60 +109,60 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         du = asdq(u,i)
         dv = asdq(v,i)
         dw = asdq(w,i)
-    
+
         if (icoor == 2) then
 !           # transverse direction is y-like direction so
 !           # auxN(:,:,2) holds data in appropriate plane and N=(1,2,3)
 !           # for row (below,at,above) the slice of q data
 
-            ! determine x-y plane normal info
+            ! determine x-z plane normal info
             if (ixyz + icoor == 5) then
                 ! transverse direction is x
-                nxb = aux2(5,iadj,2)
-                nyb = aux2(6,iadj,2)
-                arearatiob = aux2(7,iadj,2)
+                nxb = aux2(6,iadj,2)
+                nzb = aux2(7,iadj,2)
+                arearatiob = aux2(8,iadj,2)
 
-                nxa = aux3(5,iadj,2)
-                nya = aux3(6,iadj,2)
-                arearatioa = aux3(7,iadj,2)
+                nxa = aux3(6,iadj,2)
+                nza = aux3(7,iadj,2)
+                arearatioa = aux3(8,iadj,2)
             else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
                 ! transverse direction is y
-                nxb = aux2(8,iadj,2)
-                nyb = aux2(9,iadj,2)
-                arearatiob = aux2(10,iadj,2)
-
-                nxa = aux3(8,iadj,2)
-                nya = aux3(9,iadj,2)
-                arearatioa = aux3(10,iadj,2)
-            else if (ixyz + icoor == 4) then
-                ! transverse direction is z
                 nxb = 0.d0
-                nyb = 0.d0
-                arearatiob = aux2(11,iadj,2)
+                nzb = 0.d0
+                arearatiob = aux2(9,iadj,2)
 
                 nxa = 0.d0
-                nya = 0.d0
-                arearatioa = aux3(11,iadj,2)
+                nza = 0.d0
+                arearatioa = aux3(9,iadj,2)
+            else if (ixyz + icoor == 4) then
+                ! transverse direction is z
+                nxb = aux2(10,iadj,2)
+                nzb = aux2(11,iadj,2)
+                arearatiob = aux2(12,iadj,2)
+
+                nxa = aux3(10,iadj,2)
+                nza = aux3(11,iadj,2)
+                arearatioa = aux3(12,iadj,2)
             end if
 
             ! Assign material parameters
-            lamb = aux1(1,iadj,2)
-            mub = aux1(2,iadj,2)
+            lamb = aux1(2,iadj,2)
+            mub = aux1(3,iadj,2)
             bulkb = lamb + 2.d0*mub
-            cpb = aux1(3,iadj,2)
-            csb = aux1(4,iadj,2)
+            cpb = aux1(4,iadj,2)
+            csb = aux1(5,iadj,2)
 
-            lam = aux2(1,iadj,2)
-            mu = aux2(2,iadj,2)
+            lam = aux2(2,iadj,2)
+            mu = aux2(3,iadj,2)
             bulk = lam + 2.d0*mu
-            cp = aux2(3,iadj,2)
-            cs = aux2(4,iadj,2)
+            cp = aux2(4,iadj,2)
+            cs = aux2(5,iadj,2)
 
-            lama = aux3(1,iadj,2)
-            mua = aux3(2,iadj,2)
+            lama = aux3(2,iadj,2)
+            mua = aux3(3,iadj,2)
             bulka = lama + 2.d0*mua
-            cpa = aux3(3,iadj,2)
-            csa = aux3(4,iadj,2)
+            cpa = aux3(4,iadj,2)
+            csa = aux3(5,iadj,2)
         else !! (icoor .eq. 3)
 !           # transverse direction is z-like direction so
 !           # aux2(:,:,N) holds data in appropriate plane and N=(1,2,3)
@@ -171,53 +171,53 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
             ! determine x-y plane normal info
             if (ixyz + icoor == 5) then
                 ! transverse direction is x
-                nxb = aux2(5,iadj,2)
-                nyb = aux2(6,iadj,2)
-                arearatiob = aux2(7,iadj,2)
+                nxb = aux2(6,iadj,2)
+                nzb = aux2(7,iadj,2)
+                arearatiob = aux2(8,iadj,2)
 
-                nxa = aux2(5,iadj,3)
-                nya = aux2(6,iadj,3)
-                arearatioa = aux2(7,iadj,3)
+                nxa = aux2(6,iadj,3)
+                nza = aux2(7,iadj,3)
+                arearatioa = aux2(8,iadj,3)
             else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
                 ! transverse direction is y
-                nxb = aux2(8,iadj,2)
-                nyb = aux2(9,iadj,2)
-                arearatiob = aux2(10,iadj,2)
-
-                nxa = aux2(8,iadj,3)
-                nya = aux2(9,iadj,3)
-                arearatioa = aux2(10,iadj,3)
-            else if (ixyz + icoor == 4) then
-                ! transverse direction is z
                 nxb = 0.d0
-                nyb = 0.d0
-                arearatiob = aux2(11,iadj,2)
+                nzb = 0.d0
+                arearatiob = aux2(9,iadj,2)
 
                 nxa = 0.d0
-                nya = 0.d0
-                arearatioa = aux2(11,iadj,3)
+                nza = 0.d0
+                arearatioa = aux2(9,iadj,3)
+            else if (ixyz + icoor == 4) then
+                ! transverse direction is z
+                nxb = aux2(10,iadj,2)
+                nzb = aux2(11,iadj,2)
+                arearatiob = aux2(12,iadj,2)
+
+                nxa = aux2(10,iadj,3)
+                nza = aux2(11,iadj,3)
+                arearatioa = aux2(12,iadj,3)
             end if
 
             ! Assign material parameters
-            lamb = aux2(1,iadj,1)
-            mub = aux2(2,iadj,1)
+            lamb = aux2(2,iadj,1)
+            mub = aux2(3,iadj,1)
             bulkb = lamb + 2.d0*mub
-            cpb = aux2(3,iadj,1)
-            csb = aux2(4,iadj,1)
+            cpb = aux2(4,iadj,1)
+            csb = aux2(5,iadj,1)
 
-            lam = aux2(1,iadj,2)
-            mu = aux2(2,iadj,2)
+            lam = aux2(2,iadj,2)
+            mu = aux2(3,iadj,2)
             bulk = lam + 2.d0*mu
-            cp = aux2(3,iadj,2)
-            cs = aux2(4,iadj,2)
+            cp = aux2(4,iadj,2)
+            cs = aux2(5,iadj,2)
 
-            lama = aux2(1,iadj,3)
-            mua = aux2(2,iadj,3)
+            lama = aux2(2,iadj,3)
+            mua = aux2(3,iadj,3)
             bulka = lama + 2.d0*mua
-            cpa = aux2(3,iadj,3)
-            csa = aux2(4,iadj,3)
+            cpa = aux2(4,iadj,3)
+            csa = aux2(5,iadj,3)
         endif
-    
+
         ! Compute the P-wave parts (a1 downward, a2 upward)
         do j = 1, meqn
             wave(j,1) = 0.d0
@@ -226,39 +226,39 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         s(1) = -cpb
         s(2) = cpa
 
-        if (ixyz + icoor == 4) then
-            ! transverse direction is z
-            a1 = (cp*dsig_zz + bulk*dw) / (bulk*cpb + bulkb*cp)
-            a2 = (cp*dsig_zz - bulk*dw) / (bulk*cpa + bulka*cp)
+        if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
+            ! transverse direction is y
+            a1 = (cp*dsig_yy + bulk*dv) / (bulk*cpb + bulkb*cp)
+            a2 = (cp*dsig_yy - bulk*dv) / (bulk*cpa + bulka*cp)
 
-            wave(sig_zz,1) = a1 * bulkb
+            wave(sig_yy,1) = a1 * bulkb
             wave(sig_xx,1) = a1 * lamb
-            wave(sig_yy,1) = a1 * lamb
-            wave(w,1) = a1 * cpb
+            wave(sig_zz,1) = a1 * lamb
+            wave(v,1) = a1 * cpb
 
-            wave(sig_zz,2) = a2 * bulka
+            wave(sig_yy,2) = a2 * bulka
             wave(sig_xx,2) = a2 * lama
-            wave(sig_yy,2) = a2 * lama
-            wave(w,2) = -a2 * cpa
+            wave(sig_zz,2) = a2 * lama
+            wave(v,2) = -a2 * cpa
         else
-            ! transverse direction is x or y
-            a1 = (cp*(dsig_xx*nxb*nxb + dsig_yy*nyb*nyb + 2.d0*nxb*nyb*dsig_xy) + bulk*(nxb*du + nyb*dv)) / (bulk*cpb + bulkb*cp)
-            a2 = (cp*(dsig_xx*nxa*nxa + dsig_yy*nya*nya + 2.d0*nxa*nya*dsig_xy) - bulk*(nxa*du + nya*dv)) / (bulk*cpa + bulka*cp)
+            ! transverse direction is x or z
+            a1 = (cp*(dsig_xx*nxb*nxb + dsig_zz*nzb*nzb + 2.d0*nxb*nzb*dsig_xz) + bulk*(nxb*du + nzb*dw)) / (bulk*cpb + bulkb*cp)
+            a2 = (cp*(dsig_xx*nxa*nxa + dsig_zz*nza*nza + 2.d0*nxa*nza*dsig_xz) - bulk*(nxa*du + nza*dw)) / (bulk*cpa + bulka*cp)
 
             wave(sig_xx,1) = a1 * (lamb + 2.d0*mub*nxb*nxb)
-            wave(sig_yy,1) = a1 * (lamb + 2.d0*mub*nyb*nyb)
-            wave(sig_zz,1) = a1 * lamb
-            wave(sig_xy,1) = a1 * 2.d0*mub*nxb*nyb
+            wave(sig_zz,1) = a1 * (lamb + 2.d0*mub*nzb*nzb)
+            wave(sig_yy,1) = a1 * lamb
+            wave(sig_xz,1) = a1 * 2.d0*mub*nxb*nzb
             wave(u,1) = a1 * cpb * nxb
-            wave(v,1) = a1 * cpb * nyb
+            wave(w,1) = a1 * cpb * nzb
             s(1) = -cpb
 
             wave(sig_xx,2) = a2 * (lama + 2.d0*mua*nxa*nxa)
-            wave(sig_yy,2) = a2 * (lama + 2.d0*mua*nya*nya)
-            wave(sig_zz,2) = a2 * lama
-            wave(sig_xy,2) = a2 * 2.d0*mua*nxa*nya
+            wave(sig_zz,2) = a2 * (lama + 2.d0*mua*nza*nza)
+            wave(sig_yy,2) = a2 * lama
+            wave(sig_xz,2) = a2 * 2.d0*mua*nxa*nza
             wave(u,2) = -a2 * cpa * nxa
-            wave(v,2) = -a2 * cpa * nya
+            wave(w,2) = -a2 * cpa * nza
         end if
 
         ! Compute the S-wave parts (a3,a4 downward, a5,a6 upward)
@@ -273,65 +273,65 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         s(5) = csa
         s(6) = csa
 
-        if (ixyz + icoor == 4) then
-            ! transverse direction is z
+        if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
+            ! transverse direction is y
 
             det = mub*cs + mu*csb
             if (det > 1.e-10) then
-                a3 = (cs*dsig_xz + mu*du) / det
-                a4 = (cs*dsig_yz + mu*dv) / det
+                a3 = (cs*dsig_xy + mu*du) / det
+                a4 = (cs*dsig_yz + mu*dw) / det
 
-                wave(sig_xz,3) = a3 * mub
+                wave(sig_xy,3) = a3 * mub
                 wave(u,3) = a3 * csb
 
                 wave(sig_yz,4) = a4 * mub
-                wave(v,4) = a4 * csb
-            end if
-
-            det = mua*cs + mu*csa
-            if (det > 1.e-10) then
-                a5 = (cs*dsig_xz - mu*du) / det
-                a6 = (cs*dsig_yz - mu*dv) / det
-
-                wave(sig_xy,5) = a5 * mua
-                wave(u,5) = -a5 * csa
-
-                wave(sig_yz,6) = a6 * mua
-                wave(v,6) = -a6 * csa
-            end if
-        else
-            ! transverse direction is x or y
-
-            det = mub*cs + mu*csb
-            if (det > 1.e-10) then
-                a3 = (cs*(dsig_xy*(nxb*nxb - nyb*nyb) + nxb*nyb*(dsig_yy - dsig_xx)) + mu*(nxb*dv - nyb*du)) / det
-                a4 = (cs*(dsig_xz*nxb + dsig_yz*nyb) + mu*dw) / det
-
-                wave(sig_xx,3) = -a3 * 2.d0*mub*nxb*nyb
-                wave(sig_yy,3) = a3 * 2.d0*mub*nxb*nyb
-                wave(sig_xy,3) = a3 * mub*(nxb*nxb - nyb*nyb)
-                wave(u,3) = -a3 * csb*nyb
-                wave(v,3) = a3 * csb*nxb
-
-                wave(sig_xz,4) = a4 * mub*nxb
-                wave(sig_yz,4) = a4 * mub*nyb
                 wave(w,4) = a4 * csb
             end if
 
             det = mua*cs + mu*csa
             if (det > 1.e-10) then
-                a5 = (cs*(dsig_xy*(nxa*nxa - nya*nya) + nxa*nya*(dsig_yy - dsig_xx)) - mu*(nxa*dv - nya*du)) / det
-                a6 = (cs*(dsig_xz*nxa + dsig_yz*nya) - mua*dw) / det
+                a5 = (cs*dsig_xy - mu*du) / det
+                a6 = (cs*dsig_yz - mu*dw) / det
 
-                wave(sig_xx,5) = -a5 * 2.d0*mua*nxa*nya
-                wave(sig_yy,5) = a5 * 2.d0*mua*nxa*nya
-                wave(sig_xy,5) = a5 * mua*(nxa*nxa - nya*nya)
-                wave(u,5) = a5 * csa*nya
-                wave(v,5) = -a5 * csa*nxa
+                wave(sig_xy,5) = a5 * mua
+                wave(u,5) = -a5 * csa
 
-                wave(sig_xz,6) = a6 * mua*nxa
-                wave(sig_yz,6) = a6 * mua*nya
+                wave(sig_yz,6) = a6 * mua
                 wave(w,6) = -a6 * csa
+            end if
+        else
+            ! transverse direction is x or z
+
+            det = mub*cs + mu*csb
+            if (det > 1.e-10) then
+                a3 = (cs*(dsig_xz*(nxb*nxb - nzb*nzb) + nxb*nzb*(dsig_zz - dsig_xx)) + mu*(nxb*dw - nzb*du)) / det
+                a4 = (cs*(dsig_xy*nxb + dsig_yz*nzb) + mu*dv) / det
+
+                wave(sig_xx,3) = -a3 * 2.d0*mub*nxb*nzb
+                wave(sig_zz,3) = a3 * 2.d0*mub*nxb*nzb
+                wave(sig_xz,3) = a3 * mub*(nxb*nxb - nzb*nzb)
+                wave(u,3) = -a3 * csb*nzb
+                wave(w,3) = a3 * csb*nxb
+
+                wave(sig_xy,4) = a4 * mub*nxb
+                wave(sig_yz,4) = a4 * mub*nzb
+                wave(v,4) = a4 * csb
+            end if
+
+            det = mua*cs + mu*csa
+            if (det > 1.e-10) then
+                a5 = (cs*(dsig_xz*(nxa*nxa - nza*nza) + nxa*nza*(dsig_zz - dsig_xx)) - mu*(nxa*dw - nza*du)) / det
+                a6 = (cs*(dsig_xy*nxa + dsig_yz*nza) - mua*dv) / det
+
+                wave(sig_xx,5) = -a5 * 2.d0*mua*nxa*nza
+                wave(sig_zz,5) = a5 * 2.d0*mua*nxa*nza
+                wave(sig_xz,5) = a5 * mua*(nxa*nxa - nza*nza)
+                wave(u,5) = a5 * csa*nza
+                wave(w,5) = -a5 * csa*nxa
+
+                wave(sig_xy,6) = a6 * mua*nxa
+                wave(sig_yz,6) = a6 * mua*nza
+                wave(v,6) = -a6 * csa
              end if
          end if
 
@@ -355,5 +355,3 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
 
     return
 end subroutine rpt3
-
-

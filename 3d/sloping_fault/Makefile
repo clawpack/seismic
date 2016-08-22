@@ -42,8 +42,8 @@ SOURCES = \
   ./qinit.f90 \
   ./setprob.f90 \
   ../rp/rpn3_vc_elasticity_mapped_Yinvariant.f90 \
-  ../rp/rpt3_vc_elasticity_cylindrical.f90 \
-  ../rp/rptt3_vc_elasticity_cylindrical.f90 \
+  ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
+  ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
   ./bc3amr.f90 \
   ./mapc2p.f90 \
   ./setaux.f90 
