@@ -231,7 +231,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
                 a3 = (csr*(dsig_xz*(nx2 - nz2) + nxz*(dsig_zz - dsig_xx)) + mur*(nx*dw - nz*du)) / det
                 a4 = (csr*(dsig_xy*nx + dsig_yz*nz) + mur*dv) / det
                 a5 = (csl*(dsig_xz*(nx2 - nz2) + nxz*(dsig_zz - dsig_xx)) - mul*(nx*dw - nz*du)) / det
-                a6 = (csl*(dsig_xz*nx + dsig_yz*nz) - mul*dv) / det
+                a6 = (csl*(dsig_xy*nx + dsig_yz*nz) - mul*dv) / det
 
                 wave(sig_xx,3,i) = -a3 * 2.d0*mul*nxz
                 wave(sig_zz,3,i) = a3 * 2.d0*mul*nxz
