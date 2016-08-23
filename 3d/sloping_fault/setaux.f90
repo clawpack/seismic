@@ -19,12 +19,25 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
     real (kind=8) :: center(3), theta, xcb(2), ycb(2), mindepth
     common /fault/  center, theta, xcb, ycb, mindepth
 
-    !# NEED AUX DEF HERE
+    ! Auxiliary variables:
+    !       1 rho
+    !       2 lambda
+    !       3 mu
+    !       4 cp
+    !       5 cs
+    !       6 nx at left-wall in x-direction
+    !       7 nz at left-wall in x-direction
+    !       8 area ratio of left-wall in x-direction
+    !       9 area ratio of left-wall in y-direction
+    !       10 nx at left-wall in z-direction
+    !       11 nz at left-wall in z-direction
+    !       12 area ratio of left-wall in z-direction
+    !       13 capacity function value
 
     lambda_cell = 60.d9  ! Pa
     mu_cell = 30.d9      ! Pa
     rho_cell = 2500.d0   ! kg/m**3
-    cp = dsqrt((lambda_cell + 2*mu_cell)/rho_cell)
+    cp = dsqrt((lambda_cell + 2.d0*mu_cell)/rho_cell)
     cs = dsqrt(mu_cell/rho_cell)
 
 
