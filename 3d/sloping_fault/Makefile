@@ -32,10 +32,10 @@ FFLAGS ?=  -fopenmp
 # ---------------------------------
 
 AMRLIB = $(CLAW)/amrclaw/src/3d
+SEISLIB = $(CLAW)/seismic/src/3d
 include $(AMRLIB)/Makefile.amr_3d
 
 MODULES = \
-#  $(AMRLIB)/gauges_module.f90
 #  $(AMRLIB)/slices_module.f90 
 
 SOURCES = \
@@ -44,9 +44,10 @@ SOURCES = \
   ../rp/rpn3_vc_elasticity_mapped_Yinvariant.f90 \
   ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
   ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
-  ./bc3amr.f90 \
+  ./bc3amr.f \
   ./mapc2p.f90 \
-  ./setaux.f90 
+  ./setaux.f90 \
+  $(SEISLIB)/flag2refine.f90
 
 
 #-------------------------------------------------------------------

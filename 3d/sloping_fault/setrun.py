@@ -68,9 +68,9 @@ def setrun(claw_pkg='amrclaw'):
     ## specify dz using dx,dy
     num_cells_above = np.rint(probdata.fault_depth/min(dx,dy))
     dz = probdata.fault_depth/num_cells_above
-    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx))
-    clawdata.num_cells[1] = int(np.ceil(probdata.domain_length/dy))
-    clawdata.num_cells[2] = int(np.ceil(probdata.domain_depth/dz))
+    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx/2.0))*2
+    clawdata.num_cells[1] = int(np.ceil(probdata.domain_length/dy/2.0))*2
+    clawdata.num_cells[2] = int(np.ceil(probdata.domain_depth/dz/2.0))*2
 
     # Lower and upper edgse of computational domain:
     ## note the size of domain is likely expanded here
@@ -311,7 +311,7 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 1
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
     amrdata.refinement_ratios_x = [4,4,2]
@@ -356,17 +356,16 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
-    #regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9, -1e9, 0.])
-    #regions.append([1,2, 0,1e9, -90e3, 140e3, -90e3, 140e3, -150e3, 0.])
-    #regions.append([1,3, 0,1e9, -75e3, 125e3, -75e3, 125e3, -80e3, 0.])
-    #regions.append([1,4, 0,1e9, -50e3, 105e3, -50e3, 105e3, -70e3, 0.])
-    #regions.append([4,4, 0,1, -10.e3, 60e3, 0.85, 0.95])
-    #regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
-    #                0,1, probdata.fault_xcenter-0.5*probdata.fault_width-2*dx,
-    #                probdata.fault_xcenter+0.5*probdata.fault_width+2*dx,
-    #                probdata.fault_ycenter-0.5*probdata.fault_length-2*dy,
-    #                probdata.fault_ycenter+0.5*probdata.fault_length+2*dy,
-    #                -probdata.fault_depth-2*dz, -probdata.fault_depth+2*dz])
+    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9, -1e9, 0.])
+    regions.append([1,2, 0,1e9, -90e3, 140e3, -90e3, 140e3, -150e3, 0.])
+    regions.append([1,3, 0,1e9, -75e3, 125e3, -75e3, 125e3, -80e3, 0.])
+    regions.append([1,4, 0,1e9, -50e3, 105e3, -50e3, 105e3, -70e3, 0.])
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
+                    0,1, probdata.fault_xcenter-0.5*probdata.fault_width-2*dx,
+                    probdata.fault_xcenter+0.5*probdata.fault_width+2*dx,
+                    probdata.fault_ycenter-0.5*probdata.fault_length-2*dy,
+                    probdata.fault_ycenter+0.5*probdata.fault_length+2*dy,
+                    -probdata.fault_depth-2*dz, -probdata.fault_depth+2*dz])
 
 
 
