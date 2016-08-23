@@ -20,7 +20,7 @@ subroutine mapc2p(xc, yc, zc, xp, yp, zp)
     end if
 
     alpha = ls/mindepth
-    zrot = center(3) - (xc-center(1))*dsin(theta)
+    zrot = zc - (xc-center(1))*dsin(theta)
 
     xp = xc
     yp = yc
