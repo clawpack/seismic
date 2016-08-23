@@ -134,17 +134,17 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         end if
 
         ! material properties in cells i (on right) and i-1 (on left):
-        lamr = auxl(1,i)
-        mur = auxl(2,i)
+        lamr = auxl(2,i)
+        mur = auxl(3,i)
         bulkr = lamr + 2.d0*mur
-        cpr = auxl(3,i)
-        csr = auxl(4,i)
+        cpr = auxl(4,i)
+        csr = auxl(5,i)
 
-        laml = auxr(1,i-1)
-        mul = auxr(2,i-1)
+        laml = auxr(2,i-1)
+        mul = auxr(3,i-1)
         bulkl = laml + 2.d0*mul
-        cpl = auxr(3,i-1)
-        csl = auxr(4,i-1)
+        cpl = auxr(4,i-1)
+        csl = auxr(5,i-1)
 
         ! Compute the P-waves
         do j = 1, meqn
