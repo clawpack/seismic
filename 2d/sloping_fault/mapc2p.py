@@ -34,15 +34,24 @@ def mapc2p(xc,yc):
     ls = numpy.where(xc < xcl, numpy.sqrt((xc-xcl)**2 + (yc-ycenter)**2), ls)
     ls = numpy.where(xc > xcr, numpy.sqrt((xc-xcr)**2 + (yc-ycenter)**2), ls)
 
-    # define grid that is rotated to line up with fault
-    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) - numpy.sin(theta)*(yc-ycenter)
+#    # define grid that is rotated to line up with fault
+#    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) - numpy.sin(theta)*(yc-ycenter)
+#    yrot = ycenter + numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
+#
+#    # Interpolate between roated grid and cartesian grid near the fault,
+#    # using cartesian grid far away from fault.
+#    xp = xc
+#    yp = yc
+#    xp = numpy.where(ls < tol, (tol-ls)/tol*xrot + ls/tol*xc, xp)
+#    yp = numpy.where(ls < tol, (tol-ls)/tol*yrot + ls/tol*yc, yp)
+
+    # define grid that is rotated in y-coordinate only to line up with fault
     yrot = ycenter + numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
 
     # Interpolate between roated grid and cartesian grid near the fault,
     # using cartesian grid far away from fault.
     xp = xc
     yp = yc
-    xp = numpy.where(ls < tol, (tol-ls)/tol*xrot + ls/tol*xc, xp)
     yp = numpy.where(ls < tol, (tol-ls)/tol*yrot + ls/tol*yc, yp)
 
     return xp,yp

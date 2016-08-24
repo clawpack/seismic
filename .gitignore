@@ -1,0 +1,9 @@
+*.o
+*.data
+xamr
+_output
+output_*
+_plots
+plots_*
+*.png
+*.log
