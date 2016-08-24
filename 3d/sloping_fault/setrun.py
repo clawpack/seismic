@@ -61,8 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 10
-    num_cells_fault_length = 10
+    num_cells_fault_width = 2
+    num_cells_fault_length = 2
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -310,13 +310,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2]
-    amrdata.refinement_ratios_y = [4,4,2]
-    amrdata.refinement_ratios_z = [4,4,2]
-    amrdata.refinement_ratios_t = [4,4,2]
+    amrdata.refinement_ratios_x = [4,4,4]
+    amrdata.refinement_ratios_y = [4,4,4]
+    amrdata.refinement_ratios_z = [4,4,4]
+    amrdata.refinement_ratios_t = [4,4,4]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one

@@ -38,7 +38,7 @@ ContourValues = [];   % draw contour lines from 'afterframe.m'
 
   xSliceCoords = [];
   ySliceCoords = [0.0];
-  zSliceCoords = [];
+  zSliceCoords = [0.0];
 
   IsosurfValues    =  [];     % Plot surfaces at q = surfValue(i).
 
