@@ -19,10 +19,10 @@ MappedGrid = 1;              % set to 1 if mapc2p.m exists for nonuniform grid
 MaxFrames = 1000;            % max number of frames to loop over
 MaxLevels = 6;               % max number of AMR levels
 
-PlotData =  [0 1 0 0 0 0];       % Data on refinement level k is plotted only
+PlotData =  [1 1 1 1 1 1];       % Data on refinement level k is plotted only
 			         % if k'th component is nonzero
-PlotGrid =  [0 1 0 0 0 0];       % Plot grid lines on each level?
-PlotGridEdges =  [0 1 0 0 0 0];  % Plot edges of patches of each grid at
+PlotGrid =  [1 1 1 1 1 1];       % Plot grid lines on each level?
+PlotGridEdges =  [0 0 0 0 0 0];  % Plot edges of patches of each grid at
                                  % this level on slices?
 PlotCubeEdges = [0 0 0 0 0 0];   % Plot edges of cube of refinement patch at
                                  % this level?

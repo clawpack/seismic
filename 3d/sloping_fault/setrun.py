@@ -61,8 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 2
-    num_cells_fault_length = 2
+    num_cells_fault_width = 10
+    num_cells_fault_length = 10
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -313,10 +313,10 @@ def setrun(claw_pkg='amrclaw'):
     amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [2,4,2]
-    amrdata.refinement_ratios_y = [2,4,2]
-    amrdata.refinement_ratios_z = [2,4,2]
-    amrdata.refinement_ratios_t = [2,4,2]
+    amrdata.refinement_ratios_x = [4,4,2]
+    amrdata.refinement_ratios_y = [4,4,2]
+    amrdata.refinement_ratios_z = [4,4,2]
+    amrdata.refinement_ratios_t = [4,4,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
@@ -355,16 +355,28 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
-    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9, -1e9, 0.])
-    regions.append([1,2, 0,1e9, -90e3, 140e3, -90e3, 140e3, -150e3, 0.])
-    regions.append([1,3, 0,1e9, -75e3, 125e3, -75e3, 125e3, -80e3, 0.])
-    regions.append([1,4, 0,1e9, -50e3, 105e3, -50e3, 105e3, -70e3, 0.])
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
-                    0,1, probdata.fault_xcenter-0.5*probdata.fault_width-2*dx,
-                    probdata.fault_xcenter+0.5*probdata.fault_width+2*dx,
-                    probdata.fault_ycenter-0.5*probdata.fault_length-2*dy,
-                    probdata.fault_ycenter+0.5*probdata.fault_length+2*dy,
-                    -probdata.fault_depth-2*dz, -probdata.fault_depth+2*dz])
+    xbuffer = 0.5*probdata.fault_width
+    ybuffer = 0.5*probdata.fault_length
+    zbuffer = min(xbuffer,ybuffer)
+    xcb = [probdata.fault_xcenter-xbuffer, probdata.fault_xcenter+xbuffer]
+    ycb = [probdata.fault_ycenter-ybuffer, probdata.fault_ycenter+ybuffer]
+
+    # high-resolution region to surround the fault during slip
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 0,1,
+                    xcb[0],xcb[1], ycb[0],ycb[1],
+                    -probdata.fault_depth-dz, -probdata.fault_depth+dz])
+
+    # decreasing-resolution for cells further away from fault
+    for j in range(amrdata.amr_levels_max-1):
+        regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
+                    xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
+                    ycb[0]-(j+1)*ybuffer,ycb[1]+(j+1)*ybuffer,
+                    -probdata.fault_depth-(j+1)*zbuffer,0.0])
+    regions.append([1,1, 0,1e9, -1.e9,1e9, -1e9,1e9,-1e9, 0.])
+
+#    regions.append([1,2, 0,1e9, -90e3, 140e3, -90e3, 140e3, -150e3, 0.])
+#    regions.append([1,3, 0,1e9, -75e3, 125e3, -75e3, 125e3, -80e3, 0.])
+#    regions.append([1,2, 0,1e9, -50e3, 105e3, -50e3, 105e3, -70e3, 0.])
 
 
 
