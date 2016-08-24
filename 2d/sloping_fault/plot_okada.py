@@ -24,7 +24,7 @@ slip = exp(-((x-xcenter)/(0.5*width))**2)
 for i in range(ndip):
     subfault = dtopotools.SubFault()
     subfault.mu = 3e10
-    subfault.dip = -theta/pi*180.0
+    subfault.dip = theta/pi*180.0
     subfault.width = sf_width
     subfault.depth = -(ycenter + (x[i]-xcenter)*sin(theta))
     subfault.slip = slip[i]

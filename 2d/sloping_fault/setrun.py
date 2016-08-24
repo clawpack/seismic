@@ -41,7 +41,7 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('domain_width', 400e3, 'width of domain')
     probdata.add_param('fault_center', 25e3, 'center of fault')
     probdata.add_param('fault_width', 50735, 'width of fault')
-    probdata.add_param('fault_dip', -0.17, 'angle of fault dip')
+    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
     probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
 
     #------------------------------------------------------------------
