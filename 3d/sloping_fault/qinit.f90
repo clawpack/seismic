@@ -12,16 +12,7 @@ subroutine qinit(meqn,mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,q,maux,aux)
     real(kind=8), intent(inout) :: q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
     integer :: i,j,k,m, ind
 
-
-    do k=1,mz
-      do j=1,my
-        do i=1,mx
-          do m=1,meqn
-            q(m,i,j,k) = 0.d0
-          end do
-        end do
-      end do
-    end do
+    q(:,:,:,:) = 0.d0
 
     return
 end

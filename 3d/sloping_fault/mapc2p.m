@@ -3,7 +3,7 @@ function [xp, yp, zp] = mapc2p(xc, yc, zc)
     % Parameters from run
     fault_width = 50735;
     fault_length = 50735;
-    theta = 0.0;
+    theta = 0.17;
     xcenter = 25e3;
     ycenter = 0.0;
     zcenter = -19.3e3;    

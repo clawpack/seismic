@@ -36,17 +36,20 @@ SEISLIB = $(CLAW)/seismic/src/3d
 include $(AMRLIB)/Makefile.amr_3d
 
 MODULES = \
+  $(SEISLIB)/regions_module.f90 \
 #  $(AMRLIB)/slices_module.f90 
 
 SOURCES = \
+  ./b4step3.f90 \
+  ./bc3amr.f \
+  ./mapc2p.f90 \
   ./qinit.f90 \
+  ./setaux.f90 \
   ./setprob.f90 \
   ../rp/rpn3_vc_elasticity_mapped_Yinvariant_fault.f90 \
   ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
   ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
-  ./bc3amr.f \
-  ./mapc2p.f90 \
-  ./setaux.f90 \
+  $(SEISLIB)/amr3.f90 \
   $(SEISLIB)/flag2refine.f90
 
 

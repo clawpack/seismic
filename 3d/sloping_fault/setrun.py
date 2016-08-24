@@ -61,8 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 10
-    num_cells_fault_length = 10
+    num_cells_fault_width = 2
+    num_cells_fault_length = 2
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -280,8 +280,7 @@ def setrun(claw_pkg='amrclaw'):
     # ---------------
     gauges = rundata.gaugedata.gauges
 
-    # Gauges across transducer face
-    #top edgs
+    # gauges for surface displacement
     xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1,100)
     ygauges = np.linspace(clawdata.lower[1]+1, clawdata.upper[1]-1,100)
     gcount = 0
@@ -290,12 +289,12 @@ def setrun(claw_pkg='amrclaw'):
             gauges.append([gcount, x, y, clawdata.upper[2]-1, 0.0, 1e9])
             gcount = gcount + 1
     # above fault place
-    xgauges = np.linspace(probdata.fault_xcenter-0.5*probdata.fault_width,probdata.fault_xcenter+0.5*probdata.fault_width,100)
-    ygauges = np.linspace(probdata.fault_ycenter-0.5*probdata.fault_length,probdata.fault_ycenter+0.5*probdata.fault_length,100)
-    for x in xgauges:
-        for y in ygauges:
-            gauges.append([gcount, x, y, -probdata.fault_depth+1, 0.0, 1e9])
-            gcount = gcount + 1
+    #xgauges = np.linspace(probdata.fault_xcenter-0.5*probdata.fault_width,probdata.fault_xcenter+0.5*probdata.fault_width,100)
+    #ygauges = np.linspace(probdata.fault_ycenter-0.5*probdata.fault_length,probdata.fault_ycenter+0.5*probdata.fault_length,100)
+    #for x in xgauges:
+    #    for y in ygauges:
+    #        gauges.append([gcount, x, y, -probdata.fault_depth+1, 0.0, 1e9])
+    #        gcount = gcount + 1
 
 
     # -----------------
@@ -311,13 +310,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 1
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2]
-    amrdata.refinement_ratios_y = [4,4,2]
-    amrdata.refinement_ratios_z = [4,4,2]
-    amrdata.refinement_ratios_t = [4,4,2]
+    amrdata.refinement_ratios_x = [2,4,2]
+    amrdata.refinement_ratios_y = [2,4,2]
+    amrdata.refinement_ratios_z = [2,4,2]
+    amrdata.refinement_ratios_t = [2,4,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
