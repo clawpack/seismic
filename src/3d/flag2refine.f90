@@ -26,13 +26,13 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
 
     implicit none
 
-    integer, intent(in) :: mx, my, mz, mbc, meqn, maux
+    integer, intent(in) :: mx, my, mz, mbc, meqn, maux, level
     real (kind=8), intent(in) :: q(meqn,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
     real (kind=8), intent(in) :: aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
     real (kind=8), intent(inout) :: amrflags(1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
     logical     allowflag
     external    allowflag
-    real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t, level
+    real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t
 
     real (kind=8) :: xcell, ycell, zcell, max_stress
     integer :: i, j, k, m, min_level, max_level
@@ -63,12 +63,12 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
 !               # if nothing needs to be changed, use specified tolerance and stress
                 if (min_level > 0 .and. level < min_level) then
                     amrflags(i,j,k) = DOFLAG
-                else if (min_level > 0 .and. max_level < level) then
+                else if (min_level > 0 .and. max_level <= level) then
                     amrflags(i,j,k) = DONTFLAG
                 else if (allowflag(xcell,ycell,zcell,t,level)) then
                     max_stress = 0.d0
                     do m = 1,6
-                        max_stress = max(max_stress, dabs(q(m,i,j,k)))  
+                        max_stress = max(max_stress, dabs(q(m,i,j,k)))
                     end do
                     if (max_stress .ge. tolsp) then
                         amrflags(i,j,k) = DOFLAG
@@ -78,7 +78,7 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
                 else
                     amrflags(i,j,k) = DONTFLAG
                 end if
-            
+
             end do
         end do
     end do
