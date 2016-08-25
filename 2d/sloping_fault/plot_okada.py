@@ -12,7 +12,7 @@ probdata.read('setprob.data',force=True)
 width = probdata.fault_width
 theta = probdata.fault_dip
 xcenter = probdata.fault_center
-ycenter = -probdata.fault_depth
+ycenter = probdata.fault_depth
 domain_width = probdata.domain_width
 ndip = 50
 
@@ -26,7 +26,7 @@ for i in range(ndip):
     subfault.mu = 3e10
     subfault.dip = theta/pi*180.0
     subfault.width = sf_width
-    subfault.depth = -(ycenter + (x[i]-xcenter)*sin(theta))
+    subfault.depth = ycenter + (x[i]-xcenter)*sin(theta)
     subfault.slip = slip[i]
     subfault.rake = 90
     subfault.strike = 0
