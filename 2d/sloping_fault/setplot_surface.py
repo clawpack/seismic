@@ -25,8 +25,8 @@ ycenter = -probdata.fault_depth
 
 xp1 = xcenter - 0.5*width*np.cos(theta)
 xp2 = xcenter + 0.5*width*np.cos(theta)
-yp1 = ycenter - 0.5*width*np.sin(theta)
-yp2 = ycenter + 0.5*width*np.sin(theta)
+yp1 = ycenter + 0.5*width*np.sin(theta)
+yp2 = ycenter - 0.5*width*np.sin(theta)
 
 xlimits = [-0.5*probdata.domain_width,0.5*probdata.domain_width]
 ylimits = [-probdata.domain_depth,0.0]
