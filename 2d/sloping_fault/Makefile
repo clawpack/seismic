@@ -16,7 +16,7 @@ CLAW_PKG = amrclaw                  # Clawpack package to use
 EXE = xamr                          # Executable to create
 SETRUN_FILE = setrun.py             # File containing function to make data
 OUTDIR = _output                    # Directory for output
-SETPLOT_FILE = setplot.py           # File containing function to set plots
+SETPLOT_FILE = setplot_surface.py   # File containing function to set plots
 PLOTDIR = _plots                    # Directory for plots
 
 OVERWRITE ?= True                   # False ==> make a copy of OUTDIR first
@@ -53,16 +53,12 @@ MODULES = \
 SOURCES = \
   qinit.f \
   setprob.f90 \
-  fdisc.f \
   bc2amr.f \
   setaux.f90 \
   mapc2p.f90 \
   b4step2.f90 \
   ../rp/rpn2_vc_elasticity_mapped_fault.f90 \
-  ../rp/rpt2_vc_elasticity_mapped.f90 \
-  $(AMRLIB)/cellave.f \
-  $(AMRLIB)/fss.f \
-  $(AMRLIB)/zeroin.f \
+  ../rp/rpt2_vc_elasticity_mapped.f90 
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
