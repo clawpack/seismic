@@ -25,7 +25,7 @@
     end if
 
     alpha = ls/mindepth
-    xrot = center(1) + dcos(theta)*(xc-center(1)) - dsin(theta)*(yc-center(2))
+    xrot = center(1) + dcos(theta)*(xc-center(1)) + dsin(theta)*(yc-center(2))
     yrot = center(2) - dsin(theta)*(xc-center(1)) + dcos(theta)*(yc-center(2))
     !yrot = yc - dsin(theta)*(xc-center(1))
 

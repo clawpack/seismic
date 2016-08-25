@@ -35,7 +35,7 @@ def mapc2p(xc,yc):
     ls = numpy.where(xc > xcr, numpy.sqrt((xc-xcr)**2 + (yc-ycenter)**2), ls)
 
     # define grid that is rotated to line up with fault
-    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) - numpy.sin(theta)*(yc-ycenter)
+    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) + numpy.sin(theta)*(yc-ycenter)
     yrot = ycenter - numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
 
     # Interpolate between rotated grid and cartesian grid near the fault,
