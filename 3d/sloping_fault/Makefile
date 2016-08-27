@@ -37,7 +37,7 @@ include $(AMRLIB)/Makefile.amr_3d
 
 MODULES = \
   $(SEISLIB)/regions_module.f90 \
-#  $(AMRLIB)/slices_module.f90 
+  $(SEISLIB)/slices_module.f90 
 
 SOURCES = \
   ./b4step3.f90 \
@@ -50,7 +50,8 @@ SOURCES = \
   ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
   ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
   $(SEISLIB)/amr3.f90 \
-  $(SEISLIB)/flag2refine.f90
+  $(SEISLIB)/flag2refine.f90 \
+  $(SEISLIB)/tick.f
 
 
 #-------------------------------------------------------------------

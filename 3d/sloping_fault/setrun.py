@@ -295,22 +295,13 @@ def setrun(claw_pkg='amrclaw'):
     #    for y in ygauges:
     #        gauges.append([gcount, x, y, -probdata.fault_depth+1, 0.0, 1e9])
     #        gcount = gcount + 1
-
-
-    # -----------------
-    # Slice parameters:
-    # -----------------
-
-#    rundata.slicedata.slices_xy = [0.0]
-#    rundata.slicedata.slices_xz = [0.0]
-
     # ---------------
     # AMR parameters:
     # ---------------
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
     amrdata.refinement_ratios_x = [4,4,4]
@@ -392,6 +383,24 @@ def setrun(claw_pkg='amrclaw'):
     amrdata.sprint = False      # space/memory output
     amrdata.tprint = False      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
+
+
+    # --------------
+    # Output Slices:
+    # --------------
+
+    slicedata = rundata.slicedata
+    # use slicedata.add() to add output slices defined
+    # by a point (x,y,z) and a normal direction (vx,vy,vz)
+    # e.g. slicedata.add([x,y,z],[nx,ny,nz])
+
+    point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
+    # surface slice:
+    slicedata.add(point,[0.0,0.0,1.0])
+
+    # cross section slices:
+    slicedata.add(point,[1.0,0.0,0.0])
+    slicedata.add(point,[0.0,1.0,0.0])
 
 
     return rundata
