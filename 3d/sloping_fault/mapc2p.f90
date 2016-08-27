@@ -9,7 +9,7 @@ subroutine mapc2p(xc, yc, zc, xp, yp, zp)
     common /fault/  center, theta, xcb, ycb, mindepth
 
     ! Local variables
-    real (kind=8) :: ls, alpha, zrot
+    real (kind=8) :: ls, alpha, xrot, zrot
 
     if (xc < xcb(1)) then
       ls = dsqrt((xc-xcb(1))**2 + (zc-center(3))**2)
@@ -20,13 +20,15 @@ subroutine mapc2p(xc, yc, zc, xp, yp, zp)
     end if
 
     alpha = ls/mindepth
-    zrot = zc - (xc-center(1))*dsin(theta)
+    xrot = center(1) + dcos(theta)*(xc-center(1)) + dsin(theta)*(zc-center(3))
+    zrot = center(3) - dsin(theta)*(xc-center(1)) + dcos(theta)*(zc-center(3))
 
-    xp = xc
     yp = yc
     if (alpha < 1.d0) then
+      xp = (1.d0-alpha)*xrot + alpha*xc
       zp = (1.d0-alpha)*zrot + alpha*zc
     else
+      xp = xc
       zp = zc
     end if
 

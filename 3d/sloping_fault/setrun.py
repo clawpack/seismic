@@ -301,13 +301,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,4]
-    amrdata.refinement_ratios_y = [4,4,4]
-    amrdata.refinement_ratios_z = [4,4,4]
-    amrdata.refinement_ratios_t = [4,4,4]
+    amrdata.refinement_ratios_x = [4,4,2]
+    amrdata.refinement_ratios_y = [4,4,2]
+    amrdata.refinement_ratios_z = [4,4,2]
+    amrdata.refinement_ratios_t = [4,4,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
@@ -394,13 +394,13 @@ def setrun(claw_pkg='amrclaw'):
     # by a point (x,y,z) and a normal direction (vx,vy,vz)
     # e.g. slicedata.add([x,y,z],[nx,ny,nz])
 
-    point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
+    #point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
     # surface slice:
-    slicedata.add(point,[0.0,0.0,1.0])
+    #slicedata.add(point,[0.0,0.0,1.0])
 
     # cross section slices:
-    slicedata.add(point,[1.0,0.0,0.0])
-    slicedata.add(point,[0.0,1.0,0.0])
+    #slicedata.add(point,[1.0,0.0,0.0])
+    #slicedata.add(point,[0.0,1.0,0.0])
 
 
     return rundata
