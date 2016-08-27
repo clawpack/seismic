@@ -25,12 +25,13 @@
     end if
 
     alpha = ls/mindepth
-    !xrot = center(1) + dcos(theta)*(xc-center(1)) - dsin(theta)*(yc-center(2))
-    yrot = center(2) + dsin(theta)*(xc-center(1)) + dcos(theta)*(yc-center(2))
+    xrot = center(1) + dcos(theta)*(xc-center(1)) + dsin(theta)*(yc-center(2))
+    yrot = center(2) - dsin(theta)*(xc-center(1)) + dcos(theta)*(yc-center(2))
+    !yrot = yc - dsin(theta)*(xc-center(1))
 
     if (alpha < 1.d0) then
-      !xp = (1.d0-alpha)*xrot + alpha*xc
-      xp = xc
+      xp = (1.d0-alpha)*xrot + alpha*xc
+      !xp = xc
       yp = (1.d0-alpha)*yrot + alpha*yc
     else
       xp = xc
