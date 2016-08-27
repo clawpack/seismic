@@ -96,7 +96,7 @@ program amr3
 
     use regions_module, only: set_regions
     use gauges_module, only: set_gauges, num_gauges
-!    use slices_module, only: set_slices, print_slices, num_slices
+    use slices_module, only: set_slices, print_slices, num_slices
 
     implicit none
 
@@ -477,7 +477,7 @@ program amr3
 
         call set_gauges(rest, nvar)
         call set_regions()
-!        call set_slices()
+        call set_slices()
     else
 
         open(outunit, file=outfile, status='unknown', form='formatted')
@@ -488,7 +488,7 @@ program amr3
         call setprob()
         call set_gauges(rest, nvar)
         call set_regions()
-!        call set_slices()
+        call set_slices()
 
         cflmax = 0.d0   ! otherwise use previously heckpointed val
 
@@ -593,7 +593,11 @@ program amr3
     write(outunit,*) "  original total mass ..."
     call conck(1,nvar,naux,time,rest)
     if (output_t0) then
-        call valout(1,lfine,time,nvar,naux)
+        if (num_slices > 0) then
+         call print_slices(1,lfine,time,nvar,naux)
+       else
+         call valout(1,lfine,time,nvar,naux)
+       end if
     endif
     close(parmunit)
 
