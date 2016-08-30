@@ -37,7 +37,7 @@ include $(AMRLIB)/Makefile.amr_3d
 
 MODULES = \
   $(SEISLIB)/regions_module.f90 \
-  $(SEISLIB)/slices_module.f90 
+  $(AMRLIB)/slices_module.f90 
 
 SOURCES = \
   ./b4step3.f90 \
