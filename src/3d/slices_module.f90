@@ -141,7 +141,7 @@ contains
                 do l = 1,num_slices
 
 ! ############################# YZ SLICES #######################################
-                  if ((dabs(slice_x(l)) > 0.d0) .and. &
+                  if ((dabs(slice_vx(l)) > 0.d0) .and. &
                   (slice_x(l) .ge. xlow - 0.01d0*hxposs(level)) .and. &
                   (slice_x(l) .le. xup + 0.01d0*hxposs(level))) then
 
@@ -203,7 +203,7 @@ contains
 ! ############################# YZ SLICES #######################################
 
 ! ############################# XZ SLICES #######################################
-                    if ((dabs(slice_y(l)) > 0.d0) .and. &
+                    if ((dabs(slice_vy(l)) > 0.d0) .and. &
                     (slice_y(l) .ge. ylow - 0.01d0*hyposs(level)) .and. &
                     (slice_y(l) .le. yup + 0.01d0*hyposs(level))) then
 
