@@ -55,6 +55,13 @@ y = linspace(-1.5,1.5,100)
 z = array([0.])
 dtopo = fault.create_dtopography(x,y,[1.])
 
+def plot_okada(ax=None):
+    if ax is None:
+        figure()
+        ax = subplot(111)
+#    dtopotools.plot_dZ_colors(dtopo.x*111.e3,dtopo.y*111.e3,dtopo.dZ[0,:,:],axes=ax)
+    pcolor(dtopo.x*111.e3,dtopo.y*111.e3,dtopo.dZ[0,:,:],axes=ax)
+
 if __name__=='__main__':
     dtopotools.plot_dZ_colors(dtopo.x*111.e3,dtopo.y*111.e3,dtopo.dZ[0,:,:])
     savefig('okada.png')
