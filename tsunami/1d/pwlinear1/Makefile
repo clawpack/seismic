@@ -37,6 +37,7 @@ MODULES = \
   $(GEOLIB)/gauges_module.f90 \
   $(GEOLIB)/geoclaw_module.f90 \
   setprob_module.f90 \
+  dtopo_module.f90 \
 
 SOURCES = \
   qinit.f \

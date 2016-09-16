@@ -33,6 +33,7 @@ subroutine setaux(mbc,mx,xlower,dx,maux,aux)
         if (aux(2,i) <= 0.d0) then
             write(6,*) '+++ i,xgrid(i),xgrid(i+1): ',i,xgrid(i),xgrid(i+1)
             endif
+        aux(3,i) = 0.5d0*(zgrid(i) + zgrid(i+1))  ! save initial topo if dtopo
     enddo
 
     aux(:,0) = aux(:,1)
