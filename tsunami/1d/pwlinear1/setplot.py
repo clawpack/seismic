@@ -80,7 +80,7 @@ def setplot(plotdata):
     plotaxes.title = 'Surface displacement'
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var = surface
     plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -101,7 +101,7 @@ def setplot(plotdata):
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var = surface
     plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
@@ -142,9 +142,9 @@ def setplot(plotdata):
     plotaxes.afteraxes = fixticks
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var = surface
     #plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    #plotitem.plot_var = surface  #geoplot.surface
+    #plotitem.plot_var = surface
     #plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
@@ -165,10 +165,10 @@ def setplot(plotdata):
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.show = False
-    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var = surface
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var = surface
     plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
