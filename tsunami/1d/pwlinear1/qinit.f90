@@ -28,7 +28,7 @@ subroutine qinit(meqn,mbc,mx,xlower,dx,q,maux,aux)
       eta = 0.d0  ! initialize surface to sea level
 
       ! square pulse for testing:
-      if ((xcell > -120e3) .and. (xcell < -80e3)) eta = 2.d0
+      !if ((xcell > -120e3) .and. (xcell < -80e3)) eta = 2.d0
 
       q(1,i) = max(0.0, eta - aux(1,i))
       q(2,i) = 0.d0

@@ -4,6 +4,7 @@ module dtopo_module
     integer :: mx_dtopo,mt_dtopo
     real(kind=8) :: xlow_dtopo,t0_dtopo,dx_dtopo,dt_dtopo,xhi_dtopo,tf_dtopo
     real(kind=8), allocatable :: dtopo(:,:), t_dtopo(:), x_dtopo(:)
+    logical :: dtopo_finalized
     save
 
 contains
@@ -13,9 +14,11 @@ subroutine read_dtopo()
     implicit none
     integer :: iunit, i, j, k, dtopo_type
 
+    dtopo_finalized = .false.
+
     dtopo_type = 3
-    iunit = 57
-    open(unit=iunit, file='dtopo.tt3', status='unknown',form='formatted')
+    iunit = 58 
+    open(unit=iunit, file='/Users/rjl/git/clawpack/seismic/tsunami/1d/pwlinear1/dtopo.tt3', status='unknown',form='formatted')
 
     ! Read in header directly
     read(iunit,*) mx_dtopo

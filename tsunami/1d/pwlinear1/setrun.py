@@ -66,7 +66,7 @@ def setrun(claw_pkg='classic'):
     clawdata.upper[0] = 1.           # xupper
 
     # Number of grid cells:
-    clawdata.num_cells[0] = 5000      # mx
+    clawdata.num_cells[0] = 10000      # mx
 
 
     # ---------------
@@ -77,7 +77,7 @@ def setrun(claw_pkg='classic'):
     clawdata.num_eqn = 2
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 2
+    clawdata.num_aux = 3
 
     # Index of aux array corresponding to capacity function, if there is one:
     clawdata.capa_index = 2
@@ -125,7 +125,7 @@ def setrun(claw_pkg='classic'):
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 5
+        clawdata.total_steps = 3
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 

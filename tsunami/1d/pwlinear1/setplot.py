@@ -1,5 +1,4 @@
 
-import clawpack.geoclaw.shallow_1d.plot as geoplot
 
 import setrun
 rundata=setrun.setrun()
@@ -42,43 +41,88 @@ def setplot(plotdata):
         if xmax is not None:
             plot(xmax, etamax, 'r')
 
+    def surface(current_data):
+        """
+        Return a masked array containing the surface elevation only in wet cells.
+        Surface is q[2,:]
+        """
+        from numpy import ma
+        drytol_default = rundata.geo_data.dry_tolerance
+        drytol = getattr(current_data.user, 'dry_tolerance', drytol_default)
+        q = current_data.q
+        aux = current_data.aux
+        h = q[0,:]
+        eta = q[2,:]
+        water = ma.masked_where(h<=drytol, eta)
+        #water = eta
+        return water
+
+        
+    def topo(current_data):
+        q = current_data.q
+        topo = q[2,:] - q[0,:]  # eta - h
+        return topo
+
+    def dtopo(current_data):
+        q = current_data.q
+        aux = current_data.aux
+        topo = q[2,:] - q[0,:]  # eta - h
+        topo_original = aux[2,:]
+        dtopo = topo - topo_original
+        return dtopo
+        
     plotfigure = plotdata.new_plotfigure(name='domain', figno=0)
+    plotfigure.kwargs = {'figsize': (8,9)}
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(211)'
-    plotaxes.xlimits = [-200e3,2e3]
-    plotaxes.ylimits = [-5, 5]
+    plotaxes.axescmd = 'subplot(311)'
+    plotaxes.xlimits = [-150e3,2e3]
+    plotaxes.ylimits = [-.5, .5]
     plotaxes.title = 'Surface displacement'
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.surface
+    plotitem.plot_var = surface  #geoplot.surface
     plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.topo
+    plotitem.plot_var = topo
     plotitem.color = 'k'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(212)'
-    plotaxes.xlimits = [-200e3,2e3]
-    plotaxes.ylimits = [-3500, 1000]
+    plotaxes.axescmd = 'subplot(312)'
+    plotaxes.xlimits = [-150e3,2e3]
+    plotaxes.ylimits = [-3500, 500]
     plotaxes.title = 'Full depth'
     plotaxes.afteraxes = fixticks
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    plotitem.plot_var = geoplot.surface
-    plotitem.plot_var2 = geoplot.topo
+    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.topo
+    plotitem.plot_var = topo
+    plotitem.color = 'k'
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(313)'
+    plotaxes.xlimits = [-150e3,2e3]
+    plotaxes.ylimits = [-0.5,0.5]
+    plotaxes.title = 'dtopo'
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+
+    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    plotitem.plot_var = dtopo
     plotitem.color = 'k'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
@@ -92,48 +136,46 @@ def setplot(plotdata):
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(211)'
     plotaxes.xlimits = [-50e3, 2000] #[180000,225200]
-    plotaxes.ylimits = [-20, 20]
+    plotaxes.ylimits = [-0.5,0.5]
     plotaxes.title = 'Zoom on shelf'
 
     plotaxes.afteraxes = fixticks
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.surface
+    plotitem.plot_var = surface  #geoplot.surface
     #plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    #plotitem.plot_var = geoplot.surface
-    #plotitem.plot_var2 = geoplot.topo
+    #plotitem.plot_var = surface  #geoplot.surface
+    #plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.topo
+    plotitem.plot_var = topo
     plotitem.color = 'k'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(212)'
-    #plotaxes.xlimits = [-2000,2000]
-    plotaxes.xlimits = [-1000,1000]
-    #plotaxes.ylimits = [-10,40]
-    plotaxes.ylimits = [-20,60]
+    plotaxes.xlimits = [-100,100]
+    plotaxes.ylimits = [-2,2]
     plotaxes.title = 'Zoom around shore'
 
     plotaxes.afteraxes = fixticks
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.show = False
-    plotitem.plot_var = geoplot.surface
+    plotitem.plot_var = surface  #geoplot.surface
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_fill_between')
-    plotitem.plot_var = geoplot.surface
-    plotitem.plot_var2 = geoplot.topo
+    plotitem.plot_var = surface  #geoplot.surface
+    plotitem.plot_var2 = topo
     plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = geoplot.topo
+    plotitem.plot_var = topo
     plotitem.color = 'k'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p

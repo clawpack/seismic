@@ -6,9 +6,9 @@ from scipy.interpolate import interp1d
 plot_profile = True
 
 grav = 9.81
-mx = 5000   # number of grid cells
+mx = 10000   # number of grid cells
 
-x0 = -200e3           # left boundary (meters)
+x0 = -150e3           # left boundary (meters)
 x0_slope = -65e3      # start of slope
 x0_shelf = -45e3      # start of shelf
 x0_beach = -5e3       # start of beach
