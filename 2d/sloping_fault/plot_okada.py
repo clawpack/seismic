@@ -1,6 +1,6 @@
 from pylab import *
 from clawpack.clawutil.data import ClawData
-import dtopotools_horiz_okada as dtopotools
+import dtopotools_horiz_okada_and_1d as dtopotools
 reload(dtopotools)
 fault = dtopotools.Fault()
 fault.subfaults = []
@@ -42,7 +42,18 @@ print "Mw = ", fault.Mw()
 
 x = linspace(-1.5,1.5,1000)
 y = array([0.])
-dtopo = fault.create_dtopography(x,y,[1.],y_disp=True)
+times = [1.]
+dtopo = fault.create_dtopography(x,y,times,horiz_disp=True)
+
+# Save dtopo cross section as a 1d dtopo file:
+dtopo_1d = dtopotools.DTopography1d()
+dtopo_1d.x = x * 111.e3   # convert to meters
+dtopo_1d.dZ = dtopo.dZ[0,:,:]
+dtopo_1d.times = times
+fname = 'dtopo_okada.tt3'
+dtopo_1d.write(fname,3)
+print "Created ",fname
+
 
 def plot_okada_surface(ax=None, plotstyle='k-'):
     if ax is None:
@@ -54,7 +65,7 @@ def plot_okada_horiz(ax=None, plotstyle='k-'):
     if ax is None:
         figure()
         ax = subplot(111)
-    ax.plot(dtopo.x*111.e3,dtopo.dY[0,0,:],plotstyle,label="Okada")
+    ax.plot(dtopo.x*111.e3,dtopo.dX[0,0,:],plotstyle,label="Okada")
 
 if __name__=='__main__':
     figure()
