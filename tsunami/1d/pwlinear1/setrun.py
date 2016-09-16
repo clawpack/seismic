@@ -9,7 +9,8 @@ that will be read in by the Fortran code.
 import os
 import numpy as np
 
-import clawpack.geoclaw.shallow_1d.data as geoclaw1d
+#import clawpack.geoclaw.shallow_1d.data as geoclaw1d
+import geoclaw1d  # in this directory for now
 
 #------------------------------
 def setrun(claw_pkg='classic'):
