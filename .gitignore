@@ -8,5 +8,6 @@ plots_*
 *.png
 *.log
 *.pyc
+*.mod
 .output
 .plots
