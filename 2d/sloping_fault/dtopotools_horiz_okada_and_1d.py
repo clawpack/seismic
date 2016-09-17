@@ -421,7 +421,7 @@ class DTopography(object):
             self.dZ = dZ
 
         else:
-            raise ValueError("Only topography types 1, 2, and 3 are supported,",
+            raise ValueError("Only dtopo types 1, 2, and 3 are supported,",
                              " given %s." % dtopo_type)
 
 
@@ -509,7 +509,7 @@ class DTopography(object):
                             data_file.write("\n")
 
             else:
-                raise ValueError("Only topography types 1, 2, and 3 are ",
+                raise ValueError("Only dtopo types 1, 2, and 3 are ",
                                  "supported, given %s." % dtopo_type)
 
 
@@ -2233,30 +2233,18 @@ class DTopography1d(object):
             x=numpy.linspace(xlower,xupper,mx)
             times = numpy.linspace(t0, t0+(mt-1)*dt, mt)
     
-            dZvals = numpy.loadtxt(path, skiprows=6)
-            if dtopo_type==3:
-                # 1 lines with mx values at each time
-                for k,t in enumerate(times):
-                    dZk = dZvals[k,:] 
-                    if k==0:
-                        dZ = dZk.copy()
-                    else:
-                        dZ = numpy.vstack((dZ,dZk))
-            else:
-                # dtopo_type==2 ==> mx lines with 1 values on each
-                for k,t in enumerate(times):
-                    dZk = dZvals[k*mx:(k+1)*mx]
-                    if k==0:
-                        dZ = dZk.copy()
-                    else:
-                        dZ = numpy.vstack((dZ,dZk))
-                    
+            dZvals = numpy.array(numpy.loadtxt(path, skiprows=6), ndmin=2)
+            if dtopo_type==2:
+                dZ = reshape(dZvals,(mt,mx))
+            elif dtopo_type==3:
+                dZ = dZvals
+
             self.x = x
             self.times = times
             self.dZ = dZ
 
         else:
-            raise ValueError("Only topography types 1, 2, and 3 are supported,",
+            raise ValueError("Only dtopo types 2, and 3 are supported,",
                              " given %s." % dtopo_type)
 
 
@@ -2312,7 +2300,7 @@ class DTopography1d(object):
                         data_file.write("\n")
 
             else:
-                raise ValueError("Only topography types 2 and 3 are ",
+                raise ValueError("Only dtopo types 2 and 3 are ",
                                  "supported, given %s." % dtopo_type)
 
 
