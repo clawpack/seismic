@@ -20,6 +20,10 @@ z0_shelf = -100.      # depth at x0_shelf
 z0_beach = -100.       # depth at x0_beach
 z0_shore = 0.         # depth at x0_shore
 
+## Used by sloping_fault code to define seafloor so topo matches
+def get_seafloor_parameters():
+    return x0, x0_slope, x0_shelf, x0_beach, x0_shore, x1
+
 if x0_beach != x0_shelf:
     slope_of_shelf = (z0_beach - z0_shelf) / (x0_beach - x0_shelf)
 else:
@@ -33,7 +37,6 @@ else:
 slope_of_beach = (z0_beach - z0_shore) / (x0_beach - x0_shore)
 print "Slope of shelf = ",slope_of_shelf
 print "Slope of beach = ",slope_of_beach
-
 
 def shelf_pwlin(r):
     """
@@ -57,7 +60,7 @@ if plot_profile:
     plot(r/1e3,s,'g')
     xlim(x0/1e3, x1/1e3)
     ylim(z0_ocean*1.1, 200)
-    xlabel('kilometers') 
+    xlabel('kilometers')
     ylabel('meters')
     title('shelf and beach profile')
     fname = 'profile.png'
@@ -69,14 +72,14 @@ if plot_profile:
 # xc will be uniformly spaced computational grid
 # xp will be physical grid of cell edges from x0 to x1 as defined above
 
-# The grid will be nonuniform and chosen so that 
+# The grid will be nonuniform and chosen so that
 #   c(xp[i]) / (xp[i+1] - xp[i]) \approx constant
 # where c(x) = sqrt(grav * h(x)) is the wave speed
 # so that the Courant number is roughly constant everywhere.
 
 # But near shore the depth goes to zero, so set a minimum depth
 # that is used in calculating c, and then the Courant number will be
-# roughly constant in deeper water but the cells will be uniform in 
+# roughly constant in deeper water but the cells will be uniform in
 # shallower water and the Courant number will decrease as shore is approached.
 
 hmin = 50.  # minimum depth to use in computing c
