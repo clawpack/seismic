@@ -19,7 +19,7 @@ subroutine b4step1(mbc,mx,meqn,q,xlower,dx,t,dt,maux,aux)
     real(kind=8), intent(inout) :: aux(maux,1-mbc:mx+mbc)
 
     !local variables
-    integer :: i,ig,j,m,mvars,k
+    integer :: i,ig,j,m,mvars,k,ibc
     real(kind=8) :: dz,alpha,beta,xcell
 
 
@@ -60,13 +60,14 @@ subroutine b4step1(mbc,mx,meqn,q,xlower,dx,t,dt,maux,aux)
       if (allocated(dtopo) .and. (.not. dtopo_finalized)) then
          if (mt_dtopo .gt. 1) then
              if (t .ge. tf_dtopo) then
-                k = mt_dtopo - 1
-                alpha = 0.d0
+                k = mt_dtopo - 2
+                alpha = 1.d0
                 dtopo_finalized = .true.
               else
                  k = floor((t-t0_dtopo)/dt_dtopo)
                  alpha = (t - t_dtopo(k+1))/dt_dtopo
               endif
+             !write(6,*) '+++ t, k, alpha: ',t,k,alpha
              do i=1,mx
                  xcell = 0.5*(xgrid(i) + xgrid(i+1))
                  if ((xcell.le.x_dtopo(1)) .or. (xcell.ge.x_dtopo(mx_dtopo))) then
@@ -74,8 +75,10 @@ subroutine b4step1(mbc,mx,meqn,q,xlower,dx,t,dt,maux,aux)
                    else
                      j = floor((xcell-x_dtopo(1))/dx_dtopo)
                      beta = (xcell - x_dtopo(j+1))/dx_dtopo
-                     dz = alpha*(beta*dtopo(k+1,j+1) +(1.d0-beta)*dtopo(k+1,j+2)) &
-                          + (1.d0-alpha)*(beta*dtopo(k+2,j+1) +(1.d0-beta)*dtopo(k+2,j+2))
+                     dz = (1.d0-alpha)*((1.d0-beta)*dtopo(k+1,j+1) &
+                                            + beta*dtopo(k+1,j+2)) &
+                              + alpha*((1.d0-beta)*dtopo(k+2,j+1) &
+                                            + beta*dtopo(k+2,j+2))
                    endif
                  aux(1,i) = aux(3,i) + dz  ! adjust initial topo from aux(3,:)
                  enddo
@@ -99,6 +102,11 @@ subroutine b4step1(mbc,mx,meqn,q,xlower,dx,t,dt,maux,aux)
                    endif
                  aux(1,i) = aux(3,i) + dz  ! adjust initial topo from aux(3,:)
                  !write(66,*) 'aux1,aux3: ',aux(1,i),aux(3,i)
+                 enddo
+
+              do ibc=1,mbc
+                 aux(1,1-ibc) = aux(1,1)
+                 aux(1,mx+ibc) = aux(1,mx)
                  enddo
 
          endif

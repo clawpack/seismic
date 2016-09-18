@@ -12,6 +12,8 @@ import numpy as np
 #import clawpack.geoclaw.shallow_1d.data as geoclaw1d
 import geoclaw1d  # in this directory for now
 
+dtopofname = os.path.abspath('dtopo_seismic.tt3')
+
 #------------------------------
 def setrun(claw_pkg='classic'):
 #------------------------------
@@ -40,13 +42,11 @@ def setrun(claw_pkg='classic'):
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    RC = 1.5e3
-    RD = np.sqrt(2.)*RC
-    DC = 2.*RC/3.
-    probdata.add_param('RC',    RC, 'inner radius of crater')
-    probdata.add_param('RD',    RD, 'outer radius of crater')
-    probdata.add_param('DC',    DC, 'depth of crater')
+    probdata.add_param('dtopo_xshift',   -90e3, 'dtopo_xshift')
 
+    dtopodata = rundata.new_UserData(name='dtopodata',fname='dtopo.data')
+    dtopodata.add_param('num_dtopofiles', 1, 'number of dtopo files')
+    dtopodata.add_param('dtopofname', dtopofname, '')
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -115,7 +115,7 @@ def setrun(claw_pkg='classic'):
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
         clawdata.num_output_times = 50
-        clawdata.tfinal = 2500.
+        clawdata.tfinal = 250.
         clawdata.output_t0 = False  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:

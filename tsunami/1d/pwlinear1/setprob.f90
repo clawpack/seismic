@@ -7,7 +7,7 @@ subroutine setprob
    use gauges_module
    use geoclaw_module
    use setprob_module
-   use dtopo_module
+   use dtopo_module, only: read_dtopo, dtopo_xshift
 
    implicit none
    integer :: ndim, iunit
@@ -39,6 +39,7 @@ subroutine setprob
 !  # open the unit with new routine from Clawpack 4.4 to skip over
 !  # comment lines starting with #:
    call opendatafile(iunit, fname)
+   read(iunit,*) dtopo_xshift
 
    call read_dtopo()
 

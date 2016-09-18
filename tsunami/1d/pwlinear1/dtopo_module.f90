@@ -4,6 +4,7 @@ module dtopo_module
     integer :: mx_dtopo,mt_dtopo
     real(kind=8) :: xlow_dtopo,t0_dtopo,dx_dtopo,dt_dtopo,xhi_dtopo,tf_dtopo
     real(kind=8), allocatable :: dtopo(:,:), t_dtopo(:), x_dtopo(:)
+    real(kind=8) :: dtopo_xshift
     logical :: dtopo_finalized
     save
 
@@ -12,13 +13,32 @@ contains
 subroutine read_dtopo()
     use setprob_module, only: xgrid, mx_grid
     implicit none
-    integer :: iunit, i, j, k, dtopo_type
+    integer :: iunit, i, j, k, dtopo_type, num_dtopofiles
+    character*150 :: dtopofname
+
+   iunit = 72
+   dtopofname = 'dtopo.data'
+!  # open the unit with new routine from Clawpack 4.4 to skip over
+!  # comment lines starting with #:
+   call opendatafile(iunit, dtopofname)
+
+   read(iunit,*) num_dtopofiles
+   if (num_dtopofiles .eq. 0) then
+       dtopo_finalized = .true.
+       return
+     else if (num_dtopofiles .eq. 1) then
+       read(iunit,*) dtopofname
+     else
+       write(6,*) '*** Can support at most 1 dtopo file'
+       stop
+     endif
+
+    close(iunit)
 
     dtopo_finalized = .false.
 
     dtopo_type = 3
-    iunit = 58 
-    open(unit=iunit, file='/Users/rjl/git/clawpack/seismic/tsunami/1d/pwlinear1/dtopo.tt3', status='unknown',form='formatted')
+    open(unit=iunit, file=dtopofname, status='unknown',form='formatted')
 
     ! Read in header directly
     read(iunit,*) mx_dtopo
@@ -34,6 +54,8 @@ subroutine read_dtopo()
     allocate(dtopo(mt_dtopo,mx_dtopo))
     allocate(x_dtopo(mx_dtopo))
     allocate(t_dtopo(mt_dtopo))
+
+    xlow_dtopo = xlow_dtopo + dtopo_xshift
 
     do j=1,mx_dtopo
         x_dtopo(j) = xlow_dtopo + (j-1)*dx_dtopo
@@ -58,6 +80,7 @@ subroutine read_dtopo()
             enddo
       end select
 
+     close(iunit)
 
 end subroutine read_dtopo
 
