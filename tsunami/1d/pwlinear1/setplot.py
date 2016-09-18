@@ -10,6 +10,7 @@ from mapc2p import mapc2p
 import numpy
 from pylab import find
 
+import os
 
 # Read in the maximum depth over the full run if available
 # This will be plotted as a red line in the plots
@@ -26,6 +27,9 @@ except:
     xmax = None
     print "Failed to load fort.hmax"
 
+xmax = None # to suppress plotting max eta on plots
+
+outdir2 = os.path.abspath('_output_seismic')
 
 def setplot(plotdata):
 
@@ -91,6 +95,13 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
+    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    plotitem.plot_var = surface
+    plotitem.color = 'm'
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+    plotitem.outdir = outdir2
+
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(312)'
     plotaxes.xlimits = [-150e3,2e3]
@@ -123,9 +134,16 @@ def setplot(plotdata):
 
     plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
     plotitem.plot_var = dtopo
-    plotitem.color = 'k'
+    plotitem.color = 'b'
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
+
+    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    plotitem.plot_var = dtopo
+    plotitem.color = 'm'
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+    plotitem.outdir = outdir2
 
     #----------
 
@@ -184,7 +202,7 @@ def setplot(plotdata):
     plotdata.printfigs = True          # Whether to output figures
     plotdata.print_format = 'png'      # What type of output format
     plotdata.print_framenos = 'all'      # Which frames to output
-    plotdata.print_fignos = 'all'      # Which figures to print
+    plotdata.print_fignos = [0]        # Which figures to print
     plotdata.html = True               # Whether to create HTML files
     plotdata.latex = False             # Whether to make LaTeX output
     plotdata.parallel = True

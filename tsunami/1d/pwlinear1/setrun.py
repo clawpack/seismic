@@ -12,7 +12,7 @@ import numpy as np
 #import clawpack.geoclaw.shallow_1d.data as geoclaw1d
 import geoclaw1d  # in this directory for now
 
-dtopofname = os.path.abspath('dtopo_seismic.tt3')
+dtopofname = os.path.abspath('dtopo_seismic_final.tt3')
 
 #------------------------------
 def setrun(claw_pkg='classic'):
