@@ -1,6 +1,7 @@
 from pylab import *
 from clawpack.visclaw.data import ClawPlotData
 
+
 if 0:
     gdata = loadtxt('gauges.data',skiprows=7)
     ngauges = gdata.shape[0]
@@ -96,3 +97,46 @@ def fault_slip(t):
     orthog_below = xs_below*sin(dip*pi/180.) + ys_below*cos(dip*pi/180.)
     slip = dipdir_below - dipdir_above
     return xg, slip
+
+
+def save_dtopo(xtopo, times, path='dtopo.tt3', dtopo_type=3):
+    from scipy.interpolate import interp1d
+
+    # custom dtopotools includes DTopography1d
+    import dtopotools_horiz_okada_and_1d as dtopotools
+
+    goffset = 0  # gauges at top surface
+    ngauges = 100
+
+    dtopo = dtopotools.DTopography1d()
+    dtopo.x = xtopo
+    dtopo.times = times
+
+    dZ_list = []
+    for t in times:
+        xs = zeros(ngauges)
+        ys = zeros(ngauges)
+        xg = zeros(ngauges)
+        for j in range(ngauges):
+            gaugeno = goffset + j
+            g = plotdata.getgauge(gaugeno)
+            xg[j] = g.location[0]  # x-location of this gauge
+            for k in range(1,len(g.t)):
+                if g.t[k] > t:
+                    break
+                dt = g.t[k] - g.t[k-1]
+                u = g.q[3,k]
+                v = g.q[4,k]
+                xs[j] = xs[j] + dt*u
+                ys[j] = ys[j] + dt*v
+        xg_displaced = xg + xs
+        yg_displaced = ys
+        dz = interp1d(xg_displaced, yg_displaced, 'linear',bounds_error=False,
+                fill_value=0.,assume_sorted=True)
+        dZ_list.append(dz(xtopo))
+
+    dtopo.dZ = array(dZ_list, ndmin=2)
+    dtopo.write(path, dtopo_type)
+    print "Created ",path
+
+    return dtopo
