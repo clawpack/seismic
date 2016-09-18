@@ -99,7 +99,12 @@ def fault_slip(t):
     return xg, slip
 
 
-def save_dtopo(xtopo, times, path='dtopo.tt3', dtopo_type=3):
+def make_dtopo(xtopo, times):
+    """
+    Parse the gauge output for gauges on surface (seafloor)
+    and turn into dtopo object.  Interpolate to the requested xtopo, times.
+    """
+
     from scipy.interpolate import interp1d
 
     # custom dtopotools includes DTopography1d
@@ -136,7 +141,30 @@ def save_dtopo(xtopo, times, path='dtopo.tt3', dtopo_type=3):
         dZ_list.append(dz(xtopo))
 
     dtopo.dZ = array(dZ_list, ndmin=2)
-    dtopo.write(path, dtopo_type)
-    print "Created ",path
-
     return dtopo
+
+
+def save_dtopo_test1():
+    """
+    Test make_dtopo.
+    Save full time history and also make a dtopo file with the final 
+    deformation shifted to t = 1 second.
+    """
+    
+    import copy
+    xtopo = linspace(-150e3,150e3,151)
+    times = linspace(0,80,41)
+    dtopo = make_dtopo(xtopo,times)
+    fname = 'dtopo_seismic.tt3'
+    dtopo.write(fname, 3)
+    print "Created ",fname
+
+    # make the deformation file with only the first and last columns of
+    # dtopo.dZ (initial and final time) and set final time to 1 sec:
+    dtopo_final = copy.copy(dtopo)
+    dtopo_final.times = array([0., 1.])
+    dtopo_final.dZ = dtopo.dZ[[0,-1],:]
+    fname = 'dtopo_seismic_final.tt3'
+    dtopo_final.write(fname, 3)
+    print "Created ",fname
+
