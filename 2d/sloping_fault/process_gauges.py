@@ -113,11 +113,19 @@ def make_dtopo(xtopo, times):
     goffset = 0  # gauges at top surface
     ngauges = 100
 
-    dtopo = dtopotools.DTopography1d()
-    dtopo.x = xtopo
-    dtopo.times = times
+    # dtopo object for vertical displacement:
+    dtopo_z = dtopotools.DTopography1d()
+    dtopo_z.x = xtopo
+    dtopo_z.times = times
 
-    dZ_list = []
+    # dtopo object for horizontal displacement:
+    dtopo_x = dtopotools.DTopography1d()
+    dtopo_x.x = xtopo
+    dtopo_x.times = times
+
+    dZ_list_z = []
+    dZ_list_x = []
+
     for t in times:
         xs = zeros(ngauges)
         ys = zeros(ngauges)
@@ -134,14 +142,21 @@ def make_dtopo(xtopo, times):
                 v = g.q[4,k]
                 xs[j] = xs[j] + dt*u
                 ys[j] = ys[j] + dt*v
-        xg_displaced = xg + xs
-        yg_displaced = ys
-        dz = interp1d(xg_displaced, yg_displaced, 'linear',bounds_error=False,
-                fill_value=0.,assume_sorted=True)
-        dZ_list.append(dz(xtopo))
 
-    dtopo.dZ = array(dZ_list, ndmin=2)
-    return dtopo
+        # vertical displacement:
+        dz = interp1d(xg, ys, 'linear',bounds_error=False,
+                fill_value=0.,assume_sorted=True)
+        dZ_list_z.append(dz(xtopo))
+
+        # horizontal displacement:
+        dz = interp1d(xg, xs, 'linear',bounds_error=False,
+                fill_value=0.,assume_sorted=True)
+        dZ_list_x.append(dz(xtopo))
+
+    dtopo_z.dZ = array(dZ_list_z, ndmin=2)
+    dtopo_x.dZ = array(dZ_list_x, ndmin=2)
+
+    return dtopo_z, dtopo_x
 
 
 def save_dtopo_test1():
@@ -154,17 +169,29 @@ def save_dtopo_test1():
     import copy
     xtopo = linspace(-150e3,150e3,151)
     times = linspace(0,80,41)
-    dtopo = make_dtopo(xtopo,times)
-    fname = 'dtopo_seismic.tt3'
-    dtopo.write(fname, 3)
+    dtopo_z, dtopo_x = make_dtopo(xtopo,times)
+
+    fname = 'dtopo_z_seismic.tt3'
+    dtopo_z.write(fname, 3)
+    print "Created ",fname
+
+    fname = 'dtopo_x_seismic.tt3'
+    dtopo_x.write(fname, 3)
     print "Created ",fname
 
     # make the deformation file with only the first and last columns of
     # dtopo.dZ (initial and final time) and set final time to 1 sec:
-    dtopo_final = copy.copy(dtopo)
+    dtopo_final = copy.copy(dtopo_z)
     dtopo_final.times = array([0., 1.])
-    dtopo_final.dZ = dtopo.dZ[[0,-1],:]
-    fname = 'dtopo_seismic_final.tt3'
+    dtopo_final.dZ = dtopo_z.dZ[[0,-1],:]
+    fname = 'dtopo_z_seismic_final.tt3'
+    dtopo_final.write(fname, 3)
+    print "Created ",fname
+
+    dtopo_final = copy.copy(dtopo_x)
+    dtopo_final.times = array([0., 1.])
+    dtopo_final.dZ = dtopo_x.dZ[[0,-1],:]
+    fname = 'dtopo_x_seismic_final.tt3'
     dtopo_final.write(fname, 3)
     print "Created ",fname
 
