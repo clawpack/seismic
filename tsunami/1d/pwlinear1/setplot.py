@@ -29,7 +29,8 @@ except:
 
 xmax = None # to suppress plotting max eta on plots
 
-outdir2 = os.path.abspath('_output_seismic')
+#outdir2 = os.path.abspath('_output_seismic')
+outdir2 = None
 
 def setplot(plotdata):
 
@@ -95,12 +96,13 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = surface
-    plotitem.color = 'm'
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
-    plotitem.outdir = outdir2
+    if outdir2 is not None:
+        plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+        plotitem.plot_var = surface
+        plotitem.color = 'm'
+        plotitem.MappedGrid = True
+        plotitem.mapc2p = mapc2p
+        plotitem.outdir = outdir2
 
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(312)'
@@ -138,12 +140,13 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
-    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-    plotitem.plot_var = dtopo
-    plotitem.color = 'm'
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
-    plotitem.outdir = outdir2
+    if outdir2 is not None:
+        plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+        plotitem.plot_var = dtopo
+        plotitem.color = 'm'
+        plotitem.MappedGrid = True
+        plotitem.mapc2p = mapc2p
+        plotitem.outdir = outdir2
 
     #----------
 
