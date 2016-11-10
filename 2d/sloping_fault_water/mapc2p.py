@@ -17,8 +17,8 @@ xcr = xcenter + 0.5*fault_width
 
 xp1 = xcenter - 0.5*fault_width*cos(theta)
 xp2 = xcenter + 0.5*fault_width*cos(theta)
-yp1 = ycenter - 0.5*fault_width*sin(theta)
-yp2 = ycenter + 0.5*fault_width*sin(theta)
+yp1 = ycenter + 0.5*fault_width*sin(theta)
+yp2 = ycenter - 0.5*fault_width*sin(theta)
 
 tol = min(abs(yp1),abs(yp2))
 
@@ -36,8 +36,8 @@ def mapc2p(xc,yc):
     ls = numpy.where(xc > xcr, numpy.sqrt((xc-xcr)**2 + (yc-ycenter)**2), ls)
 
     # define grid that is rotated to line up with fault
-    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) - numpy.sin(theta)*(yc-ycenter)
-    yrot = ycenter + numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
+    xrot = xcenter + numpy.cos(theta)*(xc-xcenter) + numpy.sin(theta)*(yc-ycenter)
+    yrot = ycenter - numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
 
     # Interpolate between roated grid and cartesian grid near the fault,
     # using cartesian grid far away from fault.
@@ -48,7 +48,7 @@ def mapc2p(xc,yc):
 
     return xp,yp
 
-def test(mfault):
+def test(mfault,mwater):
 
     domain_depth = probdata.domain_depth
     domain_width = probdata.domain_width
@@ -59,15 +59,14 @@ def test(mfault):
     # additional comments can be found there
     dx = fault_width/mfault
     mfault_to_floor = numpy.rint(fault_depth/dx)
-    dy = fault_depth/mfault_to_floor
+    dyg = fault_depth/mfault_to_floor
     mbelow_floor = int(numpy.ceil(domain_depth/dy))
-    mabove_floor = int(numpy.floor(water_depth/dy))
     mx = int(numpy.ceil(domain_width/dx)) # mx
-    my = mbelow_floor + mabove_floor# my
+    my = mbelow_floor + mwater # my
     mr = mx - mfault
 
     x = linspace(xcenter-0.5*fault_width - numpy.floor(mr/2.0)*dx, xcenter+0.5*fault_width + numpy.ceil(mr/2.0)*dx, mx+1)
-    y = linspace(-mbelow_floor*dy, mabove_floor*dy, my+1)
+    y = linspace(-mbelow_floor*dy, mwater*dy, my+1)
     xc,yc = meshgrid(x,y)
     xp,yp = mapc2p(xc,yc)
     figure()

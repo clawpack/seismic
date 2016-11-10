@@ -1,11 +1,11 @@
 
-""" 
+"""
 Set up the plot figures, axes, and items to be done for each frame.
 
 This module is imported by the plotting routines and then the
 function setplot is called to set the plot parameters.
-    
-""" 
+
+"""
 
 import numpy as np
 from mapc2p import mapc2p
@@ -25,8 +25,8 @@ ycenter = -probdata.fault_depth
 
 xp1 = xcenter - 0.5*width*np.cos(theta)
 xp2 = xcenter + 0.5*width*np.cos(theta)
-yp1 = ycenter - 0.5*width*np.sin(theta)
-yp2 = ycenter + 0.5*width*np.sin(theta)
+yp1 = ycenter + 0.5*width*np.sin(theta)
+yp2 = ycenter - 0.5*width*np.sin(theta)
 
 xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
 ylimits = [-probdata.domain_depth,probdata.water_depth]
@@ -40,13 +40,13 @@ yc = gdata[:,2]
 #--------------------------
 def setplot(plotdata):
 #--------------------------
-    
-    """ 
+
+    """
     Specify what is to be plotted at each frame.
     Input:  plotdata, an instance of clawpack.visclaw.data.ClawPlotData.
     Output: a modified version of plotdata.
-    
-    """ 
+
+    """
 
 
     from clawpack.visclaw import colormaps
@@ -63,7 +63,7 @@ def setplot(plotdata):
         xg = zeros(ngauges)
         yg = zeros(ngauges)
         for j in range(ngauges):
-            gaugeno = goffset + j 
+            gaugeno = goffset + j
             g = plotdata.getgauge(gaugeno)
             for k in range(1,len(g.t)):
                 if g.t[k] > t:
@@ -98,7 +98,7 @@ def setplot(plotdata):
         legend()
 
     plotdata.afterframe = afterframe
-    
+
     def plot_interfaces(current_data):
         from pylab import linspace, plot
         xl = linspace(xp1,xp2,100)
@@ -106,7 +106,7 @@ def setplot(plotdata):
         plot(xl,yl,'g')
         xl = linspace(xlimits[0],xlimits[1],100)
         plot(xl,0.0*xl,'b')
-    
+
     def sigmatr(current_data):
         # return -trace(sigma)
         q = current_data.q
@@ -127,17 +127,17 @@ def setplot(plotdata):
         ux = (u[I+1,:][:,J] - u[I-1,:][:,J]) / (2*dx)
         vy = (v[:,J+1][I,:] - v[:,J-1][I,:]) / (2*dy)
         dint = ux + vy
-        
+
         #zx = zeros((mx-2,1))
         #zy = zeros((1,my))
         #d = vstack((zy, hstack((zx, ux+vy, zx)), zy))
-        
+
         d0 = dint[:,0]
         d1 = dint[:,-1]
         d2 = vstack((d0, dint.T, d1)).T
         d0 = d2[0,:]
         d1 = d2[-1,:]
-        d = vstack((d0,d2,d1))      
+        d = vstack((d0,d2,d1))
         return d
 
     def curl(current_data):
@@ -161,7 +161,7 @@ def setplot(plotdata):
         c2 = vstack((c0, cint.T, c1)).T
         c0 = c2[0,:]
         c1 = c2[-1,:]
-        c = vstack((c0,c2,c1))      
+        c = vstack((c0,c2,c1))
 
         # to set curl to zero near patch edges...
         #c = zeros(u.shape)
@@ -169,7 +169,7 @@ def setplot(plotdata):
 
         return c
 
-    # Figure for trace(sigma) 
+    # Figure for trace(sigma)
     plotfigure = plotdata.new_plotfigure(name='trace', figno=10)
     plotfigure.kwargs = {'figsize':(8,8)}
 
@@ -383,5 +383,3 @@ def setplot(plotdata):
     plotdata.parallel = True
 
     return plotdata
-
-    

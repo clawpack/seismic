@@ -41,7 +41,7 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('domain_width', 400e3, 'width of domain')
     probdata.add_param('fault_center', 25e3, 'center of fault')
     probdata.add_param('fault_width', 50735, 'width of fault')
-    probdata.add_param('fault_dip', -0.17, 'angle of fault dip')
+    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
     probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
 
     #------------------------------------------------------------------
@@ -249,19 +249,19 @@ def setrun(claw_pkg='amrclaw'):
     xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, 100)
     for gaugeno,x in enumerate(xgauges):
         gauges.append([gaugeno,x,clawdata.upper[1]-1,0,1e10])
-    # bottom edge:
-    for gaugeno,x in enumerate(xgauges):
-        gauges.append([200+gaugeno,x,clawdata.lower[1]+1000,0,1e10])
+    ## bottom edge:
+    #for gaugeno,x in enumerate(xgauges):
+    #    gauges.append([200+gaugeno,x,clawdata.lower[1]+1000,0,1e10])
 
-    # above fault plane:
-    xgauges = np.linspace(probdata.fault_center-0.5*probdata.fault_width,
-                            probdata.fault_center+0.5*probdata.fault_width)
-    for gaugeno,x in enumerate(xgauges):
-        gauges.append([300+gaugeno,x,-probdata.fault_depth+1,0,1e10])
+    ## above fault plane:
+    #xgauges = np.linspace(probdata.fault_center-0.5*probdata.fault_width,
+    #                        probdata.fault_center+0.5*probdata.fault_width)
+    #for gaugeno,x in enumerate(xgauges):
+    #    gauges.append([300+gaugeno,x,-probdata.fault_depth+1,0,1e10])
 
     # below fault plane:
-    for gaugeno,x in enumerate(xgauges):
-        gauges.append([400+gaugeno,x,-probdata.fault_depth-1,0,1e10])
+    #for gaugeno,x in enumerate(xgauges):
+    #    gauges.append([400+gaugeno,x,-probdata.fault_depth-1,0,1e10])
 
 
     # --------------
@@ -351,17 +351,21 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 0.])
-    regions.append([1,2, 0,1e9, -90e3, 140e3, -150e3, 0.])
-    regions.append([1,3, 0,1e9, -75e3, 125e3, -80e3, 0.])
-    regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 0.])
-    #regions.append([4,4, 0,1, -10.e3, 60e3, 0.85, 0.95])
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
-                    0,1, probdata.fault_center-0.5*probdata.fault_width-2*dx,
-                    probdata.fault_center+0.5*probdata.fault_width+2*dx,
-                    -probdata.fault_depth-2*dx, -probdata.fault_depth+2*dx])
+    xbuffer = 0.5*probdata.fault_width
+    ybuffer = xbuffer
+    xcb = [probdata.fault_center-xbuffer,probdata.fault_center+xbuffer]
 
+    # high-resolution region to surround the fault during slip
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 0,1, 
+                    xcb[0],xcb[1], 
+                    -probdata.fault_depth-dx, -probdata.fault_depth+dx])
 
+    for j in range(amrdata.amr_levels_max-1):
+        regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
+                    xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
+                    -probdata.fault_depth-(j+1)*ybuffer,0.0])
+
+    regions.append([1,1, 0,1e9, -1.e9,1.e9, -1.e9,0.0])
     #  ----- For developers -----
     # Toggle debugging print statements:
     amrdata.dprint = False      # print domain flags

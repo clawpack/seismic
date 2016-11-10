@@ -41,7 +41,7 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('domain_width', 400e3, 'width of domain')
     probdata.add_param('fault_center', 25e3, 'center of fault')
     probdata.add_param('fault_width', 50735, 'width of fault')
-    probdata.add_param('fault_dip', -0.17, 'angle of fault dip')
+    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
     probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
     probdata.add_param('water_depth', 3e3, 'depth of water')
     probdata.add_param('water_scaling', 0, 'ratio automatically set for mapping')
@@ -61,15 +61,15 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells:
+    num_cells_water = 5
     num_cells_fault = 20
     dx = probdata.fault_width/num_cells_fault
     ## specify dy using dx
     num_cells_fault_to_floor = np.rint(probdata.fault_depth/dx)
     dy = probdata.fault_depth/num_cells_fault_to_floor
     num_cells_below_floor = int(np.ceil(probdata.domain_depth)/dy)
-    num_cells_above_floor = int(np.floor(probdata.water_depth)/dy)
     clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
-    clawdata.num_cells[1] = num_cells_below_floor + num_cells_above_floor # my
+    clawdata.num_cells[1] = num_cells_below_floor + num_cells_water # my
 
     # Lower and upper edges of computational domain:
     ## note the size of domain is likely expanded here
@@ -77,7 +77,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - np.floor(num_cells_remain/2.0)*dx   # xlower
     clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
     clawdata.lower[1] = -num_cells_below_floor*dy       # ylower
-    clawdata.upper[1] = num_cells_above_floor*dy          # yupper
+    clawdata.upper[1] = num_cells_water*dy          # yupper
     probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
 
     # ---------------
@@ -169,7 +169,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Initial time step for variable dt.
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 0.25
+    clawdata.dt_initial = 0.1
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
@@ -211,7 +211,7 @@ def setrun(claw_pkg='amrclaw'):
     #   2 or 'superbee' ==> superbee
     #   3 or 'vanleer'  ==> van Leer
     #   4 or 'mc'       ==> MC limiter
-    clawdata.limiter = ['mc', 'mc', 'mc', 'mc']
+    clawdata.limiter = ['vanleer', 'vanleer', 'vanleer', 'vanleer']
 
     clawdata.use_fwaves = False    # True ==> use f-wave version of algorithms
 
