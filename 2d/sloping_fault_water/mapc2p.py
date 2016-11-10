@@ -48,7 +48,7 @@ def mapc2p(xc,yc):
 
     return xp,yp
 
-def test(mfault):
+def test(mfault,mwater):
 
     domain_depth = probdata.domain_depth
     domain_width = probdata.domain_width
@@ -59,15 +59,14 @@ def test(mfault):
     # additional comments can be found there
     dx = fault_width/mfault
     mfault_to_floor = numpy.rint(fault_depth/dx)
-    dy = fault_depth/mfault_to_floor
+    dyg = fault_depth/mfault_to_floor
     mbelow_floor = int(numpy.ceil(domain_depth/dy))
-    mabove_floor = int(numpy.floor(water_depth/dy))
     mx = int(numpy.ceil(domain_width/dx)) # mx
-    my = mbelow_floor + mabove_floor# my
+    my = mbelow_floor + mwater # my
     mr = mx - mfault
 
     x = linspace(xcenter-0.5*fault_width - numpy.floor(mr/2.0)*dx, xcenter+0.5*fault_width + numpy.ceil(mr/2.0)*dx, mx+1)
-    y = linspace(-mbelow_floor*dy, mabove_floor*dy, my+1)
+    y = linspace(-mbelow_floor*dy, mwater*dy, my+1)
     xc,yc = meshgrid(x,y)
     xp,yp = mapc2p(xc,yc)
     figure()
