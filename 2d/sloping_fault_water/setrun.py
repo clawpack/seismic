@@ -169,7 +169,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Initial time step for variable dt.
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 0.25
+    clawdata.dt_initial = 0.1
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
@@ -211,7 +211,7 @@ def setrun(claw_pkg='amrclaw'):
     #   2 or 'superbee' ==> superbee
     #   3 or 'vanleer'  ==> van Leer
     #   4 or 'mc'       ==> MC limiter
-    clawdata.limiter = ['mc', 'mc', 'mc', 'mc']
+    clawdata.limiter = ['vanleer', 'vanleer', 'vanleer', 'vanleer']
 
     clawdata.use_fwaves = False    # True ==> use f-wave version of algorithms
 
