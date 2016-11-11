@@ -85,7 +85,7 @@ def setrun(claw_pkg='amrclaw'):
     # ---------------
 
     # Number of equations in the system:
-    clawdata.num_eqn = 5
+    clawdata.num_eqn = 6
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
     clawdata.num_aux = 13
@@ -124,8 +124,8 @@ def setrun(claw_pkg='amrclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 100
-        clawdata.tfinal = 100.0
+        clawdata.num_output_times = 400
+        clawdata.tfinal = 400.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -219,7 +219,7 @@ def setrun(claw_pkg='amrclaw'):
     #   src_split == 0 or 'none'    ==> no source term (src routine never called)
     #   src_split == 1 or 'godunov' ==> Godunov (1st order) splitting used,
     #   src_split == 2 or 'strang'  ==> Strang (2nd order) splitting used,  not recommended.
-    clawdata.source_split = 0
+    clawdata.source_split = 'godunov'
 
 
     # --------------------
