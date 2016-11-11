@@ -7,8 +7,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! in the normal direction (it doesn't do a rotation of coordinates)
     !
     ! Note that although there are 5 eigenvectors, one eigenvalue
-    ! is always zero and so we only need to compute 4 waves.	
-    ! 
+    ! is always zero and so we only need to compute 4 waves.
+    !
     ! solve Riemann problems along one slice of data.
     !
     ! On input, ql contains the state vector at the left edge of each cell
@@ -18,26 +18,26 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     !                                    and right state ql(:,i)
     ! From the basic clawpack routines, this routine is called with ql = qr
     !
-    ! This data is along a slice in the x-direction if ixy=1 
+    ! This data is along a slice in the x-direction if ixy=1
     !                            or the y-direction if ixy=2.
     !
     ! Contents of ql and qr:
-    ! 
+    !
     ! q(1,:) = sigma^{11} if ixy=1   or   sigma^{22} if ixy=2
     ! q(2,:) = sigma^{22} if ixy=1   or   sigma^{11} if ixy=2
     ! q(3,:) = sigma^{12} = sigma^{21}
     ! q(4,:) = u          if ixy=1   or   v          if ixy=2
     ! q(5,:) = v          if ixy=1   or   u          if ixy=2
-    ! 
+    !
     ! auxl and auxr hold corresponding slice of the aux array:
     ! Here it is assumed that auxl=auxr gives the cell values
     ! for this slice.
-    ! 
+    !
     !  auxl(1,i) = rho, density
-    !  auxl(2,i) = lambda 
+    !  auxl(2,i) = lambda
     !  auxl(3,i) = mu
-    !  auxl(4,i) = cp, P-wave speed 
-    !  auxl(5,i) = cs, S-wave speed 
+    !  auxl(4,i) = cp, P-wave speed
+    !  auxl(5,i) = cs, S-wave speed
     !
     !
     ! On output, wave contains the waves,
@@ -69,7 +69,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     double precision :: alamr, amur, bulkr, cpr, csr
     double precision :: alaml, amul, bulkl, cpl, csl
     double precision :: det, a1, a2, a3, a4
-    
+
     ! Variables required for mapped grid version
     integer :: map, mw
     double precision :: nx, ny, nx2, ny2, nxy
@@ -93,7 +93,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         map = 9
     endif
 
-    ! note that notation for u and v reflects assumption that the 
+    ! note that notation for u and v reflects assumption that the
     ! Riemann problems are in the x-direction with u in the normal
     ! direciton and v in the orthogonal direcion, but with the above
     ! definitions of ku and kv the routine also works with ixy=2
@@ -105,14 +105,14 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! relative to the material properties to the right of the interface,
 
     do i = 2-mbc, mx+mbc
-    
+
 	!Define direction of normal to grid edge normals
 	nx = auxl(map,i)
-	ny = auxl(map+1,i) 
+	ny = auxl(map+1,i)
 	nx2 = nx*nx
 	ny2 = ny*ny
 	nxy = nx*ny
-    
+
         dsig11 = ql(1,i) - qr(1,i-1)
         dsig22 = ql(2,i) - qr(2,i-1)
         dsig12 = ql(3,i) - qr(3,i-1)
@@ -137,7 +137,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         det = bulkl*cpr + bulkr*cpl
         if (det.eq.0.d0) then
             write(6,*) 'det=0 in rpn2'
-            stop 
+            stop
         endif
         a1 = (cpr*(dsig11*nx2 + dsig22*ny2 + 2*nxy*dsig12) + bulkr*(nx*du + ny*dv)) / det
         a2 = (cpl*(dsig11*nx2 + dsig22*ny2 + 2*nxy*dsig12) - bulkl*(nx*du + ny*dv)) / det
@@ -155,9 +155,9 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
         ! 5th wave has velocity 0 so is not computed or propagated.
 
-
         ! Compute the waves.
 
+        wave(:,1,i) = 0.d0
         wave(1,1,i) = a1 * (alaml + 2*amul*nx2)
         wave(2,1,i) = a1 * (alaml + 2*amul*ny2)
         wave(3,1,i) = a1 * (2*amul*nxy)
@@ -165,6 +165,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         wave(5,1,i) = a1 * cpl * ny
         s(1,i) = -cpl
 
+        wave(:,2,i) = 0.d0
         wave(1,2,i) = a2 * (alamr + 2*amur*nx2)
         wave(2,2,i) = a2 * (alamr + 2*amur*ny2)
         wave(3,2,i) = a2 * (2*amur*nxy)
@@ -172,6 +173,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         wave(5,2,i) = - a2 * cpr * ny
         s(2,i) = cpr
 
+        wave(:,3,i) = 0.d0
         wave(1,3,i) = - a3 * (2*nxy*amul)
         wave(2,3,i) = a3 * (2*nxy*amul)
         wave(3,3,i) = a3 * amul*(nx2 - ny2)
@@ -179,15 +181,16 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         wave(5,3,i) = a3 * csl * nx
         s(3,i) = -csl
 
+        wave(:,4,i) = 0.d0
         wave(1,4,i) = - a4 * (2*nxy*amur)
         wave(2,4,i) = a4 * (2*nxy*amur)
         wave(3,4,i) = a4 * amur*(nx2 - ny2)
         wave(4,4,i) =  a4 * csr * ny
         wave(5,4,i) = -a4 * csr * nx
         s(4,i) = csr
-        
+
         ! Scales speed by relative length of edge of mapped grid
-	do mw=1,mwaves	
+	do mw=1,mwaves
 	  s(mw,i) = s(mw,i)*auxl(map+2,i)
 	 end do
 
