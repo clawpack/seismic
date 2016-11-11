@@ -53,16 +53,12 @@ MODULES = \
 SOURCES = \
   qinit.f \
   setprob.f90 \
-  fdisc.f \
   bc2amr.f \
   setaux.f90 \
   mapc2p.f90 \
   b4step2.f90 \
   ../rp/rpn2_vc_elasticity_mapped_fault.f90 \
   ../rp/rpt2_vc_elasticity_mapped.f90 \
-  $(AMRLIB)/cellave.f \
-  $(AMRLIB)/fss.f \
-  $(AMRLIB)/zeroin.f \
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
