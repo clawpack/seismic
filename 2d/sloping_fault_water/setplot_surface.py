@@ -74,11 +74,10 @@ def setplot(plotdata):
                 v = g.q[4,k]
                 xg[j] = xg[j] + dt*u
                 yg[j] = yg[j] + dt*v
-        goffset = 200
         xw = zeros(ngauges)
         yw = zeros(ngauges)
         for j in range(ngauges):
-            gaugeno = goffset + j
+            gaugeno = ngauges + j
             g = plotdata.getgauge(gaugeno)
             for k in range(1,len(g.t)):
                 if g.t[k] > t:
