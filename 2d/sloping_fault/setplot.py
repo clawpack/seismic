@@ -43,7 +43,7 @@ def setplot(plotdata):
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
-
+    plotdata.format = 'binary'
     def plot_interfaces(current_data):
         from pylab import linspace, plot, sin, pi
         xl = linspace(xp1,xp2,100)
