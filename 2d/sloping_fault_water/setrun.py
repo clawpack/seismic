@@ -61,12 +61,12 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells:
-    num_cells_water = 5
     num_cells_fault = 20
     dx = probdata.fault_width/num_cells_fault
     ## specify dy using dx
     num_cells_fault_to_floor = np.rint(probdata.fault_depth/dx)
     dy = probdata.fault_depth/num_cells_fault_to_floor
+    num_cells_water = int(np.ceil(probdata.water_depth/dy))
     num_cells_below_floor = int(np.ceil(probdata.domain_depth)/dy)
     clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
     clawdata.num_cells[1] = num_cells_below_floor + num_cells_water # my
@@ -211,7 +211,7 @@ def setrun(claw_pkg='amrclaw'):
     #   2 or 'superbee' ==> superbee
     #   3 or 'vanleer'  ==> van Leer
     #   4 or 'mc'       ==> MC limiter
-    clawdata.limiter = ['vanleer', 'vanleer', 'vanleer', 'vanleer']
+    clawdata.limiter = ['mc', 'mc', 'mc', 'mc']
 
     clawdata.use_fwaves = False    # True ==> use f-wave version of algorithms
 
@@ -308,13 +308,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 5
 
     # List of refinement ratios at each level (length at least
     # amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,2,2]
-    amrdata.refinement_ratios_y = [4,2,2]
-    amrdata.refinement_ratios_t = [4,2,2]
+    amrdata.refinement_ratios_x = [4,2,2,2]
+    amrdata.refinement_ratios_y = [4,2,2,2]
+    amrdata.refinement_ratios_t = [4,2,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -361,10 +361,17 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+
+    ## Regions to facilitate outgoing boundary conditions
     regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9])
     regions.append([1,2, 0,1e9, -90e3, 140e3, -150e3, 1e9])
     regions.append([1,3, 0,1e9, -75e3, 125e3, -80e3, 1e9])
     regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 1e9])
+
+    ## Region for the water
+    regions.append([1,5, 0,1e9, -50e3, 105e3, 0, 1e9])
+
+    ## Region for the fault
     regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
                     0,1, probdata.fault_center-0.5*probdata.fault_width-2*dx,
                     probdata.fault_center+0.5*probdata.fault_width+2*dx,
