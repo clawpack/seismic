@@ -61,7 +61,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells:
-    num_cells_fault = 20
+    num_cells_fault = 10
     dx = probdata.fault_width/num_cells_fault
     ## specify dy using dx
     num_cells_fault_to_floor = np.rint(probdata.fault_depth/dx)
@@ -298,9 +298,9 @@ def setrun(claw_pkg='amrclaw'):
 
     # List of refinement ratios at each level (length at least
     # amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,2,2,2]
-    amrdata.refinement_ratios_y = [4,2,2,2]
-    amrdata.refinement_ratios_t = [4,2,2,2]
+    amrdata.refinement_ratios_x = [4,4,2,2]
+    amrdata.refinement_ratios_y = [4,4,2,2]
+    amrdata.refinement_ratios_t = [4,4,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
