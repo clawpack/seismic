@@ -17,7 +17,6 @@ subroutine src2(meqn,mbc,mx,my,xlower,ylower,dx,dy,q,maux,aux,t,dt)
 
     do j=1-mbc,my+mbc
       do i=1-mbc,mx+mbc
-        q(5,i,j) = q(5,i,j) - dt*(g/lambda_water)*0.5d0*(q(1,i,j)+q(2,i,j))
         q(6,i,j) = q(6,i,j) + dt*q(5,i,j)
       end do
     end do

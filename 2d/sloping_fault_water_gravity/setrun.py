@@ -358,7 +358,7 @@ def setrun(claw_pkg='amrclaw'):
         regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 1e9])
 
     ## Region for the water
-    regions.append([1,amrdata.amr_levels_max, 0,1e9, -50e3, 105e3, 0, 1e9])
+    regions.append([1,amrdata.amr_levels_max, 0,1e9, -90e3, 140e3, 0, 1e9])
 
     ## Region for the fault
     regions.append([amrdata.amr_levels_max-1,amrdata.amr_levels_max-1,
