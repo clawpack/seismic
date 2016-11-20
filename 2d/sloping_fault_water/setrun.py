@@ -78,7 +78,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
     clawdata.lower[1] = -num_cells_below_floor*dy       # ylower
     clawdata.upper[1] = num_cells_water*dy          # yupper
-    probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
+    #probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
+    probdata.water_scaling = 1.0
 
     # ---------------
     # Size of system:
@@ -124,8 +125,8 @@ def setrun(claw_pkg='amrclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 100
-        clawdata.tfinal = 100.0
+        clawdata.num_output_times = 300
+        clawdata.tfinal = 300.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -358,7 +359,7 @@ def setrun(claw_pkg='amrclaw'):
         regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 1e9])
 
     ## Region for the water
-    regions.append([1,amrdata.amr_levels_max, 0,1e9, -50e3, 105e3, 0, 1e9])
+    regions.append([1,amrdata.amr_levels_max, 0,1e9, -1e9, 1e9, 0, 1e9])
 
     ## Region for the fault
     regions.append([amrdata.amr_levels_max-1,amrdata.amr_levels_max-1,
