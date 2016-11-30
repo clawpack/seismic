@@ -78,8 +78,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
     clawdata.lower[1] = -num_cells_below_floor*dy       # ylower
     clawdata.upper[1] = num_cells_water*dy          # yupper
-    #probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
-    probdata.water_scaling = 1.0
+    probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
 
     # ---------------
     # Size of system:
@@ -176,7 +175,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.dt_max = 1.000000e+99
 
     # Desired Courant number if variable dt used
-    clawdata.cfl_desired = 0.900000
+    clawdata.cfl_desired = 0.700000
     # max Courant number to allow without retaking step with a smaller dt:
     clawdata.cfl_max = 1.000000
 
