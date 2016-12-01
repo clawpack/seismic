@@ -19,7 +19,8 @@ ndip = 50
 dlongitude = (width/111.e3) / ndip   # convert to degees and split up
 sf_width = width/ndip
 x = arange(xcenter-0.5*width,xcenter+0.5*width,sf_width)
-slip = exp(-((x-xcenter)/(0.5*width))**2)
+#slip = exp(-((x-xcenter)/(0.5*width))**2)
+slip = ones(shape(x))
 
 for i in range(ndip):
     subfault = dtopotools.SubFault()
