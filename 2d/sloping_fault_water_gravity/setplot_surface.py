@@ -9,7 +9,10 @@ function setplot is called to set the plot parameters.
 
 import numpy as np
 from mapc2p import mapc2p
+from plot_okada import plot_okada_surface
 from clawpack.clawutil.data import ClawData
+
+
 cscale = 8 # scale color limits
 
 probdata = ClawData()
@@ -26,7 +29,13 @@ yp1 = ycenter + 0.5*width*np.sin(theta)
 yp2 = ycenter - 0.5*width*np.sin(theta)
 
 xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
-ylimits = [-probdata.domain_depth,0.0]
+ylimits = [-probdata.domain_depth,probdata.water_depth]
+
+gdata = np.loadtxt('gauges.data',skiprows=7)
+ngauges = gdata.shape[0]
+print "Found %s gauges" % ngauges
+xc = gdata[:,1]
+yc = gdata[:,2]
 
 #--------------------------
 def setplot(plotdata):
@@ -44,13 +53,59 @@ def setplot(plotdata):
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
+
+    def afterframe(current_data):
+        from pylab import figure,subplot,plot,linspace,title,zeros,ylim,legend
+        from clawpack.visclaw.data import ClawPlotData
+        ngauges = 100
+        t = current_data.t
+
+        goffset = 0
+        xg = zeros(ngauges)
+        yg = zeros(ngauges)
+        for j in range(ngauges):
+            gaugeno = goffset + j
+            g = plotdata.getgauge(gaugeno)
+            for k in range(1,len(g.t)):
+                if g.t[k] > t:
+                    break
+                dt = g.t[k] - g.t[k-1]
+                u = g.q[3,k]
+                v = g.q[4,k]
+                xg[j] = xg[j] + dt*u
+                yg[j] = yg[j] + dt*v
+        xw = zeros(ngauges)
+        yw = zeros(ngauges)
+        for j in range(ngauges):
+            gaugeno = ngauges + j
+            g = plotdata.getgauge(gaugeno)
+            for k in range(1,len(g.t)):
+                if g.t[k] > t:
+                    break
+                dt = g.t[k] - g.t[k-1]
+                u = g.q[3,k]
+                v = g.q[4,k]
+                xw[j] = xw[j] + dt*u
+                yw[j] = yw[j] + dt*v
+
+        figure(10)
+        ax = subplot(211)
+        plot(xc[:ngauges],yg,'k',label="ground")
+	plot(xc[:ngauges],yw,'b',label="water")
+        title("surface displacements")
+        ylim(-0.5,0.5)
+        plot_okada_surface(ax, 'r--')
+        legend()
+
+    plotdata.afterframe = afterframe
+
     def plot_interfaces(current_data):
-        from pylab import linspace, plot, sin, pi
+        from pylab import linspace, plot
         xl = linspace(xp1,xp2,100)
         yl = linspace(yp1,yp2,100)
-        #yl = -8e3 - sin(10*pi/180.)*xl
-        plot(xl,yl,'k')
-
+        plot(xl,yl,'g')
+        xl = linspace(xlimits[0],xlimits[1],100)
+        plot(xl,0.0*xl,'b')
 
     def sigmatr(current_data):
         # return -trace(sigma)
@@ -116,11 +171,13 @@ def setplot(plotdata):
 
     # Figure for trace(sigma)
     plotfigure = plotdata.new_plotfigure(name='trace', figno=10)
-    plotfigure.kwargs = {'figsize':(10,8)}
+    plotfigure.kwargs = {'figsize':(8,8)}
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(211)'
+    plotaxes.axescmd = 'subplot(212)'
+    #plotaxes.xlimits = [-75e3, 125e3]
+    #plotaxes.ylimits = [-50e3,0]
     plotaxes.xlimits = xlimits
     plotaxes.ylimits = ylimits
     plotaxes.title = '-trace(sigma)'
@@ -131,35 +188,15 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
     plotitem.plot_var = sigmatr
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -1e6
-    plotitem.pcolor_cmax = 1e6
+    plotitem.pcolor_cmin = -2e6
+    plotitem.pcolor_cmax = 2e6
     plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0]
+    plotitem.amr_celledges_show = [0,0]
     plotitem.amr_patchedges_show = [0]
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
 
-    # Set up for axes in this figure:
-    plotaxes = plotfigure.new_plotaxes()
-    plotaxes.axescmd = 'subplot(212)'
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
-    plotaxes.title = 'y-velocity'
-    plotaxes.scaled = True
-    plotaxes.afteraxes = plot_interfaces
-
-    # Set up for item on these axes:
-    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = 4
-    plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -0.1
-    plotitem.pcolor_cmax = 0.1
-    plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0]
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
 
 
     # Figure for trace(sigma) and sigma_12 side by side
@@ -259,8 +296,8 @@ def setplot(plotdata):
     # Figure for y-velocity:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(515)'
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = ylimits
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
     plotaxes.title = 'y-velocity'
     plotaxes.scaled = True
     #plotaxes.afteraxes = plot_interfaces
@@ -298,12 +335,14 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
+
     #-----------------------------------------
     # Figures for gauges
     #-----------------------------------------
     plotfigure = plotdata.new_plotfigure(name='gauge plot', figno=300, \
                     type='each_gauge')
     #plotfigure.clf_each_gauge = False
+    plotfigure.show = False
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
@@ -341,6 +380,6 @@ def setplot(plotdata):
     plotdata.latex_figsperline = 2           # layout of plots
     plotdata.latex_framesperline = 1         # layout of plots
     plotdata.latex_makepdf = False           # also run pdflatex?
-#    plotdata.parallel = True
+    plotdata.parallel = True
 
     return plotdata

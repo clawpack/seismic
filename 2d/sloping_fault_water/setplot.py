@@ -26,7 +26,10 @@ yp1 = ycenter + 0.5*width*np.sin(theta)
 yp2 = ycenter - 0.5*width*np.sin(theta)
 
 xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
-ylimits = [-probdata.domain_depth,0.0]
+ylimits = [-probdata.domain_depth,probdata.water_depth]
+
+xlimitsW = [xcenter-width,xcenter+width]
+ylimitsW = [-probdata.water_depth,probdata.water_depth]
 
 #--------------------------
 def setplot(plotdata):
@@ -44,12 +47,14 @@ def setplot(plotdata):
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
+
     def plot_interfaces(current_data):
-        from pylab import linspace, plot, sin, pi
+        from pylab import linspace, plot
         xl = linspace(xp1,xp2,100)
         yl = linspace(yp1,yp2,100)
-        #yl = -8e3 - sin(10*pi/180.)*xl
-        plot(xl,yl,'k')
+        plot(xl,yl,'g')
+        xl = linspace(xlimits[0],xlimits[1],1000)
+        plot(xl,0.0*xl,'b')
 
 
     def sigmatr(current_data):
@@ -278,6 +283,51 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
+    plotfigure = plotdata.new_plotfigure(name='trace (water)', figno=5000)
+    plotfigure.kwargs = {'figsize':(10,8)}
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(211)'
+    plotaxes.xlimits = xlimitsW
+    plotaxes.ylimits = ylimitsW
+    plotaxes.title = '-trace(sigma)'
+    plotaxes.scaled = True
+    plotaxes.afteraxes = plot_interfaces
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = sigmatr
+    plotitem.pcolor_cmap = colormaps.blue_white_red
+    plotitem.pcolor_cmin = -1e6
+    plotitem.pcolor_cmax = 1e6
+    plotitem.add_colorbar = False
+    plotitem.amr_celledges_show = [0]
+    plotitem.amr_patchedges_show = [0]
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(212)'
+    plotaxes.xlimits = xlimitsW
+    plotaxes.ylimits = ylimitsW
+    plotaxes.title = 'y-velocity'
+    plotaxes.scaled = True
+    plotaxes.afteraxes = plot_interfaces
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = 4
+    plotitem.pcolor_cmap = colormaps.blue_white_red
+    plotitem.pcolor_cmin = -1e-1
+    plotitem.pcolor_cmax = 1e-1
+    plotitem.add_colorbar = False
+    plotitem.amr_celledges_show = [0]
+    plotitem.amr_patchedges_show = [0]
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
 
 
     # Figure for grid cells

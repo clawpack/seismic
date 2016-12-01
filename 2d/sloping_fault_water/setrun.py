@@ -43,6 +43,8 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('fault_width', 50735, 'width of fault')
     probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
     probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
+    probdata.add_param('water_depth', 3e3, 'depth of water')
+    probdata.add_param('water_scaling', 0, 'ratio automatically set for mapping')
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -62,20 +64,21 @@ def setrun(claw_pkg='amrclaw'):
     num_cells_fault = 10
     dx = probdata.fault_width/num_cells_fault
     ## specify dy using dx
-    num_cells_above = np.rint(probdata.fault_depth/dx)
-    dy = probdata.fault_depth/num_cells_above
-    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx))
-    clawdata.num_cells[1] = int(np.ceil(probdata.domain_depth/dy)) # my
+    num_cells_fault_to_floor = np.rint(probdata.fault_depth/dx)
+    dy = probdata.fault_depth/num_cells_fault_to_floor
+    num_cells_water = int(np.ceil(probdata.water_depth/dy))
+    num_cells_below_floor = int(np.ceil(probdata.domain_depth)/dy)
+    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
+    clawdata.num_cells[1] = num_cells_below_floor + num_cells_water # my
 
-    # Lower and upper edge of computational domain:
+    # Lower and upper edges of computational domain:
     ## note the size of domain is likely expanded here
     num_cells_remain = clawdata.num_cells[0] - num_cells_fault
     clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - np.floor(num_cells_remain/2.0)*dx   # xlower
     clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
-    clawdata.lower[1] = -clawdata.num_cells[1]*dy       # ylower
-    clawdata.upper[1] = 0.0          # yupper
-    probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
-    probdata.domain_depth = clawdata.upper[1] - clawdata.lower[1]
+    clawdata.lower[1] = -num_cells_below_floor*dy       # ylower
+    clawdata.upper[1] = num_cells_water*dy          # yupper
+    probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
 
     # ---------------
     # Size of system:
@@ -121,8 +124,8 @@ def setrun(claw_pkg='amrclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 50
-        clawdata.tfinal = 100.0
+        clawdata.num_output_times = 300
+        clawdata.tfinal = 300.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -166,13 +169,13 @@ def setrun(claw_pkg='amrclaw'):
 
     # Initial time step for variable dt.
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 0.25
+    clawdata.dt_initial = 0.1
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
 
     # Desired Courant number if variable dt used
-    clawdata.cfl_desired = 0.900000
+    clawdata.cfl_desired = 0.700000
     # max Courant number to allow without retaking step with a smaller dt:
     clawdata.cfl_max = 1.000000
 
@@ -245,24 +248,17 @@ def setrun(claw_pkg='amrclaw'):
     # ---------------
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    # top edge:
-    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, 100)
+    ngauges = 100
+
+    # sea floor:
+    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, ngauges)
     for gaugeno,x in enumerate(xgauges):
-        gauges.append([gaugeno,x,clawdata.upper[1]-1,0,1e10])
-    ## bottom edge:
-    #for gaugeno,x in enumerate(xgauges):
-    #    gauges.append([200+gaugeno,x,clawdata.lower[1]+1000,0,1e10])
+        gauges.append([gaugeno,x,0.0,0,1e10])
 
-    ## above fault plane:
-    #xgauges = np.linspace(probdata.fault_center-0.5*probdata.fault_width,
-    #                        probdata.fault_center+0.5*probdata.fault_width)
-    #for gaugeno,x in enumerate(xgauges):
-    #    gauges.append([300+gaugeno,x,-probdata.fault_depth+1,0,1e10])
-
-    # below fault plane:
-    #for gaugeno,x in enumerate(xgauges):
-    #    gauges.append([400+gaugeno,x,-probdata.fault_depth-1,0,1e10])
-
+    # water_surface:
+    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, ngauges)
+    for gaugeno,x in enumerate(xgauges):
+        gauges.append([ngauges+gaugeno,x,clawdata.upper[1]-1,0,1e10])
 
     # --------------
     # Checkpointing:
@@ -298,13 +294,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 5
 
     # List of refinement ratios at each level (length at least
     # amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2]
-    amrdata.refinement_ratios_y = [4,4,2]
-    amrdata.refinement_ratios_t = [4,4,2]
+    amrdata.refinement_ratios_x = [4,4,2,2]
+    amrdata.refinement_ratios_y = [4,4,2,2]
+    amrdata.refinement_ratios_t = [4,4,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -323,7 +319,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Flag for refinement using routine flag2refine:
     amrdata.flag2refine = True      # use this?
-    amrdata.flag2refine_tol = 0.0001  # tolerance used in this routine
+    amrdata.flag2refine_tol = 1.0e-5 # tolerance used in this routine
     # User can modify flag2refine to change the criterion for flagging.
     # Default: check maximum absolute difference of first component of q
     # between a cell and each of its neighbors.
@@ -333,7 +329,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
-    amrdata.regrid_buffer_width  = 2
+    amrdata.regrid_buffer_width  = 1
 
     # clustering alg. cutoff for (# flagged pts) / (total # of cells
     # refined)
@@ -351,21 +347,26 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    xbuffer = 0.5*probdata.fault_width
-    ybuffer = xbuffer
-    xcb = [probdata.fault_center-xbuffer,probdata.fault_center+xbuffer]
 
-    # high-resolution region to surround the fault during slip
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 0,1, 
-                    xcb[0],xcb[1], 
-                    -probdata.fault_depth-dx, -probdata.fault_depth+dx])
+    ## Regions to facilitate outgoing boundary conditions
+    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9])
+    if (amrdata.amr_levels_max > 2):
+        regions.append([1,2, 0,1e9, -90e3, 140e3, -150e3, 1e9])
+    if (amrdata.amr_levels_max > 3):
+        regions.append([1,3, 0,1e9, -75e3, 125e3, -80e3, 1e9])
+    if (amrdata.amr_levels_max > 4):
+        regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 1e9])
 
-    for j in range(amrdata.amr_levels_max-1):
-        regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
-                    xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
-                    -probdata.fault_depth-(j+1)*ybuffer,0.0])
+    ## Region for the water
+    regions.append([1,amrdata.amr_levels_max, 0,1e9, -1e9, 1e9, 0, 1e9])
 
-    regions.append([1,1, 0,1e9, -1.e9,1.e9, -1.e9,0.0])
+    ## Region for the fault
+    regions.append([amrdata.amr_levels_max-1,amrdata.amr_levels_max-1,
+                    0,1, probdata.fault_center-0.5*probdata.fault_width-2*dx,
+                    probdata.fault_center+0.5*probdata.fault_width+2*dx,
+                    -probdata.fault_depth-2*dx, -probdata.fault_depth+2*dx])
+
+
     #  ----- For developers -----
     # Toggle debugging print statements:
     amrdata.dprint = False      # print domain flags
