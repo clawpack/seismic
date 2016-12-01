@@ -10,6 +10,7 @@ if 0:
 
 # Load ClawplotData
 plotdata = ClawPlotData()
+plotdata.format = 'binary'
 plotdata.outdir = '_output'
 
 
