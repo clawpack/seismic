@@ -37,8 +37,8 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    probdata.add_param('domain_depth', 200e3, 'depth of domain')
-    probdata.add_param('domain_width', 400e3, 'width of domain')
+    probdata.add_param('domain_depth', 300e3, 'depth of domain')
+    probdata.add_param('domain_width', 600e3, 'width of domain')
     probdata.add_param('fault_center', 25e3, 'center of fault')
     probdata.add_param('fault_width', 50735, 'width of fault')
     probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
