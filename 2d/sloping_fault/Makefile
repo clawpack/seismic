@@ -32,6 +32,7 @@ FFLAGS ?= -fopenmp
 # ---------------------------------
 
 AMRLIB = $(CLAW)/amrclaw/src/2d
+SEISLIB = $(CLAW)/seismic/src/2d
 include $(AMRLIB)/Makefile.amr_2d
 
 # ---------------------------------------
@@ -49,6 +50,7 @@ EXCLUDE_SOURCES = \
 # ----------------------------------------
 
 MODULES = \
+  $(SEISLIB)/fault_module.f90
 
 SOURCES = \
   qinit.f \
