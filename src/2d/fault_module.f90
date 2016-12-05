@@ -2,7 +2,10 @@ module fault_module
 
     implicit none
     integer :: nsubfaults
-    real(kind=8), allocatable :: widths(:), slips(:), rupture_times(:), rise_times(:)
+    type subfault
+      real(kind=8) :: width, slip, rupture_time, rise_time
+    end type subfault
+    type(subfault), allocatable :: subfaults(:)
     real(kind=8) :: center(2), theta, xcb(2), mindepth
 
 contains
@@ -23,39 +26,38 @@ contains
         read(7,*) nsubfaults
         read(7,*)
 
-        allocate(widths(nsubfaults),slips(nsubfaults))
-        allocate(rupture_times(nsubfaults),rise_times(nsubfaults))
+        allocate(subfaults(nsubfaults))
 
         ! Read in subfaults
         read(7,*) input_line
         theta = input_line(2)/180.0*4.d0*datan(1.d0)
-        widths(1) = input_line(3)
-        slips(1) = input_line(5)
-        rupture_times(1) = input_line(11)
-        rise_times(1) = input_line(12)
-        total_width = widths(1)
+        subfaults(1)%width = input_line(3)
+        subfaults(1)%slip = input_line(5)
+        subfaults(1)%rupture_time = input_line(11)
+        subfaults(1)%rise_time = input_line(12)
+        total_width = subfaults(1)%width
         center(1) = 0.5d0*input_line(9)*111.d3
         center(2) = -0.5d0*input_line(4)
 
         do i=2,nsubfaults-1
           read(7,*) input_line
-          widths(i) = input_line(3)
-          slips(i) = input_line(5)
-          rupture_times(i) = input_line(11)
-          rise_times(i) = input_line(12)
-          total_width = total_width + widths(i)
+          subfaults(i)%width = input_line(3)
+          subfaults(i)%slip = input_line(5)
+          subfaults(i)%rupture_time = input_line(11)
+          subfaults(i)%rise_time = input_line(12)
+          total_width = total_width + subfaults(i)%width
         end do
 
         read(7,*) input_line
-        widths(nsubfaults) = input_line(3)
-        slips(nsubfaults) = input_line(5)
-        rupture_times(nsubfaults) = input_line(11)
-        rise_times(nsubfaults) = input_line(12)
-        total_width = total_width + widths(nsubfaults)
+        subfaults(nsubfaults)%width = input_line(3)
+        subfaults(nsubfaults)%slip = input_line(5)
+        subfaults(nsubfaults)%rupture_time = input_line(11)
+        subfaults(nsubfaults)%rise_time = input_line(12)
+        total_width = total_width + subfaults(nsubfaults)%width
         center(1) = center(1) + 0.5*(input_line(9)*111.d3  &
-                                      + cos(theta)*widths(nsubfaults))
+                                      + cos(theta)*subfaults(nsubfaults)%width)
         center(2) = center(2) - 0.5*(input_line(4) &
-                                      + sin(theta)*widths(nsubfaults))
+                                      + sin(theta)*subfaults(nsubfaults)%width)
 
         xcb(1) = center(1) - 0.5d0*total_width
         xcb(2) = center(1) + 0.5d0*total_width

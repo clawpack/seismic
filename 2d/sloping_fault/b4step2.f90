@@ -6,7 +6,7 @@ subroutine b4step2(mbc,mx,my,meqn,q,xlower,ylower,dx,dy,t,dt,maux,aux)
     !
     ! This default version does nothing.
 
-    use fault_module, only: center, xcb, nsubfaults, widths, slips, rupture_times, rise_times
+    use fault_module, only: center, xcb, nsubfaults, subfaults
 
     implicit none
     integer, intent(in) :: mbc,mx,my,meqn,maux
@@ -28,14 +28,14 @@ subroutine b4step2(mbc,mx,my,meqn,q,xlower,ylower,dx,dy,t,dt,maux,aux)
           aux(13,i,j) = 0.d0
           if (xcb(1) <= xcell - 0.5d0*dx .and. xcell + 0.5d0*dx <= xcb(2)) then
             ! check if current subfault needs to be updated
-            do while(xcell > subfaultx + widths(subfaulti))
-              subfaultx = subfaultx + widths(subfaulti)
+            do while(xcell > subfaultx + subfaults(subfaulti)%width)
+              subfaultx = subfaultx + subfaults(subfaulti)%width
               subfaulti = subfaulti + 1
             end do
 
-            if (rupture_times(subfaulti) <= t .and. &
-                  t <= rupture_times(subfaulti) + rise_times(subfaulti)) then
-              aux(13,i,j) = slips(subfaulti)/rise_times(subfaulti)
+            if (subfaults(subfaulti)%rupture_time <= t .and. &
+                  t <= subfaults(subfaulti)%rupture_time + subfaults(subfaulti)%rise_time) then
+              aux(13,i,j) = subfaults(subfaulti)%slip/subfaults(subfaulti)%rise_time
             end if
 
           end if
