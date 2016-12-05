@@ -51,7 +51,6 @@ SOURCES = \
   ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
   $(SEISLIB)/amr3.f90 \
   $(SEISLIB)/flag2refine.f90 \
-  $(SEISLIB)/tick.f
 
 
 #-------------------------------------------------------------------
