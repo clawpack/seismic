@@ -40,8 +40,8 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('domain_depth', 200e3, 'depth of domain')
     probdata.add_param('domain_width', 400e3, 'width of domain (in x direction)')
     probdata.add_param('domain_length', 400e3, 'length of domain (in y direction)')
-    probdata.add_param('fault_xcenter', 25e3, 'centeroid of fault (x)')
-    probdata.add_param('fault_ycenter', 0.0, 'centeroid of fault (y)')
+    probdata.add_param('fault_xcenter', 25e3, 'centroid of fault (x)')
+    probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
     probdata.add_param('fault_width', 50735, 'width of fault (in x direction)')
     probdata.add_param('fault_length', 50735, 'width of fault (in y direction)')
     probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
@@ -61,8 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 10
-    num_cells_fault_length = 10
+    num_cells_fault_width = 2
+    num_cells_fault_length = 2
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -130,7 +130,7 @@ def setrun(claw_pkg='amrclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 50 #80
+        clawdata.num_output_times = 2 #80
         clawdata.tfinal = 100.0 #6e-5 #0.0001800000 #0.00003
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
@@ -159,7 +159,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
-    clawdata.verbosity = 1
+    clawdata.verbosity = 4
 
 
 
@@ -379,9 +379,9 @@ def setrun(claw_pkg='amrclaw'):
     amrdata.gprint = False      # grid bisection/clustering
     amrdata.nprint = False      # proper nesting output
     amrdata.pprint = False      # proj. of tagged points
-    amrdata.rprint = False      # print regridding summary
+    amrdata.rprint = True      # print regridding summary
     amrdata.sprint = False      # space/memory output
-    amrdata.tprint = False      # time step reporting each level
+    amrdata.tprint = True      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
 
 

@@ -34,7 +34,8 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
     external    allowflag
     real (kind=8), intent(in) :: DOFLAG, DONTFLAG, xlower, ylower, zlower, dx, dy, dz, tolsp, t
 
-    real (kind=8) :: xcell, ycell, zcell, max_stress
+!    real (kind=8) :: xcell, ycell, zcell, max_stress
+    real(kind=8) :: xcell, ycell, zcell, dq(meqn), dqi(meqn), dqj(meqn), dqk(meqn)
     integer :: i, j, k, m, min_level, max_level
     integer :: infinity = 1e3
 
@@ -60,21 +61,27 @@ subroutine flag2refine(mx,my,mz,mbc,meqn,maux,xlower,ylower, &
                 end do
 
 !               # if the cell intersects any region, make sure that cell is refined as specified
-!               # if nothing needs to be changed, use specified tolerance and stress
+!               # if nothing needs to be changed, use specified tolerance
                 if (min_level > 0 .and. level < min_level) then
                     amrflags(i,j,k) = DOFLAG
-                else if (min_level > 0 .and. max_level <= level) then
+                else if (max_level > 0 .and. max_level <= level) then
                     amrflags(i,j,k) = DONTFLAG
                 else if (allowflag(xcell,ycell,zcell,t,level)) then
-                    max_stress = 0.d0
-                    do m = 1,6
-                        max_stress = max(max_stress, dabs(q(m,i,j,k)))
+!                    max_stress = 0.d0
+                    dq = 0.d0
+                    dqi = abs(q(:,i+1,j,k) - q(:,i-1,j,k))
+                    dqj = abs(q(:,i,j+1,k) - q(:,i,j-1,k))
+                    dqk = abs(q(:,i,j,k+1) - q(:,i,j,k-1))
+                    dq = max(dq,dqi,dqj,dqk)
+
+                    do m = 1,meqn
+!                        max_stress = max(max_stress, dabs(q(m,i,j,k)))
+                        if (dq(m) > tolsp) then
+                             amrflags(i,j,k) = DOFLAG
+                        else
+                             amrflags(i,j,k) = DONTFLAG
+                        end if
                     end do
-                    if (max_stress .ge. tolsp) then
-                        amrflags(i,j,k) = DOFLAG
-                    else
-                        amrflags(i,j,k) = DONTFLAG
-                    end if
                 else
                     amrflags(i,j,k) = DONTFLAG
                 end if

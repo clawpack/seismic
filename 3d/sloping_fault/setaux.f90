@@ -13,7 +13,7 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
     real(kind=8), intent(out) ::  aux(maux,1-mbc:mx+mbc,1-mbc:my+mbc,1-mbc:mz+mbc)
 
     real(kind=8) :: xcell, ycell, zcell, cp, cs, rho_cell, lambda_cell, mu_cell
-    real(kind=8) :: xpcorn(4), ypcorn(4), zpcorn(4), mag, zmin, zmax
+    real(kind=8) :: xpcorn(4), ypcorn(4), zpcorn(4), mag
     integer :: i,j,k
 
     real (kind=8) :: center(3), theta, xcb(2), ycb(2), mindepth
@@ -77,7 +77,7 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
           call mapc2p(xcell + 0.5d0*dx, ycell - 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(3), ypcorn(3), zpcorn(3))
           call mapc2p(xcell + 0.5d0*dx, ycell - 0.5d0*dy, zcell - 0.5d0*dz, xpcorn(4), ypcorn(4), zpcorn(4))
           ! only need area ratio from cross-product of diagonals, which will point in the y direction
-          mag = (xpcorn(3) - xpcorn(1))*(zpcorn(2) - zpcorn(4)) - (xpcorn(2) - xpcorn(4))*(zpcorn(3) - zpcorn(1))
+          mag = dabs((xpcorn(3) - xpcorn(1))*(zpcorn(2) - zpcorn(4)) - (xpcorn(2) - xpcorn(4))*(zpcorn(3) - zpcorn(1)))
           aux(9,i,j,k) = 0.5d0*mag/(dx*dz)
 
           ! compute mapping info for lower face in z direction
@@ -94,19 +94,11 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
           aux(11,i,j,k) = ((xpcorn(3) - xpcorn(1))*(ypcorn(2) - ypcorn(4)) - (xpcorn(2) - xpcorn(4))*(ypcorn(3) - ypcorn(1)))/mag
           aux(12,i,j,k) = 0.5d0*mag/(dx*dy)
 
-          ! compute capacity function value
-          zmin = dmin1(zpcorn(1),zpcorn(2),zpcorn(3),zpcorn(4))
-          mag = dmax1(zpcorn(1),zpcorn(2),zpcorn(3),zpcorn(4))
-          call mapc2p(xcell - 0.5d0*dx, ycell - 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(1), ypcorn(1), zpcorn(1))
-          call mapc2p(xcell - 0.5d0*dx, ycell + 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(2), ypcorn(2), zpcorn(2))
-          call mapc2p(xcell + 0.5d0*dx, ycell + 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(3), ypcorn(3), zpcorn(3))
-          call mapc2p(xcell + 0.5d0*dx, ycell - 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(4), ypcorn(4), zpcorn(4))
-          zmax = dmax1(zpcorn(1),zpcorn(2),zpcorn(3),zpcorn(4))
-          mag = 0.5d0*(zmax - zmin + dmin1(zpcorn(1),zpcorn(2),zpcorn(3),zpcorn(4)) - mag)
-          aux(13,i,j,k) = mag/dz
+          ! compute capacity function value ( volume = (vol of lower face in y direction)*dy )
+          aux(13,i,j,k) = aux(9,i,j,k)
 
           ! set fault slip:
-          if ((abs(zcell+0.5d0*dz - center(3)) < 0.5d0*dz) .and. &
+          if ((abs(zcell-0.5d0*dz - center(3)) < 0.5d0*dz) .and. &
               (xcb(1) <= xcell) .and. (xcell <= xcb(2)) .and. &
               (ycb(1) <= ycell) .and. (ycell <= ycb(2))) then
                 aux(14,i,j,k) = exp(-( &

@@ -32,13 +32,13 @@ subroutine setprob
     read(7,*) center(3)
 
     center(3) = -center(3)
-    xcb(1) = center(1) - 0.5*width
-    xcb(2) = center(1) + 0.5*width
-    ycb(1) = center(2) - 0.5*length
-    ycb(2) = center(2) + 0.5*width
+    xcb(1) = center(1) - 0.5d0*width
+    xcb(2) = center(1) + 0.5d0*width
+    ycb(1) = center(2) - 0.5d0*length
+    ycb(2) = center(2) + 0.5d0*length
 
-    mindepth = dmin1(dabs(center(3) - 0.5*width*dsin(theta)), &
-                      dabs(center(3) + 0.5*width*dsin(theta)))
+    mindepth = dmin1(dabs(center(3) - 0.5d0*width*dsin(theta)), &
+                      dabs(center(3) + 0.5d0*width*dsin(theta)))
 
     return
 end
