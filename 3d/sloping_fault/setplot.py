@@ -34,6 +34,7 @@ def setplot(plotdata):
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
+    plotdata.format = 'binary'
 
     def afterframe(current_data):
         from pylab import figure,subplot,linspace,title,zeros,pcolor,colorbar,axis

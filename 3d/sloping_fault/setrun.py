@@ -61,8 +61,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 2
-    num_cells_fault_length = 2
+    num_cells_fault_width = 10
+    num_cells_fault_length = 10
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -146,7 +146,7 @@ def setrun(claw_pkg='amrclaw'):
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 
-    clawdata.output_format = 'ascii'      # 'ascii' or 'binary'
+    clawdata.output_format = 'binary'      # 'ascii' or 'binary'
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'none'  # could be list
@@ -215,7 +215,7 @@ def setrun(claw_pkg='amrclaw'):
     #   2 or 'superbee' ==> superbee
     #   3 or 'vanleer'  ==> van Leer
     #   4 or 'mc'       ==> MC limiter
-    clawdata.limiter = ['vanleer', 'vanleer', 'vanleer', 'vanleer', 'vanleer','vanleer']
+    clawdata.limiter = ['mc', 'mc', 'mc', 'mc', 'mc','mc']
 
     clawdata.use_fwaves = False    # True ==> use f-wave version of algorithms
 
@@ -389,7 +389,7 @@ def setrun(claw_pkg='amrclaw'):
     # Output Slices:
     # --------------
 
-    slicedata = rundata.slicedata
+    #slicedata = rundata.slicedata
     # use slicedata.add() to add output slices defined
     # by a point (x,y,z) and a normal direction (vx,vy,vz)
     # e.g. slicedata.add([x,y,z],[nx,ny,nz])
