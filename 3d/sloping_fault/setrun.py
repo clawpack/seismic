@@ -8,6 +8,7 @@ that will be read in by the Fortran code.
 
 import os
 import numpy as np
+from clawpack.seismic.data import SliceData
 
 #------------------------------
 def setrun(claw_pkg='amrclaw'):
@@ -61,8 +62,8 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells
-    num_cells_fault_width = 2
-    num_cells_fault_length = 2
+    num_cells_fault_width = 10
+    num_cells_fault_length = 10
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -130,7 +131,7 @@ def setrun(claw_pkg='amrclaw'):
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 2 #80
+        clawdata.num_output_times = 50
         clawdata.tfinal = 100.0 #6e-5 #0.0001800000 #0.00003
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
@@ -159,7 +160,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
-    clawdata.verbosity = 4
+    clawdata.verbosity = 1
 
 
 
@@ -324,11 +325,11 @@ def setrun(claw_pkg='amrclaw'):
     # Flags regions to be refined where tol is roughly the smallest amplitude of normal velocity to capture
 
     # steps to take on each level L between regriddings of level L+1:
-    amrdata.regrid_interval = 2
+    amrdata.regrid_interval = 10
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
-    amrdata.regrid_buffer_width  = 2
+    amrdata.regrid_buffer_width  = 10
 
     # clustering alg. cutoff for (# flagged pts) / (total # of cells
     # refined)
@@ -379,9 +380,9 @@ def setrun(claw_pkg='amrclaw'):
     amrdata.gprint = False      # grid bisection/clustering
     amrdata.nprint = False      # proper nesting output
     amrdata.pprint = False      # proj. of tagged points
-    amrdata.rprint = True      # print regridding summary
+    amrdata.rprint = False      # print regridding summary
     amrdata.sprint = False      # space/memory output
-    amrdata.tprint = True      # time step reporting each level
+    amrdata.tprint = False      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
 
 
@@ -389,18 +390,20 @@ def setrun(claw_pkg='amrclaw'):
     # Output Slices:
     # --------------
 
-    #slicedata = rundata.slicedata
+    slicedata = SliceData()
     # use slicedata.add() to add output slices defined
     # by a point (x,y,z) and a normal direction (vx,vy,vz)
     # e.g. slicedata.add([x,y,z],[nx,ny,nz])
 
-    #point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
+    point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
     # surface slice:
-    #slicedata.add(point,[0.0,0.0,1.0])
+    slicedata.add(point,[0.0,0.0,1.0])
 
     # cross section slices:
-    #slicedata.add(point,[1.0,0.0,0.0])
-    #slicedata.add(point,[0.0,1.0,0.0])
+    slicedata.add(point,[1.0,0.0,0.0])
+    slicedata.add(point,[0.0,1.0,0.0])
+
+    slicedata.write()
 
 
     return rundata
