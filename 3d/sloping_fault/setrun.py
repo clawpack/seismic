@@ -325,11 +325,11 @@ def setrun(claw_pkg='amrclaw'):
     # Flags regions to be refined where tol is roughly the smallest amplitude of normal velocity to capture
 
     # steps to take on each level L between regriddings of level L+1:
-    amrdata.regrid_interval = 10
+    amrdata.regrid_interval = 4
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
-    amrdata.regrid_buffer_width  = 10
+    amrdata.regrid_buffer_width  = 4
 
     # clustering alg. cutoff for (# flagged pts) / (total # of cells
     # refined)

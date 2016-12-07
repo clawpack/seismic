@@ -25,7 +25,7 @@ RESTART ?= False                    # Should = clawdata.restart in setrun
 GFORTRAN_UNBUFFERED_PRECONNECTED=y
 
 # Compiler flags can be specified here or set as an environment variable
-FFLAGS ?=  -fopenmp #-fdefault-integer-8
+FFLAGS ?=  -fopenmp -fdefault-integer-8
 
 # ---------------------------------
 # List of sources for this program:
@@ -57,6 +57,7 @@ SOURCES = \
   $(SEISLIB)/init_alloc.f90 \
   $(SEISLIB)/step3.f \
   $(SEISLIB)/stepgrid.f \
+  $(SEISLIB)/tick.f \
   $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/qad.f \
@@ -101,7 +102,6 @@ SOURCES = \
   $(AMRLIB)/setgrd.f \
   $(AMRLIB)/setuse.f \
   $(AMRLIB)/stst1.f \
-  $(AMRLIB)/tick.f \
   $(AMRLIB)/trimbd.f \
   $(AMRLIB)/update.f \
   $(AMRLIB)/nodget.f \
