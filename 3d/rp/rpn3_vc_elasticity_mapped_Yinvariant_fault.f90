@@ -104,8 +104,8 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
 
         ! obtain mapped-grid parameters
         nx = auxr(7,i)
-        nz = auxr(8,i)
-        arearatio = auxr(9,i)
+        nz = auxr(9,i)
+        arearatio = auxr(10,i)
 
         nx2 = nx*nx
         nz2 = nz*nz

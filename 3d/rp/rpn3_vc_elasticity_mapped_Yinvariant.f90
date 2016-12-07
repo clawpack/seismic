@@ -26,18 +26,19 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
 !       3 mu
 !       4 cp
 !       5 cs
-!       6 nx at lower wall in e1 direction (see setaux1d)
-!       7 ny at lower wall in e1 direction
-!       8 nz at lower wall in e1 direction
-!       9 area ratio of lower wall in e1 direction
-!       10 nx at lower wall in e2 direction
-!       11 ny at lower wall in e2 direction
-!       12 nz at lower wall in e2 direction
-!       13 area ratio of lower wall in e2 direction
-!       14 nx at lower wall in e3 direction
-!       15 ny at lower wall in e3 direction
-!       16 nz at lower wall in e3 direction
-!       17 area ratio of lower wall in e3 direction
+!       6 --- not used ---
+!       7 nx at lower wall in e1 direction (see setaux1d)
+!       8 ny at lower wall in e1 direction
+!       9 nz at lower wall in e1 direction
+!       10 area ratio of lower wall in e1 direction
+!       11 nx at lower wall in e2 direction
+!       12 ny at lower wall in e2 direction
+!       13 nz at lower wall in e2 direction
+!       14 area ratio of lower wall in e2 direction
+!       15 nx at lower wall in e3 direction
+!       16 ny at lower wall in e3 direction
+!       17 nz at lower wall in e3 direction
+!       18 area ratio of lower wall in e3 direction
 
 ! Note that although there are 9 eigenvectors, 3 eigenvalues are
 ! always zero and so we only need to compute 6 waves.
@@ -102,9 +103,9 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
 
 
         ! obtain mapped-grid parameters
-        nx = auxr(6,i)
-        nz = auxr(8,i)
-        arearatio = auxr(9,i)
+        nx = auxr(7,i)
+        nz = auxr(9,i)
+        arearatio = auxr(10,i)
 
         nx2 = nx*nx
         nz2 = nz*nz
