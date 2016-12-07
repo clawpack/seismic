@@ -125,37 +125,16 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 !           # depending on icoor:
 
             if (icoor == 2) then
-!           # new double-transverse direction is y-like direction
+!           # new double-transverse direction is e2 direction
 
-                ! determine x-y plane normal info
-                if (ixyz + icoor == 5) then
-                    ! transverse direction is x
-                    nxb = aux2(6,iadj,1)
-                    nzb = aux2(7,iadj,1)
-                    arearatiob = aux2(8,iadj,1)
+                ! obtain mapped-grid parameters
+                nxb = aux2(11,iadj,1)
+                nzb = aux2(13,iadj,1)
+                arearatiob = aux2(14,iadj,1)
 
-                    nxa = aux3(6,iadj,1)
-                    nza = aux3(7,iadj,1)
-                    arearatioa = aux3(8,iadj,1)
-                else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
-                    ! transverse direction is y
-                    nxb = 0.d0
-                    nzb = 0.d0
-                    arearatiob = aux2(9,iadj,1)
-
-                    nxa = 0.d0
-                    nza = 0.d0
-                    arearatioa = aux3(9,iadj,1)
-                else if (ixyz + icoor == 4) then
-                    ! transverse direction is z
-                    nxb = aux2(10,iadj,1)
-                    nzb = aux2(11,iadj,1)
-                    arearatiob = aux2(12,iadj,1)
-
-                    nxa = aux3(10,iadj,1)
-                    nza = aux3(11,iadj,1)
-                    arearatioa = aux3(12,iadj,1)
-                end if
+                nxa = aux3(11,iadj,1)
+                nza = aux3(13,iadj,1)
+                arearatioa = aux3(14,iadj,1)
 
                 ! Assign material parameters
                 lamb = aux1(2,iadj,1)
@@ -176,37 +155,16 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
                 cpa = aux3(4,iadj,1)
                 csa = aux3(5,iadj,1)
             else !! (icoor .eq. 3)
-!           # new double-transverse direction is z-like direction
+!           # new double-transverse direction e3 direction
 
-                ! determine x-y plane normal info
-                if (ixyz + icoor == 5) then
-                    ! transverse direction is x
-                    nxb = aux1(6,iadj,2)
-                    nzb = aux1(7,iadj,2)
-                    arearatiob = aux1(8,iadj,2)
+                ! obtain mapped-grid parameters
+                nxb = aux1(15,iadj,2)
+                nzb = aux1(17,iadj,2)
+                arearatiob = aux1(18,iadj,2)
 
-                    nxa = aux1(6,iadj,3)
-                    nza = aux1(7,iadj,3)
-                    arearatioa = aux1(8,iadj,3)
-                else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
-                    ! transverse direction is y
-                    nxb = 0.d0
-                    nzb = 0.d0
-                    arearatiob = aux1(9,iadj,2)
-
-                    nxa = 0.d0
-                    nza = 0.d0
-                    arearatioa = aux1(9,iadj,3)
-                else if (ixyz + icoor == 4) then
-                    ! transverse direction is z
-                    nxb = aux1(10,iadj,2)
-                    nzb = aux1(11,iadj,2)
-                    arearatiob = aux1(12,iadj,2)
-
-                    nxa = aux1(10,iadj,3)
-                    nza = aux1(11,iadj,3)
-                    arearatioa = aux1(12,iadj,3)
-                end if
+                nxa = aux1(15,iadj,3)
+                nza = aux1(17,iadj,3)
+                arearatioa = aux1(18,iadj,3)
 
                 ! Assign material parameters
                 lamb = aux1(2,iadj,1)
@@ -232,37 +190,16 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 !           # so we either use auxN(:,:,3) or aux3(:,:,N) for N=1,2,3
 !           # depending on icoor:
             if (icoor == 2) then
-!           # new double-transverse direction is y-like direction
+!           # new double-transverse direction is e2 direction
 
-                ! determine x-y plane normal info
-                if (ixyz + icoor == 5) then
-                    ! transverse direction is x
-                    nxb = aux2(6,iadj,3)
-                    nzb = aux2(7,iadj,3)
-                    arearatiob = aux2(8,iadj,3)
+                ! obtain mapped-grid parameters
+                nxb = aux2(11,iadj,3)
+                nzb = aux2(13,iadj,3)
+                arearatiob = aux2(14,iadj,3)
 
-                    nxa = aux3(6,iadj,3)
-                    nza = aux3(7,iadj,3)
-                    arearatioa = aux3(8,iadj,3)
-                else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
-                    ! transverse direction is y
-                    nxb = 0.d0
-                    nzb = 0.d0
-                    arearatiob = aux2(9,iadj,3)
-
-                    nxa = 0.d0
-                    nza = 0.d0
-                    arearatioa = aux3(9,iadj,3)
-                else if (ixyz + icoor == 4) then
-                    ! transverse direction is z
-                    nxb = aux2(10,iadj,3)
-                    nzb = aux2(11,iadj,3)
-                    arearatiob = aux2(12,iadj,3)
-
-                    nxa = aux3(10,iadj,3)
-                    nza = aux3(11,iadj,3)
-                    arearatioa = aux3(12,iadj,3)
-                end if
+                nxa = aux3(11,iadj,3)
+                nza = aux3(13,iadj,3)
+                arearatioa = aux3(14,iadj,3)
 
                 ! Assign material parameters
                 lamb = aux1(2,iadj,3)
@@ -283,37 +220,16 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
                 cpa = aux3(4,iadj,3)
                 csa = aux3(5,iadj,3)
             else !! (icoor .eq. 3)
-!           # new double-transverse direction is z-like direction
+!           # new double-transverse direction is e3 direction
 
-                ! determine x-y plane normal info
-                if (ixyz + icoor == 5) then
-                    ! transverse direction is x
-                    nxb = aux3(6,iadj,2)
-                    nzb = aux3(7,iadj,2)
-                    arearatiob = aux3(8,iadj,2)
+                ! obtain mapped-grid parameters
+                nxb = aux3(15,iadj,2)
+                nzb = aux3(17,iadj,2)
+                arearatiob = aux3(18,iadj,2)
 
-                    nxa = aux3(6,iadj,3)
-                    nza = aux3(7,iadj,3)
-                    arearatioa = aux3(8,iadj,3)
-                else if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
-                    ! transverse direction is y
-                    nxb = 0.d0
-                    nzb = 0.d0
-                    arearatiob = aux3(9,iadj,2)
-
-                    nxa = 0.d0
-                    nza = 0.d0
-                    arearatioa = aux3(9,iadj,3)
-                else if (ixyz + icoor == 4) then
-                    ! transverse direction is z
-                    nxb = aux3(10,iadj,2)
-                    nzb = aux3(11,iadj,2)
-                    arearatiob = aux3(12,iadj,2)
-
-                    nxa = aux3(10,iadj,3)
-                    nza = aux3(11,iadj,3)
-                    arearatioa = aux3(12,iadj,3)
-                end if
+                nxa = aux3(15,iadj,3)
+                nza = aux3(17,iadj,3)
+                arearatioa = aux3(18,iadj,3)
 
                 ! Assign material parameters
                 lamb = aux3(2,iadj,1)

@@ -26,14 +26,19 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
 !       3 mu
 !       4 cp
 !       5 cs
-!       6 nx at left-wall in x-direction
-!       7 nz at left-wall in x-direction
-!       8 area ratio of left-wall in x-direction
-!       9 area ratio of left-wall in y-direction
-!       10 nx at left-wall in z-direction
-!       11 nz at left-wall in z-direction
-!       12 area ratio of left-wall in z-direction
-!       13 capacity function value
+!       6 slip
+!       6 nx at lower wall in e1 direction (see setaux1d)
+!       7 ny at lower wall in e1 direction
+!       8 nz at lower wall in e1 direction
+!       9 area ratio of lower wall in e1 direction
+!       10 nx at lower wall in e2 direction
+!       11 ny at lower wall in e2 direction
+!       12 nz at lower wall in e2 direction
+!       13 area ratio of lower wall in e2 direction
+!       14 nx at lower wall in e3 direction
+!       15 ny at lower wall in e3 direction
+!       16 nz at lower wall in e3 direction
+!       17 area ratio of lower wall in e3 direction
 
 ! Note that although there are 9 eigenvectors, 3 eigenvalues are
 ! always zero and so we only need to compute 6 waves.
@@ -97,20 +102,10 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
     do i = 2-mbc, mx+mbc
 
 
-        ! determine x-y plane normal info
-        if (ixyz == 1) then
-            nx = auxr(6,i-1)
-            nz = auxr(7,i-1)
-            arearatio = auxr(8,i-1)
-        else if (ixyz == 2) then
-            nx = 0.d0
-            nz = 0.d0
-            arearatio = auxr(9,i-1)
-        else if (ixyz == 3) then
-            nx = auxr(10,i-1)
-            nz = auxr(11,i-1)
-            arearatio = auxr(12,i-1)
-        end if
+        ! obtain mapped-grid parameters
+        nx = auxr(7,i)
+        nz = auxr(8,i)
+        arearatio = auxr(9,i)
 
         nx2 = nx*nx
         nz2 = nz*nz
@@ -128,10 +123,8 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         dw = ql(w,i) - qr(w,i-1)
 
         ! Modify velocity differences to include slip along fault
-        if (ixyz == 3) then
-          du = du + nz*auxl(14,i)
-          dw = dw - nx*auxl(14,i)
-        end if
+        du = du + nz*auxl(6,i)
+        dw = dw - nx*auxl(6,i)
 
         ! material properties in cells i (on right) and i-1 (on left):
         lamr = auxl(2,i)
@@ -157,9 +150,8 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         det = bulkl*cpr + bulkr*cpl
         if (det < 1.e-10) then
             write(6,*) 'det=0 in rpn3'
-            write (6,*) 'cpr', cpr, 'bulkl', bulkl, 'cpl', cpl, 'bulkr', bulkr, 'i', i
-            write (6,*) 'test', auxl(1,i)
-
+            write(6,*) ixyz
+            write(6,*) auxl(1,:)
             stop
         else
             if (ixyz == 2) then

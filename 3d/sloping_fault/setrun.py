@@ -95,10 +95,10 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_eqn = 9
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 14
+    clawdata.num_aux = 1
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.capa_index = 13
+    clawdata.capa_index = 1
 
 
     # -------------
@@ -143,7 +143,7 @@ def setrun(claw_pkg='amrclaw'):
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 10
+        clawdata.total_steps = 1
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 
@@ -314,7 +314,7 @@ def setrun(claw_pkg='amrclaw'):
     # This must be a list of length num_aux, each element of which is one
     # of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-    amrdata.aux_type = ['center', 'center', 'center', 'center', 'center', 'xleft', 'xleft', 'xleft', 'yleft', 'zleft', 'zleft','zleft','capacity','zleft']
+    amrdata.aux_type = ['capacity']
 
     # Flag for refinement based on Richardson error estimater:
     amrdata.flag_richardson = False    # use Richardson?

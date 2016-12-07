@@ -3,7 +3,7 @@ c ------------------------------------------------------------------
 c
       subroutine bc3amr(val,aux,nrow,ncol,nfil,meqn,naux,
      1                  hx, hy, hz,level, time,
-     2                  xlo_patch,  xhi_patch,  
+     2                  xlo_patch,  xhi_patch,
      3                  ylo_patch, yhi_patch,
      4                  zlo_patch, zhi_patch)
 
@@ -21,7 +21,7 @@ c     # Standard boundary condition choices for amr3ez in clawpack
 c
 c     # At each boundary  k = 1 (xlower),  2 (xupper),  3 (ylower ), 4 (yupper),
 c                         5 (zlower) 6 (zupper)
-c     #  
+c     #
 c     #   mthbc(k) =  0  for user-supplied BC's (must be inserted!)
 c     #            =  1  for zero-order extrapolation
 c     #            =  2  for periodic boundary coniditions
@@ -48,13 +48,13 @@ c                         /                         /  |
 c                        /_________________________/   |
 c                        |                         |   |
 c                        |                         |   |
-c                     ___|_____(xhi_patch,yhi_patch,zhi_patch) 
+c                     ___|_____(xhi_patch,yhi_patch,zhi_patch)
 c                    /___|____/|                   |   |
 c                    |   |    ||                   |   |
 c                    |   |    ||                   |   |
 c                    |   |    ||                   |   |
 c                    |___|____|/                   |   |
-c  (xlo_patch,ylo_patch,zlo_patch)                 |  /                       
+c  (xlo_patch,ylo_patch,zlo_patch)                 |  /
 c                        |                         | /
 c                        |_________________________|/
 c  (xlower,ylower,zlower)
@@ -84,12 +84,12 @@ c ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::;
       use amr_module, only:  xperdom,yperdom,zperdom
       implicit none
 
-      real*8  val(meqn,nrow,ncol,nfil)
-      real*8  aux(naux,nrow,ncol,nfil)
-      real*8  hx,hy,hz,hxmarg,hymarg,hzmarg,time
       integer nrow,ncol,nfil,meqn,naux,level
-      real*8  xlo_patch,xhi_patch,ylo_patch,yhi_patch
-      real*8  zlo_patch,zhi_patch
+      real(kind=8)  val(meqn,nrow,ncol,nfil)
+      real(kind=8)  aux(naux,nrow,ncol,nfil)
+      real(kind=8)  hx,hy,hz,hxmarg,hymarg,hzmarg,time
+      real(kind=8)  xlo_patch,xhi_patch,ylo_patch,yhi_patch
+      real(kind=8)  zlo_patch,zhi_patch
       integer i,j,k,m,nxl,nxr,ibeg,nyf,nyr,jbeg,nzb,nzt,kbeg
 
       hxmarg = hx*.01d0
@@ -170,7 +170,7 @@ c
   200 continue
 c     # user-specified boundary conditions go here in place of error output
       write(6,*)
-     &   '*** ERROR *** mthbc(2)=0 and no BCs specified in bc2amr'
+     &   '*** ERROR *** mthbc(2)=0 and no BCs specified in bc3amr'
       stop
       go to 299
 
@@ -416,7 +416,7 @@ c     # periodic:   handled elsewhere in amr
 
   630 continue
 c     # solid wall (assumes 3'rd component is velocity or momentum in y):
-       do 635 k = kbeg,nfil            
+       do 635 k = kbeg,nfil
         do 635 j = 1,ncol
          do 635 i = 1,nrow
           do 635 m=1,meqn

@@ -25,7 +25,7 @@ RESTART ?= False                    # Should = clawdata.restart in setrun
 GFORTRAN_UNBUFFERED_PRECONNECTED=y
 
 # Compiler flags can be specified here or set as an environment variable
-FFLAGS ?=  -fopenmp -fdefault-integer-8
+FFLAGS ?=  -fopenmp #-fdefault-integer-8
 
 # ---------------------------------
 # List of sources for this program:
@@ -42,11 +42,12 @@ MODULES = \
   $(AMRLIB)/gauges_module.f90
 
 SOURCES = \
-  ./b4step3.f90 \
+  ./advanc_debug.f \
   ./bc3amr.f \
   ./mapc2p.f90 \
   ./qinit.f90 \
   ./setaux.f90 \
+  ./setaux1d.f90 \
   ./setprob.f90 \
   ../rp/rpn3_vc_elasticity_mapped_Yinvariant_fault.f90 \
   ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
@@ -54,13 +55,14 @@ SOURCES = \
   $(SEISLIB)/amr3.f90 \
   $(SEISLIB)/flag2refine.f90 \
   $(SEISLIB)/init_alloc.f90 \
+  $(SEISLIB)/step3.f \
+  $(SEISLIB)/stepgrid.f \
+  $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/qad.f \
   $(AMRLIB)/src3.f90 \
   $(AMRLIB)/src1d.f90 \
-  $(AMRLIB)/advanc.f \
   $(AMRLIB)/bound.f \
-  $(AMRLIB)/stepgrid.f \
   $(AMRLIB)/stepgrid_dimSplit.f \
   $(AMRLIB)/auxcoarsen.f \
   $(AMRLIB)/fixcapaq.f \
@@ -123,7 +125,6 @@ SOURCES = \
   $(AMRLIB)/preintcopy.f \
   $(AMRLIB)/icall.f \
   $(AMRLIB)/preicall.f \
-  $(AMRLIB)/step3.f \
   $(AMRLIB)/step3x.f \
   $(AMRLIB)/step3y.f \
   $(AMRLIB)/step3z.f \
