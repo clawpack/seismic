@@ -1,4 +1,4 @@
-subroutine setaux1d(ixyz,mbc,mx1,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux,iout)
+subroutine setaux1d(ixyz,mbc,mx1,maxm,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux,iout)
 
     ! set auxiliary variables in current row with direction specified by ixyz
     !
@@ -27,9 +27,9 @@ subroutine setaux1d(ixyz,mbc,mx1,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux,iout
     !       18 area ratio of lower wall in e3 direction
 
     implicit none
-    integer, intent(in) :: ixyz,mbc,mx1,maux,iout
+    integer, intent(in) :: ixyz,mbc,mx1,maxm,maux,iout
     real(kind=8), intent(in) :: x1lower,x2val,x3val,dx1,dx2,dx3,t
-    real(kind=8), intent(out) ::  aux(maux,1-mbc:mx1+mbc,3)
+    real(kind=8), intent(out) ::  aux(maux,1-mbc:maxm+mbc,3)
 
     real(kind=8) :: x1cell, cp, cs, rho_cell, lambda_cell, mu_cell
     real(kind=8) :: x1ccorn(4), x2ccorn(4), x3ccorn(4)

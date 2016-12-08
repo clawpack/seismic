@@ -179,25 +179,25 @@ c
          endif
 c
          if (maux1d .gt. 0)  then
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval-0.5d0*dy, zval-0.5d0*dz, dx,dy,dz,t,maux1d,aux1,1)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval-0.5d0*dy, zval, dx,dy,dz,t,maux1d,aux1,2)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval-0.5d0*dy, zval+0.5d0*dz, dx,dy,dz,t,maux1d,aux1,3)
 
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval, zval-0.5d0*dz, dx,dy,dz,t,maux1d,aux2,1)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval, zval, dx,dy,dz,t,maux1d,aux2,2)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval, zval+0.5d0*dz, dx,dy,dz,t,maux1d,aux2,3)
 
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval+0.5d0*dy, zval-0.5d0*dz, dx,dy,dz,t,maux1d,aux3,1)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval+0.5d0*dy, zval, dx,dy,dz,t,maux1d,aux3,2)
-           call setaux1d(1,mbc,mx,xlow+mbc*dx,
+           call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval+0.5d0*dy, zval+0.5d0*dz, dx,dy,dz,t,maux1d,aux3,3)
          endif
 
@@ -298,25 +298,25 @@ c
          endif
 c
          if (maux1d .gt. 0)  then
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval-0.5d0*dz, xval-0.5d0*dx, dy,dz,dx,t,maux1d,aux1,1)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval-0.5d0*dz, xval, dy,dz,dx,t,maux1d,aux1,2)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval-0.5d0*dz, xval+0.5d0*dx, dy,dz,dx,t,maux1d,aux1,3)
 
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval, xval-0.5d0*dx, dy,dz,dx,t,maux1d,aux2,1)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval, xval, dy,dz,dx,t,maux1d,aux2,2)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval, xval+0.5d0*dx, dy,dz,dx,t,maux1d,aux2,3)
 
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval+0.5d0*dz, xval-0.5d0*dx, dy,dz,dx,t,maux1d,aux3,1)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval+0.5d0*dz, xval, dy,dz,dx,t,maux1d,aux3,2)
-           call setaux1d(2,mbc,my,ylow+mbc*dy,
+           call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval+0.5d0*dz, xval+0.5d0*dx, dy,dz,dx,t,maux1d,aux3,3)
          endif
 c
@@ -424,25 +424,25 @@ c
          endif
 c
          if (maux1d .gt. 0)  then
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval-0.5d0*dx, yval-0.5d0*dy, dz,dx,dy,t,maux1d,aux1,1)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval-0.5d0*dx, yval, dz,dx,dy,t,maux1d,aux1,2)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval-0.5d0*dx, yval+0.5d0*dy, dz,dx,dy,t,maux1d,aux1,3)
 
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval, yval-0.5d0*dy, dz,dx,dy,t,maux1d,aux2,1)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval, yval, dz,dx,dy,t,maux1d,aux2,2)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval, yval+0.5d0*dy, dz,dx,dy,t,maux1d,aux2,3)
 
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval+0.5d0*dx, yval-0.5d0*dy, dz,dx,dy,t,maux1d,aux3,1)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval+0.5d0*dx, yval, dz,dx,dy,t,maux1d,aux3,2)
-           call setaux1d(3,mbc,mz,zlow+mbc*dz,
+           call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval+0.5d0*dx, yval+0.5d0*dy, dz,dx,dy,t,maux1d,aux3,3)
          endif
 c
