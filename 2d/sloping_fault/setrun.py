@@ -8,7 +8,7 @@ that will be read in by the Fortran code.
 
 import os
 import numpy as np
-import dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 reload(dtopotools)
 
 #------------------------------
