@@ -1,6 +1,6 @@
 from pylab import *
 from clawpack.clawutil.data import ClawData
-import dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 reload(dtopotools)
 
 # Read in fault info
