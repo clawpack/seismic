@@ -2,7 +2,7 @@ from clawpack.clawutil.data import ClawData
 import numpy
 from pylab import *
 from math import atan2
-import dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 reload(dtopotools)
 
 probdata = ClawData()

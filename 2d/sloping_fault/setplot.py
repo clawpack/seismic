@@ -10,7 +10,7 @@ function setplot is called to set the plot parameters.
 import numpy as np
 from mapc2p import mapc2p
 from clawpack.clawutil.data import ClawData
-import dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 reload(dtopotools)
 cscale = 8 # scale color limits
 
