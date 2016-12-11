@@ -1,4 +1,4 @@
-import dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 from numpy import arange,sin,pi
 reload(dtopotools)
 
