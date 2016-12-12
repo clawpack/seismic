@@ -1124,20 +1124,20 @@ class Fault(object):
         for subfault in self.subfaults:
             subfault.slip_at_dynamic_t = subfault.dynamic_slip(t)
 
-    def plot_okada(self, ax=None, plotstyle='k-',label='Okada',displacement='vertical'):
+    def plot_okada(self, axes=None, displacement='vertical', kwargs={}):
         if (self.dtopo is None):
 	    raise ValueError("Need to call create_dtopography before plot_okada")
         
         if (displacement is 'vertical'):
-            if ax is None:
+            if axes is None:
                 figure()
-                ax = subplot(111)
-            ax.plot(self.dtopo.x*111.e3,self.dtopo.dZ[0,0,:],plotstyle,label=label)
+                axes = subplot(111)
+            axes.plot(self.dtopo.x*111.e3,self.dtopo.dZ[0,0,:],**kwargs)
         elif (displacement is 'horizontal'):
-            if ax is None:
+            if axes is None:
                 figure()
-                ax = subplot(111)
-            ax.plot(self.dtopo.x*111.e3,self.dtopo.dY[0,0,:],plotstyle,label=label)
+                axes = subplot(111)
+            axes.plot(self.dtopo.x*111.e3,self.dtopo.dY[0,0,:],**kwargs)
 
 
 # ==============================================================================
