@@ -2,14 +2,31 @@ from clawpack.clawutil.data import ClawData
 import numpy
 from pylab import *
 from math import atan2
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
+reload(dtopotools)
 
 probdata = ClawData()
 probdata.read('setprob.data',force=True)
 
-fault_width = probdata.fault_width
-theta = probdata.fault_dip
-xcenter = probdata.fault_center
-ycenter = -probdata.fault_depth
+column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
+            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
+fault = dtopotools.Fault(coordinate_specification='top center')
+fault.read('fault.data',column_map=column_map,skiprows=4)
+
+fault_width = 0.0
+for subfault in fault.subfaults:
+    fault_width += subfault.width
+
+subfaultL = fault.subfaults[0]
+subfaultR = fault.subfaults[-1]
+theta = subfaultL.dip/180.0*numpy.pi
+fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
+            + np.sin(theta)*subfaultR.width)
+fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
+            + np.cos(theta)*subfaultR.width)
+
+xcenter = fault_center
+ycenter = -fault_depth
 
 xcl = xcenter - 0.5*fault_width
 xcr = xcenter + 0.5*fault_width
@@ -60,7 +77,6 @@ def test(mfault):
 
     domain_depth = probdata.domain_depth
     domain_width = probdata.domain_width
-    fault_depth = probdata.fault_depth
 
     # num of cells here determined in an identical fashion to that in setrun.py
     # additional comments can be found there

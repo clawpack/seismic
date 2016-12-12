@@ -1,32 +1,47 @@
 
-""" 
+"""
 Set up the plot figures, axes, and items to be done for each frame.
 
 This module is imported by the plotting routines and then the
 function setplot is called to set the plot parameters.
-    
-""" 
+
+"""
 
 import numpy as np
 from mapc2p import mapc2p
 from plot_okada import plot_okada_surface
 from clawpack.clawutil.data import ClawData
-
-
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
+reload(dtopotools)
 cscale = 8 # scale color limits
 
 probdata = ClawData()
 probdata.read('setprob.data',force=True)
 
-width = probdata.fault_width
-theta = probdata.fault_dip
-xcenter = probdata.fault_center
-ycenter = -probdata.fault_depth
+column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
+            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
+fault = dtopotools.Fault(coordinate_specification='top center')
+fault.read('fault.data',column_map=column_map,skiprows=4)
 
-xp1 = xcenter - 0.5*width*np.cos(theta)
-xp2 = xcenter + 0.5*width*np.cos(theta)
-yp1 = ycenter + 0.5*width*np.sin(theta)
-yp2 = ycenter - 0.5*width*np.sin(theta)
+fault_width = 0.0
+for subfault in fault.subfaults:
+    fault_width += subfault.width
+
+subfaultL = fault.subfaults[0]
+subfaultR = fault.subfaults[-1]
+theta = subfaultL.dip/180.0*np.pi
+fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
+            + np.sin(theta)*subfaultR.width)
+fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
+            + np.cos(theta)*subfaultR.width)
+
+xcenter = fault_center
+ycenter = -fault_depth
+
+xp1 = xcenter - 0.5*fault_width*np.cos(theta)
+xp2 = xcenter + 0.5*fault_width*np.cos(theta)
+yp1 = ycenter + 0.5*fault_width*np.sin(theta)
+yp2 = ycenter - 0.5*fault_width*np.sin(theta)
 
 xlimits = [-0.5*probdata.domain_width,0.5*probdata.domain_width]
 ylimits = [-probdata.domain_depth,0.0]
@@ -40,13 +55,13 @@ yc = gdata[:,2]
 #--------------------------
 def setplot(plotdata):
 #--------------------------
-    
-    """ 
+
+    """
     Specify what is to be plotted at each frame.
     Input:  plotdata, an instance of clawpack.visclaw.data.ClawPlotData.
     Output: a modified version of plotdata.
-    
-    """ 
+
+    """
 
 
     from clawpack.visclaw import colormaps
@@ -62,7 +77,7 @@ def setplot(plotdata):
         xs = zeros(ngauges)
         ys = zeros(ngauges)
         for j in range(ngauges):
-            gaugeno = goffset + j 
+            gaugeno = goffset + j
             g = plotdata.getgauge(gaugeno)
             for k in range(1,len(g.t)):
                 if g.t[k] > t:
@@ -81,13 +96,13 @@ def setplot(plotdata):
         legend()
 
     plotdata.afterframe = afterframe
-    
+
     def plot_interfaces(current_data):
         from pylab import linspace, plot, sin, pi
         xl = linspace(xp1,xp2,100)
         yl = linspace(yp1,yp2,100)
         plot(xl,yl,'k')
-    
+
 
     def sigmatr(current_data):
         # return -trace(sigma)
@@ -109,17 +124,17 @@ def setplot(plotdata):
         ux = (u[I+1,:][:,J] - u[I-1,:][:,J]) / (2*dx)
         vy = (v[:,J+1][I,:] - v[:,J-1][I,:]) / (2*dy)
         dint = ux + vy
-        
+
         #zx = zeros((mx-2,1))
         #zy = zeros((1,my))
         #d = vstack((zy, hstack((zx, ux+vy, zx)), zy))
-        
+
         d0 = dint[:,0]
         d1 = dint[:,-1]
         d2 = vstack((d0, dint.T, d1)).T
         d0 = d2[0,:]
         d1 = d2[-1,:]
-        d = vstack((d0,d2,d1))      
+        d = vstack((d0,d2,d1))
         return d
 
     def curl(current_data):
@@ -143,7 +158,7 @@ def setplot(plotdata):
         c2 = vstack((c0, cint.T, c1)).T
         c0 = c2[0,:]
         c1 = c2[-1,:]
-        c = vstack((c0,c2,c1))      
+        c = vstack((c0,c2,c1))
 
         # to set curl to zero near patch edges...
         #c = zeros(u.shape)
@@ -151,7 +166,7 @@ def setplot(plotdata):
 
         return c
 
-    # Figure for trace(sigma) 
+    # Figure for trace(sigma)
     plotfigure = plotdata.new_plotfigure(name='trace', figno=10)
     plotfigure.kwargs = {'figsize':(8,8)}
 
@@ -365,5 +380,3 @@ def setplot(plotdata):
     plotdata.parallel = True
 
     return plotdata
-
-    

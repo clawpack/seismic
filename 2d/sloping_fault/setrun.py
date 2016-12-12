@@ -8,6 +8,8 @@ that will be read in by the Fortran code.
 
 import os
 import numpy as np
+import clawpack.seismic.dtopotools_horiz_okada as dtopotools
+reload(dtopotools)
 
 #------------------------------
 def setrun(claw_pkg='amrclaw'):
@@ -35,14 +37,31 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Problem-specific parameters to be written to setprob.data:
     #------------------------------------------------------------------
-    # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    probdata.add_param('domain_depth', 200e3, 'depth of domain')
-    probdata.add_param('domain_width', 400e3, 'width of domain')
-    probdata.add_param('fault_center', 25e3, 'center of fault')
-    probdata.add_param('fault_width', 50735, 'width of fault')
-    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
-    probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
+    probdata.add_param('domain_depth', 300e3, 'depth of domain')
+    probdata.add_param('domain_width', 600e3, 'width of domain')
+
+    #------------------------------------------------------------------
+    # Read in fault information
+    #------------------------------------------------------------------
+    column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
+                'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
+    fault = dtopotools.Fault(coordinate_specification='top center')
+    fault.read('fault.data',column_map=column_map,skiprows=4)
+
+    fault_width = 0.0
+    rupture_rise_time = 0.0
+    for subfault in fault.subfaults:
+        fault_width += subfault.width
+        rupture_rise_time = max(rupture_rise_time,subfault.rupture_time
+                                    + subfault.rise_time)
+
+    subfaultL = fault.subfaults[0]
+    subfaultR = fault.subfaults[-1]
+    fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
+                + np.sin(subfaultR.dip/180.0*np.pi)*subfaultR.width)
+    fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
+                + np.cos(subfaultR.dip/180.0*np.pi)*subfaultR.width)
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -356,19 +375,19 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    xbuffer = 0.5*probdata.fault_width
+    xbuffer = 0.5*fault_width
     ybuffer = xbuffer
-    xcb = [probdata.fault_center-xbuffer,probdata.fault_center+xbuffer]
+    xcb = [fault_center-xbuffer,fault_center+xbuffer]
 
     # high-resolution region to surround the fault during slip
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 0,1, 
-                    xcb[0],xcb[1], 
-                    -probdata.fault_depth-dx, -probdata.fault_depth+dx])
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
+                    0,rupture_rise_time, xcb[0],xcb[1],
+                    -fault_depth-dx, -fault_depth+dx])
 
     for j in range(amrdata.amr_levels_max-1):
         regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
                     xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
-                    -probdata.fault_depth-(j+1)*ybuffer,0.0])
+                    -fault_depth-(j+1)*ybuffer,0.0])
 
     regions.append([1,1, 0,1e9, -1.e9,1.e9, -1.e9,0.0])
     #  ----- For developers -----
