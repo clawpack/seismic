@@ -78,6 +78,10 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.upper[1] = 0.0
     clawdata.num_cells[1] = int(num_cells_below + num_cells_above)
 
+    # adjust probdata
+    probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
+    probdata.domain_depth = clawdata.upper[1] - clawdata.lower[1]
+
     # ---------------
     # Size of system:
     # ---------------
