@@ -79,21 +79,21 @@ def setrun(claw_pkg='amrclaw'):
 
     # Number of grid cells:
     num_cells_fault = 10
-    dx = probdata.fault_width/num_cells_fault
+    dx = fault_width/num_cells_fault
 
     # determine cell number and set computational boundaries
     target_num_cells = np.rint(probdata.domain_width/dx)    # x direction
     num_cells_below = np.rint((target_num_cells - num_cells_fault)/2.0)
     num_cells_above = target_num_cells - num_cells_below - num_cells_fault
-    clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - num_cells_below*dx
-    clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + num_cells_above*dx
+    clawdata.lower[0] = fault_center-0.5*fault_width - num_cells_below*dx
+    clawdata.upper[0] = fault_center+0.5*fault_width + num_cells_above*dx
     clawdata.num_cells[0] = int(num_cells_below + num_cells_fault + num_cells_above)
 
-    num_cells_above = np.rint(probdata.fault_depth/dx) # y direction
-    dy = probdata.fault_depth/num_cells_above
+    num_cells_above = np.rint(fault_depth/dx) # y direction
+    dy = fault_depth/num_cells_above
     target_num_cells = np.rint(probdata.domain_depth/dy)
     num_cells_below = target_num_cells - num_cells_above
-    clawdata.lower[1] = -probdata.fault_depth - num_cells_below*dy
+    clawdata.lower[1] = -fault_depth - num_cells_below*dy
     clawdata.upper[1] = 0.0
     clawdata.num_cells[1] = int(num_cells_below + num_cells_above)
 
