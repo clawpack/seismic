@@ -9,7 +9,6 @@ function setplot is called to set the plot parameters.
 
 import numpy as np
 from mapc2p import mapc2p
-from plot_okada import plot_okada_surface
 from clawpack.clawutil.data import ClawData
 import clawpack.seismic.dtopotools_horiz_okada as dtopotools
 reload(dtopotools)
@@ -50,7 +49,7 @@ gdata = np.loadtxt('gauges.data',skiprows=7)
 ngauges = gdata.shape[0]
 print "Found %s gauges" % ngauges
 xc = gdata[:,1]
-yc = gdata[:,2]
+fault.create_dtopography(xc/111.e3,np.array([0.]),[1.0],y_disp=True)
 
 #--------------------------
 def setplot(plotdata):
@@ -92,7 +91,7 @@ def setplot(plotdata):
         plot(xc[:ngauges],ys,label="seismic")
         title("surface displacement")
         ylim(-0.5,0.5)
-        plot_okada_surface(ax, 'r-')
+        fault.plot_okada(ax, 'r-')
         legend()
 
     plotdata.afterframe = afterframe
