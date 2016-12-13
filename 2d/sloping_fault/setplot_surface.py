@@ -91,7 +91,8 @@ def setplot(plotdata):
         plot(xc[:ngauges],ys,label="seismic")
         title("surface displacement")
         ylim(-0.5,0.5)
-        fault.plot_okada(ax, 'r-')
+        kwargs = {'color':'r','label':'Okada'}
+        fault.plot_okada(ax, kwargs=kwargs)
         legend()
 
     plotdata.afterframe = afterframe
