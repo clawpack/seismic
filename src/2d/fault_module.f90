@@ -6,7 +6,7 @@ module fault_module
       real(kind=8) :: width, slip, rupture_time, rise_time
     end type subfault
     type(subfault), allocatable :: subfaults(:)
-    real(kind=8) :: center(2), theta, xcb(2), mindepth
+    real(kind=8) :: center(2), theta, xcb(2)
 
 contains
 
@@ -61,9 +61,6 @@ contains
 
         xcb(1) = center(1) - 0.5d0*total_width
         xcb(2) = center(1) + 0.5d0*total_width
-
-        mindepth = dmin1(dabs(center(2) - 0.5d0*total_width*dsin(theta)), &
-                        dabs(center(2) + 0.5d0*total_width*dsin(theta)))
 
         close(7)
 

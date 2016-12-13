@@ -22,7 +22,7 @@ subroutine b4step2(mbc,mx,my,meqn,q,xlower,ylower,dx,dy,t,dt,maux,aux)
       ycell = ylower + (j-0.5d0)*dy
       if (abs(ycell - 0.5d0*dy - center(2)) < 0.5d0*dy) then
         subfaulti = 1
-        subfaultx = xcb(0)
+        subfaultx = xcb(1)
         do i=1-mbc,mx+mbc
           xcell = xlower + (i-0.5d0)*dx
           aux(13,i,j) = 0.d0
