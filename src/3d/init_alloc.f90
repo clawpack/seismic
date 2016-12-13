@@ -13,12 +13,10 @@
       use amr_module
       implicit none
 
-!      if (.not.allocated(storage)) then   ! old way, changed mjb jan. 2015
-       if (.not.allocated(alloc)) then     ! new way, use allocatable arrays, not pointers
-          memsize = 5e10
-!         allocate(storage(memsize))
+       if (.not.allocated(alloc)) then
+!          memsize = 5e10
+          memsize = 5e6
           allocate(alloc(memsize))
-!          alloc => storage
           print *, "Storage allocated..."
       else
           print *, "Storage already allocated!"
