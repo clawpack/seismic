@@ -1130,11 +1130,13 @@ class Fault(object):
         
         if (displacement is 'vertical'):
             if axes is None:
+                from pylab import figure, subplot
                 figure()
                 axes = subplot(111)
             axes.plot(self.dtopo.x*111.e3,self.dtopo.dZ[0,0,:],**kwargs)
         elif (displacement is 'horizontal'):
             if axes is None:
+                from pylab import figure, subplot
                 figure()
                 axes = subplot(111)
             axes.plot(self.dtopo.x*111.e3,self.dtopo.dY[0,0,:],**kwargs)
