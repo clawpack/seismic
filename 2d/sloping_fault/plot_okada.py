@@ -35,6 +35,7 @@ for i in range(ndip):
     subfault.latitude = 0.
     subfault.coordinate_specification = 'top center'
     subfault.calculate_geometry()
+    subfault.scale_longitude = False  # don't scale by cos(lat)
 
     fault.subfaults.append(subfault)
 
