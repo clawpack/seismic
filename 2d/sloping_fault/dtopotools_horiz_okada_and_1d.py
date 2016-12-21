@@ -421,7 +421,7 @@ class DTopography(object):
             self.dZ = dZ
 
         else:
-            raise ValueError("Only topography types 1, 2, and 3 are supported,",
+            raise ValueError("Only dtopo types 1, 2, and 3 are supported,",
                              " given %s." % dtopo_type)
 
 
@@ -509,7 +509,7 @@ class DTopography(object):
                             data_file.write("\n")
 
             else:
-                raise ValueError("Only topography types 1, 2, and 3 are ",
+                raise ValueError("Only dtopo types 1, 2, and 3 are ",
                                  "supported, given %s." % dtopo_type)
 
 
@@ -772,8 +772,8 @@ class Fault(object):
         return Mw(self.Mo())
 
     
-    def create_dtopography(self, x, y, times=[0., 1.], y_disp=False,
-                 x_disp=False, verbose=False):
+    def create_dtopography(self, x, y, times=[0., 1.], horiz_disp=False,
+                 verbose=False):
         r"""Compute change in topography and construct a dtopography object.
 
         Use subfaults' `okada` routine and add all 
@@ -800,7 +800,7 @@ class Fault(object):
             if verbose:
                 sys.stdout.write("%s.." % k)
                 sys.stdout.flush()
-            subfault.okada(x,y,y_disp=y_disp,x_disp=x_disp)  
+            subfault.okada(x,y,horiz_disp=horiz_disp)  
                     # sets subfault.dtopo with times=[0]
                     # and subfault.dtopo.dZ.shape[0] == 1
         if verbose:
@@ -823,22 +823,27 @@ class Fault(object):
                 if dtopo.dZ.shape != (2, dz.shape[0], dz.shape[1]):
                     raise ValueError("dtopo.dZ does not have expected shape")
 
-            if y_disp:
+            if horiz_disp:
                 if len(times) > 2:
                     raise ValueError("For static deformation, need len(times) <= 2")
-                dy = numpy.zeros(X.shape)
+                dx = numpy.zeros(X.shape)
+                dy = numpy.zeros(Y.shape)
                 for subfault in self.subfaults:
+                    dx += subfault.dtopo.dX[0,:,:]
                     dy += subfault.dtopo.dY[0,:,:]
 
                 if len(times) == 1:
                     # only final deformation stored:
+                    dtopo.dX = numpy.array(dx, ndmin=3) 
                     dtopo.dY = numpy.array(dy, ndmin=3) 
                 elif len(times) == 2:
                     # store 0 at first time and final deformation at second:
-                    dy0 = numpy.zeros(X.shape)
+                    dx0 = numpy.zeros(X.shape)
+                    dtopo.dX = numpy.array([dx0, dx])
+                    dy0 = numpy.zeros(Y.shape)
                     dtopo.dY = numpy.array([dy0, dy])
 
-                # !!!! need to add dynamic and x_disp !!!!
+                # !!!! need to add dynamic !!!!
 
         elif self.rupture_type in ['dynamic','kinematic']:
 
@@ -1211,6 +1216,8 @@ class SubFault(object):
         r"""Longitude of the subfault based on *coordinate_specification*."""
         self.coordinate_specification = None
         r"""Specifies where the latitude, longitude and depth are measured from."""
+        self.scale_longitude = True 
+        r"""True ==> scale delta longitude by cos(latitude)."""
 
         # default value for rigidity = shear modulus
         # Note that standard units for mu is now Pascals.
@@ -1339,10 +1346,14 @@ class SubFault(object):
         # Vector *up_dip* goes from bottom edge to top edge, in meters,
         # from point 2 to point 0 in the figure in the class docstring.
 
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(self.latitude * DEG2RAD)
+        else:
+            longitude_scale_factor = 1.
 
         up_dip = (-self.width * numpy.cos(self.dip * DEG2RAD)           \
                               * numpy.cos(self.strike * DEG2RAD)        \
-                              / (LAT2METER * numpy.cos(self.latitude * DEG2RAD)),
+                              / (LAT2METER * longitude_scale_factor),
                    self.width * numpy.cos(self.dip * DEG2RAD)           \
                               * numpy.sin(self.strike * DEG2RAD) / LAT2METER)
         if self.coordinate_specification == 'top center':
@@ -1379,8 +1390,13 @@ class SubFault(object):
         # Vector *strike* goes along the top edge from point 1 to point a
         # in the figure in the class docstring.
 
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(self._centers[2][1] * DEG2RAD)
+        else:
+            longitude_scale_factor = 1.
+
         up_strike = (0.5 * self.length * numpy.sin(self.strike * DEG2RAD) \
-           / (lat2meter * numpy.cos(self._centers[2][1] * DEG2RAD)),
+           / (lat2meter * longitude_scale_factor),
                      0.5 * self.length * numpy.cos(self.strike * DEG2RAD) \
            / lat2meter)
         
@@ -1402,17 +1418,18 @@ class SubFault(object):
                                                                  - up_strike[1])
 
     
-    def okada(self, x, y, y_disp=False, x_disp=False):
+    def okada(self, x, y, horiz_disp=False):
         r"""
         Apply Okada to this subfault and return a DTopography object.
 
         :Input:
           - x,y are 1d arrays
-          - x_disp == True means also return horizontal displacement in dip direction
+          - horiz_disp == True means also return horizontal displacement 
         :Output:
           - DTopography object with dZ array of shape (1,len(x),len(y))
                 with single static displacement and times = [0.].
-          - Another DTopography object if x_disp==True
+          - If horiz_disp == True, also set attributes dStrike, dDip, dX, dY
+            of horizontal displacesments in Strike, Dip, x, and y directions resp.
 
         Calculates the vertical displacement by default.
 
@@ -1464,7 +1481,13 @@ class SubFault(object):
     
         # Convert distance from (X,Y) to (x_bottom,y_bottom) from degrees to
         # meters:
-        xx = LAT2METER * numpy.cos(DEG2RAD * Y) * (X - x_bottom)   
+
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(Y * DEG2RAD)
+        else:
+            longitude_scale_factor = 1.
+
+        xx = LAT2METER * longitude_scale_factor * (X - x_bottom)   
         yy = LAT2METER * (Y - y_bottom)
     
     
@@ -1484,15 +1507,14 @@ class SubFault(object):
         dFs = ['z']
         dtopo.dY = dtopo.dX = None  # if not set below
 
-        if y_disp:
+        if horiz_disp:
             strike_slips.append(self._strike_slip_y)
             dip_slips.append(self._dip_slip_y)
-            dFs.append('y')
+            dFs.append('down dip')
 
-        if x_disp:
             strike_slips.append(self._strike_slip_x)
             dip_slips.append(self._dip_slip_x)
-            dFs.append('x')
+            dFs.append('along strike')
 
         for strike_slip,dip_slip,dF in zip(strike_slips, dip_slips, dFs):
             f1 = strike_slip(x1 + halfL, p,     ang_dip, q)
@@ -1516,10 +1538,14 @@ class SubFault(object):
 
             dZ = numpy.array(dz, ndmin=3)
             if dF=='z': dtopo.dZ = dZ
-            if dF=='y': dtopo.dY = -dZ   # since y is up-dip in Okada paper
-            if dF=='x': dtopo.dX = dZ
-            #import pdb; pdb.set_trace()
+            if dF=='down dip': dtopo.dDip = -dZ   # since y is up-dip in Okada paper
+            if dF=='along strike': dtopo.dStrike = dZ
 
+        if horiz_disp:
+            dtopo.dX = dtopo.dStrike * numpy.sin(ang_strike) \
+                       + dtopo.dDip * numpy.cos(ang_strike)
+            dtopo.dY = dtopo.dStrike * numpy.cos(ang_strike) \
+                       - dtopo.dDip * numpy.sin(ang_strike)
         self.dtopo = dtopo
         return dtopo
 
@@ -2084,6 +2110,7 @@ class SubdividedPlaneFault(Fault):
                 subfault.slip = slip
                 subfault.coordinate_specification = \
                         base_subfault.coordinate_specification
+                subfault.scale_longitude = base_subfault.scale_longitude
                 subfault.mu = base_subfault.mu
 
                 self.subfaults.append(subfault)
@@ -2158,3 +2185,157 @@ class TensorProductFault(SubdividedPlaneFault):
         if slip_down_dip is None:
             # set to constant in the dip direction if not specified
             slip_down_dip = lambda xi: 1.0
+
+
+# ==============================================================================
+#  DTopography Base Class for 1-dimensional dtopo
+# ==============================================================================
+class DTopography1d(object):
+    r"""Basic object representing moving topography in 1d
+
+
+
+    """
+
+
+    def __init__(self, path=None, dtopo_type=None):
+        r"""DTopography initialization routine.
+        
+        See :class:`DTopography` for more info.
+
+        """
+
+        self.dZ = None
+        self.times = []
+        self.x = None
+        self.delta = None
+        self.path = path
+        if path:
+            self.read(path, dtopo_type)
+
+
+    def read(self, path=None, dtopo_type=None, verbose=False):
+        r"""
+        Read in a dtopo file and use to set attributes of this object.
+
+        :input:
+        
+         - *path* (path) - Path to existing dtopo file to read in.
+         - *dtopo_type* (int) - Type of topography file to read.  Default is 3
+            if not specified or apparent from file extension.
+        """
+
+        if path is not None:
+            self.path = path
+        else:
+            if self.path is None:
+                raise ValueError("Need to specify a path to a file.")
+            else:
+                path = self.path
+
+        if dtopo_type is None:
+            dtopo_type = topotools.determine_topo_type(path, default=3)
+
+
+        if dtopo_type == 2 or dtopo_type == 3:
+            fid = open(path)
+            mx = int(fid.readline().split()[0])
+            mt = int(fid.readline().split()[0])
+            xlower = float(fid.readline().split()[0])
+            t0 = float(fid.readline().split()[0])
+            dx = float(fid.readline().split()[0])
+            dt = float(fid.readline().split()[0])
+            fid.close()
+    
+            xupper = xlower + (mx-1)*dx
+            x=numpy.linspace(xlower,xupper,mx)
+            times = numpy.linspace(t0, t0+(mt-1)*dt, mt)
+    
+            dZvals = numpy.array(numpy.loadtxt(path, skiprows=6), ndmin=2)
+            if dtopo_type==2:
+                dZ = reshape(dZvals,(mt,mx))
+            elif dtopo_type==3:
+                dZ = dZvals
+
+            self.x = x
+            self.times = times
+            self.dZ = dZ
+
+        else:
+            raise ValueError("Only dtopo types 2, and 3 are supported,",
+                             " given %s." % dtopo_type)
+
+
+    def write(self, path=None, dtopo_type=None):
+        r"""Write out subfault resulting dtopo to file at *path*.
+
+        :input:
+        
+         - *path* (path) - Path to the output file to written to.
+         - *dtopo_type* (int) - Type of topography file to write out.  Default
+           is 3.
+
+        """
+
+        if path is not None:
+            self.path = path
+        if self.path is None:
+            raise IOError("*** need to specify path to file for writing")
+        path = self.path
+
+        if dtopo_type is None:
+            dtopo_type = topotools.determine_topo_type(path, default=3)
+
+        x = self.x
+        dx = x[1] - x[0]
+
+        # Construct each interpolating function and evaluate at new grid
+        ## Shouldn't need to interpolate in time.
+        with open(path, 'w') as data_file:
+
+            if dtopo_type == 2 or dtopo_type == 3:
+                if len(self.times) == 1:
+                    dt = 0.
+                else:
+                    dt = float(self.times[1] - self.times[0])
+                # Write out header
+                data_file.write("%7i       mx \n" % x.shape[0])
+                data_file.write("%7i       mt \n" % len(self.times))
+                data_file.write("%20.14e   xlower\n" % x[0])
+                data_file.write("%20.14e   t0\n" % self.times[0])
+                data_file.write("%20.14e   dx\n" % dx)
+                data_file.write("%20.14e   dt\n" % dt)
+
+                if dtopo_type == 2:
+                    for (n, time) in enumerate(self.times):
+                        for j in range(len(x)):
+                            data_file.write('%012.6e\n' % self.dZ[n,j])
+
+                elif dtopo_type == 3:
+                    for (n, time) in enumerate(self.times):
+                        data_file.write(self.x.shape[0] * '%012.6e  ' 
+                                              % tuple(self.dZ[n,:]))
+                        data_file.write("\n")
+
+            else:
+                raise ValueError("Only dtopo types 2 and 3 are ",
+                                 "supported, given %s." % dtopo_type)
+
+
+    def dZ_at_t(self, t):
+        """
+        Interpolate dZ to specified time t and return deformation.
+        """
+        from matplotlib.mlab import find
+        if t <= self.times[0]:
+            return self.dZ[0,:]
+        elif t >= self.times[-1]:
+            return self.dZ[-1,:]
+        else:
+            n = max(find(self.times <= t))
+            t1 = self.times[n]
+            t2 = self.times[n+1]
+            dz = (t2-t)/(t2-t1) * self.dZ[n,:] + \
+                 (t-t1)/(t2-t1) * self.dZ[n+1,:]
+            return dz
+
