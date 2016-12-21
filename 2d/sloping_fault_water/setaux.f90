@@ -7,11 +7,17 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
     real(kind=8) :: xcell, ycell, cp, cs
     integer :: i,j
 
+    real(kind=8) :: rho_plate, lambda_plate, mu_plate
+    real(kind=8) :: rho_water, lambda_water, mu_water
     real(kind=8) :: rho_cell, lambda_cell, mu_cell
 
     ! Arrays to temporarily store computational and physical corners of grid cells
     real(kind=8) :: xccorn(4),yccorn(4),xpcorn(4),ypcorn(4)
     real(kind=8) :: norm, xn, yn, areap, b2c
+
+    real (kind=8) :: center(2), theta, xcb(2), mindepth
+    common /fault/  center, theta, xcb, mindepth
+
 
 ! c     #   (lambda = nu*E/((1+nu)(1-2nu))), E=young modulus, nu=poisson ration
 ! c     #   aux(1,i,j) is the density of the elastic material
@@ -34,22 +40,36 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
 ! c     #   aux(13,i,j) = slip:
     !
 
-    lambda_cell = 60.d9  ! Pa
-    mu_cell = 30.d9      ! Pa
-    rho_cell = 2500.d0   ! kg/m**3
-    cp = dsqrt((lambda_cell + 2*mu_cell)/rho_cell)
-    cs = dsqrt(mu_cell/rho_cell)
+    lambda_plate = 60.d9  ! Pa
+    mu_plate = 30.d9      ! Pa
+    rho_plate = 2500.d0   ! kg/m**3
+
+    lambda_water = 2.202256d9  ! Pa
+    mu_water = 0.d0      ! Pa
+    rho_water = 1000.d0   ! kg/m**3
 
     ! Loop over all cells
       do j=1-mbc,my + mbc
         ycell = ylower + (j-0.5d0)*dy
         do i=1-mbc,mx + mbc
 
+          if (ycell .gt. 0.d0) then
+            lambda_cell = lambda_water
+            mu_cell = mu_water
+            rho_cell = rho_water
+          else
+            lambda_cell = lambda_plate
+            mu_cell = mu_plate
+            rho_cell = rho_plate
+          endif
+
           aux(1,i,j) = rho_cell
           aux(2,i,j) = lambda_cell
           aux(3,i,j) = mu_cell
 
           ! Calculate pressure and shear wave speeds
+          cp = dsqrt((lambda_cell + 2*mu_cell)/rho_cell)
+          cs = dsqrt(mu_cell/rho_cell)
           aux(4,i,j) = cp
           aux(5,i,j) = cs
 
@@ -106,8 +126,15 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
           areap = 0.5*dabs(areap)
           aux(12,i,j) = areap/(dx*dy)
 
-          ! Initialize slip to zero
-          aux(13,i,j) = 0.d0
+          ! set slip:
+          xccorn(1) = xlower + float(i-1)*dx
+          yccorn(1) = ylower + float(j-1)*dy
+          if ((abs(yccorn(1)-center(2)) < 0.5d0*dy) .and. &
+              (xccorn(1) >= xcb(1)) .and. (xccorn(1) <= xcb(2))) then
+                aux(13,i,j) = exp(-((xccorn(1)-center(1))/(center(1)-xcb(1)))**2)
+            else
+                aux(13,i,j) = 0.d0
+            endif
 
         end do
       end do

@@ -16,7 +16,7 @@ CLAW_PKG = amrclaw                  # Clawpack package to use
 EXE = xamr                          # Executable to create
 SETRUN_FILE = setrun.py             # File containing function to make data
 OUTDIR = _output                    # Directory for output
-SETPLOT_FILE = setplot_surface.py   # File containing function to set plots
+SETPLOT_FILE = setplot_surface.py           # File containing function to set plots
 PLOTDIR = _plots                    # Directory for plots
 
 OVERWRITE ?= True                   # False ==> make a copy of OUTDIR first
@@ -32,7 +32,6 @@ FFLAGS ?= -fopenmp
 # ---------------------------------
 
 AMRLIB = $(CLAW)/amrclaw/src/2d
-SEISLIB = $(CLAW)/seismic/src/2d
 include $(AMRLIB)/Makefile.amr_2d
 
 # ---------------------------------------
@@ -50,7 +49,6 @@ EXCLUDE_SOURCES = \
 # ----------------------------------------
 
 MODULES = \
-  $(SEISLIB)/fault_module.f90
 
 SOURCES = \
   qinit.f \
@@ -59,8 +57,9 @@ SOURCES = \
   setaux.f90 \
   mapc2p.f90 \
   b4step2.f90 \
-  $(CLAW)/seismic/src/rp/rpn2_vc_elasticity_mapped_fault.f90 \
-  $(CLAW)/seismic/src/rp/rpt2_vc_elasticity_mapped.f90 
+  src2.f90 \
+  ../rp/rpn2_vc_elasticity_mapped_fault.f90 \
+  ../rp/rpt2_vc_elasticity_mapped.f90 \
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:

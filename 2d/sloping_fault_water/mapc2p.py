@@ -2,31 +2,15 @@ from clawpack.clawutil.data import ClawData
 import numpy
 from pylab import *
 from math import atan2
-import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
-reload(dtopotools)
 
 probdata = ClawData()
 probdata.read('setprob.data',force=True)
 
-column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
-fault = dtopotools.Fault(coordinate_specification='top center')
-fault.read('fault.data',column_map=column_map,skiprows=4)
-
-fault_width = 0.0
-for subfault in fault.subfaults:
-    fault_width += subfault.width
-
-subfaultL = fault.subfaults[0]
-subfaultR = fault.subfaults[-1]
-theta = subfaultL.dip/180.0*numpy.pi
-fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
-            + np.sin(theta)*subfaultR.width)
-fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
-            + np.cos(theta)*subfaultR.width)
-
-xcenter = fault_center
-ycenter = -fault_depth
+fault_width = probdata.fault_width
+theta = probdata.fault_dip
+xcenter = probdata.fault_center
+ycenter = -probdata.fault_depth
+water_scaling = probdata.water_scaling
 
 xcl = xcenter - 0.5*fault_width
 xcr = xcenter + 0.5*fault_width
@@ -55,44 +39,40 @@ def mapc2p(xc,yc):
     xrot = xcenter + numpy.cos(theta)*(xc-xcenter) + numpy.sin(theta)*(yc-ycenter)
     yrot = ycenter - numpy.sin(theta)*(xc-xcenter) + numpy.cos(theta)*(yc-ycenter)
 
-    # Interpolate between rotated grid and cartesian grid near the fault,
+    # Interpolate between roated grid and cartesian grid near the fault,
     # using cartesian grid far away from fault.
     xp = xc
-    yp = yc
+    yp = numpy.where(yc > 0, yc*water_scaling, yc)
     xp = numpy.where(ls < tol, (tol-ls)/tol*xrot + ls/tol*xc, xp)
     yp = numpy.where(ls < tol, (tol-ls)/tol*yrot + ls/tol*yc, yp)
 
-    ## define grid that is mapped in y-coordinate only to line up with fault
-    #yrot = yc - numpy.sin(theta)*(xc-xcenter)
-    #
-    ## Interpolate between roated grid and cartesian grid near the fault,
-    ## using cartesian grid far away from fault.
-    #xp = xc
-    #yp = yc
-    #yp = numpy.where(ls < tol, (tol-ls)/tol*yrot + ls/tol*yc, yp)
-
     return xp,yp
 
-def test(mfault):
+def test(mfault,mwater):
 
     domain_depth = probdata.domain_depth
     domain_width = probdata.domain_width
+    fault_depth = probdata.fault_depth
+    water_depth = probdata.water_depth
 
     # num of cells here determined in an identical fashion to that in setrun.py
     # additional comments can be found there
     dx = fault_width/mfault
-    num_cells_above = numpy.rint(fault_depth/dx)
-    dy = fault_depth/num_cells_above
+    mfault_to_floor = numpy.rint(fault_depth/dx)
+    dyg = fault_depth/mfault_to_floor
+    mbelow_floor = int(numpy.ceil(domain_depth/dy))
     mx = int(numpy.ceil(domain_width/dx)) # mx
-    my = int(numpy.ceil(domain_depth/dy)) # my
+    my = mbelow_floor + mwater # my
     mr = mx - mfault
 
     x = linspace(xcenter-0.5*fault_width - numpy.floor(mr/2.0)*dx, xcenter+0.5*fault_width + numpy.ceil(mr/2.0)*dx, mx+1)
-    y = linspace(-my*dy, 0.0, my+1)
+    y = linspace(-mbelow_floor*dy, mwater*dy, my+1)
     xc,yc = meshgrid(x,y)
     xp,yp = mapc2p(xc,yc)
     figure()
     plot(xp,yp,'k-')
     plot(xp.T,yp.T,'k-')
-    plot((xp1,xp2),(yp1,yp2),'-g')
+    plot((xp1,xp2),(yp1,yp2),'-g', linewidth=2.0)
+    plot(x,0*x,'-b', linewidth=2.0)
+
     axis('scaled')

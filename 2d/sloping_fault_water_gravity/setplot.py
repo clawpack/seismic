@@ -10,40 +10,26 @@ function setplot is called to set the plot parameters.
 import numpy as np
 from mapc2p import mapc2p
 from clawpack.clawutil.data import ClawData
-import clawpack.seismic.dtopotools_horiz_okada as dtopotools
-reload(dtopotools)
 cscale = 8 # scale color limits
 
 probdata = ClawData()
 probdata.read('setprob.data',force=True)
 
-column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
-fault = dtopotools.Fault(coordinate_specification='top center')
-fault.read('fault.data',column_map=column_map,skiprows=4)
+width = probdata.fault_width
+theta = probdata.fault_dip
+xcenter = probdata.fault_center
+ycenter = -probdata.fault_depth
 
-fault_width = 0.0
-for subfault in fault.subfaults:
-    fault_width += subfault.width
-
-subfaultL = fault.subfaults[0]
-subfaultR = fault.subfaults[-1]
-theta = subfaultL.dip/180.0*np.pi
-fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
-            + np.sin(theta)*subfaultR.width)
-fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
-            + np.cos(theta)*subfaultR.width)
-
-xcenter = fault_center
-ycenter = -fault_depth
-
-xp1 = xcenter - 0.5*fault_width*np.cos(theta)
-xp2 = xcenter + 0.5*fault_width*np.cos(theta)
-yp1 = ycenter + 0.5*fault_width*np.sin(theta)
-yp2 = ycenter - 0.5*fault_width*np.sin(theta)
+xp1 = xcenter - 0.5*width*np.cos(theta)
+xp2 = xcenter + 0.5*width*np.cos(theta)
+yp1 = ycenter + 0.5*width*np.sin(theta)
+yp2 = ycenter - 0.5*width*np.sin(theta)
 
 xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
-ylimits = [-probdata.domain_depth,0.0]
+ylimits = [-probdata.domain_depth,probdata.water_depth]
+
+xlimitsW = [xcenter-width,xcenter+width]
+ylimitsW = [-probdata.water_depth,probdata.water_depth]
 
 #--------------------------
 def setplot(plotdata):
@@ -61,12 +47,14 @@ def setplot(plotdata):
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
     plotdata.format = 'binary'
+
     def plot_interfaces(current_data):
-        from pylab import linspace, plot, sin, pi
+        from pylab import linspace, plot
         xl = linspace(xp1,xp2,100)
         yl = linspace(yp1,yp2,100)
-        #yl = -8e3 - sin(10*pi/180.)*xl
-        plot(xl,yl,'k')
+        plot(xl,yl,'g')
+        xl = linspace(xlimits[0],xlimits[1],1000)
+        plot(xl,0.0*xl,'b')
 
 
     def sigmatr(current_data):
@@ -168,7 +156,7 @@ def setplot(plotdata):
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = 3
+    plotitem.plot_var = 4
     plotitem.pcolor_cmap = colormaps.blue_white_red
     plotitem.pcolor_cmin = -0.1
     plotitem.pcolor_cmax = 0.1
@@ -295,6 +283,51 @@ def setplot(plotdata):
     plotitem.MappedGrid = True
     plotitem.mapc2p = mapc2p
 
+    plotfigure = plotdata.new_plotfigure(name='trace (water)', figno=5000)
+    plotfigure.kwargs = {'figsize':(10,8)}
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(211)'
+    plotaxes.xlimits = xlimitsW
+    plotaxes.ylimits = ylimitsW
+    plotaxes.title = '-trace(sigma)'
+    plotaxes.scaled = True
+    plotaxes.afteraxes = plot_interfaces
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = sigmatr
+    plotitem.pcolor_cmap = colormaps.blue_white_red
+    plotitem.pcolor_cmin = -1e6
+    plotitem.pcolor_cmax = 1e6
+    plotitem.add_colorbar = False
+    plotitem.amr_celledges_show = [0]
+    plotitem.amr_patchedges_show = [0]
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
+
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(212)'
+    plotaxes.xlimits = xlimitsW
+    plotaxes.ylimits = ylimitsW
+    plotaxes.title = 'y-velocity'
+    plotaxes.scaled = True
+    plotaxes.afteraxes = plot_interfaces
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = 4
+    plotitem.pcolor_cmap = colormaps.blue_white_red
+    plotitem.pcolor_cmin = -1e-1
+    plotitem.pcolor_cmax = 1e-1
+    plotitem.add_colorbar = False
+    plotitem.amr_celledges_show = [0]
+    plotitem.amr_patchedges_show = [0]
+    plotitem.MappedGrid = True
+    plotitem.mapc2p = mapc2p
 
 
     # Figure for grid cells
