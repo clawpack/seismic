@@ -673,6 +673,8 @@ class Fault(object):
                     setattr(new_subfault, param, defaults[param])
 
             new_subfault.convert_to_standard_units(self.input_units)
+            new_subfault.calculate_geometry()
+            new_subfault.scale_longitude = False
             self.subfaults.append(new_subfault)
 
 
@@ -1127,7 +1129,7 @@ class Fault(object):
     def plot_okada(self, axes=None, displacement='vertical', kwargs={}):
         if (self.dtopo is None):
 	    raise ValueError("Need to call create_dtopography before plot_okada")
-        
+
         if (displacement is 'vertical'):
             if axes is None:
                 from pylab import figure, subplot
@@ -1228,6 +1230,8 @@ class SubFault(object):
         r"""Longitude of the subfault based on *coordinate_specification*."""
         self.coordinate_specification = None
         r"""Specifies where the latitude, longitude and depth are measured from."""
+        self.scale_longitude = True
+        r"""True ==> scale delta longitude by cos(latitude)."""
 
         # default value for rigidity = shear modulus
         # Note that standard units for mu is now Pascals.
@@ -1356,10 +1360,14 @@ class SubFault(object):
         # Vector *up_dip* goes from bottom edge to top edge, in meters,
         # from point 2 to point 0 in the figure in the class docstring.
 
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(self.latitude * DEG2RAD)
+        else:
+            longitude_scale_factor = 1.
 
         up_dip = (-self.width * numpy.cos(self.dip * DEG2RAD)           \
                               * numpy.cos(self.strike * DEG2RAD)        \
-                              / (LAT2METER * numpy.cos(self.latitude * DEG2RAD)),
+                              / (LAT2METER * longitude_scale_factor),
                    self.width * numpy.cos(self.dip * DEG2RAD)           \
                               * numpy.sin(self.strike * DEG2RAD) / LAT2METER)
         if self.coordinate_specification == 'top center':
@@ -1396,8 +1404,13 @@ class SubFault(object):
         # Vector *strike* goes along the top edge from point 1 to point a
         # in the figure in the class docstring.
 
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(self._centers[2][1] * DEG2RAD)
+        else:
+            longitude_scale_factor = 1.
+
         up_strike = (0.5 * self.length * numpy.sin(self.strike * DEG2RAD) \
-           / (lat2meter * numpy.cos(self._centers[2][1] * DEG2RAD)),
+           / (lat2meter * longitude_scale_factor),
                      0.5 * self.length * numpy.cos(self.strike * DEG2RAD) \
            / lat2meter)
 
@@ -1481,7 +1494,12 @@ class SubFault(object):
 
         # Convert distance from (X,Y) to (x_bottom,y_bottom) from degrees to
         # meters:
-        xx = LAT2METER * numpy.cos(DEG2RAD * Y) * (X - x_bottom)
+        if self.scale_longitude:
+            longitude_scale_factor = numpy.cos(Y * DEG2RAD)
+        else:
+            longitude_scale_factor = 1
+
+        xx = LAT2METER * longitude_scale_factor * (X - x_bottom)
         yy = LAT2METER * (Y - y_bottom)
 
 
@@ -2101,6 +2119,7 @@ class SubdividedPlaneFault(Fault):
                 subfault.slip = slip
                 subfault.coordinate_specification = \
                         base_subfault.coordinate_specification
+                subfault.scale_longitude = base_subfault.scale_longitude
                 subfault.mu = base_subfault.mu
 
                 self.subfaults.append(subfault)

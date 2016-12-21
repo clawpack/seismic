@@ -8,7 +8,7 @@ that will be read in by the Fortran code.
 
 import os
 import numpy as np
-import clawpack.seismic.dtopotools_horiz_okada as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 reload(dtopotools)
 
 #------------------------------
@@ -78,7 +78,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells:
-    num_cells_fault = 10
+    num_cells_fault = 5
     dx = fault_width/num_cells_fault
 
     # determine cell number and set computational boundaries
@@ -146,7 +146,7 @@ def setrun(claw_pkg='amrclaw'):
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
         clawdata.num_output_times = 50
-        clawdata.tfinal = 100.0
+        clawdata.tfinal = 50.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -295,7 +295,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 1
+    clawdata.checkpt_style = 2
 
     if clawdata.checkpt_style == 0:
       # Do not checkpoint at all
@@ -307,7 +307,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [0.1,0.15]
+      clawdata.checkpt_times = [1.0]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)

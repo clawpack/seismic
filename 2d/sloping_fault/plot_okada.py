@@ -1,6 +1,6 @@
 from pylab import *
 from clawpack.clawutil.data import ClawData
-import dtopotools_horiz_okada_and_1d as dtopotools
+import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 reload(dtopotools)
 fault = dtopotools.Fault()
 fault.subfaults = []
