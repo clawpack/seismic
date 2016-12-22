@@ -12,11 +12,11 @@ CLAWMAKE = $(CLAW)/clawutil/src/Makefile.common
 # Adjust these variables if desired:
 # ----------------------------------
 
-CLAW_PKG = amrclaw                  # Clawpack package to use
-EXE = xamr                          # Executable to create
+CLAW_PKG = classic                  # Clawpack package to use
+EXE = xclaw                         # Executable to create
 SETRUN_FILE = setrun.py             # File containing function to make data
 OUTDIR = _output                    # Directory for output
-SETPLOT_FILE = setplot_surface.py   # File containing function to set plots
+SETPLOT_FILE = setplot.py           # File containing function to set plots
 PLOTDIR = _plots                    # Directory for plots
 
 OVERWRITE ?= True                   # False ==> make a copy of OUTDIR first
@@ -25,43 +25,39 @@ RESTART ?= False                    # Should = clawdata.restart in setrun
 # Environment variable FC should be set to fortran compiler, e.g. gfortran
 
 # Compiler flags can be specified here or set as an environment variable
-FFLAGS ?= -fopenmp
+FFLAGS ?=
 
 # ---------------------------------
-# package sources for this program:
+# List of sources for this program:
 # ---------------------------------
 
-AMRLIB = $(CLAW)/amrclaw/src/2d
-SEISLIB = $(CLAW)/seismic/src/2d
-include $(AMRLIB)/Makefile.amr_2d
-
-# ---------------------------------------
-# package sources specifically to exclude
-# (i.e. if a custom replacement source
-#  under a different name is provided)
-# ---------------------------------------
-
-EXCLUDE_MODULES = \
-
-EXCLUDE_SOURCES = \
-
-# ----------------------------------------
-# List of custom sources for this program:
-# ----------------------------------------
+GEOLIB = ../../geoclaw_src/1d
 
 MODULES = \
-  $(SEISLIB)/fault_module.f90
+  $(GEOLIB)/gauges_module.f90 \
+  $(GEOLIB)/geoclaw_module.f90 \
+  setprob_module.f90 \
+  dtopo_module.f90 \
 
 SOURCES = \
   qinit.f \
+  setaux.f \
+  src1.f90 \
   setprob.f90 \
-  bc2amr.f \
-  setaux.f90 \
-  mapc2p.f90 \
-  b4step2.f90 \
-  $(CLAW)/seismic/src/rp/rpn2_vc_elasticity_mapped_fault.f90 \
-  $(CLAW)/seismic/src/rp/rpt2_vc_elasticity_mapped_fault.f90 \
+  claw1ez.f \
+  b4step1.f90 \
+  $(CLAW)/riemann/src/geoclaw_riemann_utils.f \
+  $(GEOLIB)/rp1_geoclaw.f90 \
+  $(GEOLIB)/bc1.f \
+  $(GEOLIB)/out1.f \
+  $(CLAW)/classic/src/1d/driver.f90 \
+  $(CLAW)/classic/src/1d/inlinelimiter.f90 \
+  $(CLAW)/classic/src/1d/step1.f90 \
+  $(CLAW)/classic/src/1d/claw1.f \
+  $(CLAW)/classic/src/1d/copyq1.f \
+  $(CLAW)/classic/src/1d/opendatafile.f
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
+
