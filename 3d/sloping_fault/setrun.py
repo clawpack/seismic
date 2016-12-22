@@ -38,15 +38,15 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    probdata.add_param('domain_depth', 200e3, 'depth of domain')
-    probdata.add_param('domain_width', 400e3, 'width of domain (in x direction)')
-    probdata.add_param('domain_length', 400e3, 'length of domain (in y direction)')
+    probdata.add_param('domain_depth', 300e3, 'depth of domain')
+    probdata.add_param('domain_width', 600e3, 'width of domain (in x direction)')
+    probdata.add_param('domain_length', 600e3, 'length of domain (in y direction)')
     probdata.add_param('fault_xcenter', 25e3, 'centroid of fault (x)')
     probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
-    probdata.add_param('fault_width', 50735, 'width of fault (in x direction)')
-    probdata.add_param('fault_length', 50735, 'width of fault (in y direction)')
-    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
-    probdata.add_param('fault_depth', 19.3e3, 'depth of fault centroid')
+    probdata.add_param('fault_width', 50e3, 'width of fault (in x direction)')
+    probdata.add_param('fault_length', 50e3, 'width of fault (in y direction)')
+    probdata.add_param('fault_dip', 0.2, 'angle of fault dip')
+    probdata.add_param('fault_depth', 20e3, 'depth of fault centroid')
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -63,7 +63,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Number of grid cells
     num_cells_fault_width = 10
-    num_cells_fault_length = 10
+    num_cells_fault_length = 5
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
     ## specify dz using dx,dy
@@ -126,7 +126,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify at what times the results should be written to fort.q files.
     # Note that the time integration stops after the final output time.
 
-    clawdata.output_style = 1
+    clawdata.output_style = 2
 
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
@@ -138,7 +138,7 @@ def setrun(claw_pkg='amrclaw'):
     elif clawdata.output_style == 2:
         # Specify a list or numpy array of output times:
         # Include t0 if you want output at the initial time.
-        clawdata.output_times =  [48.0, 65.0, 90.0, 135.0, 180.0]
+        clawdata.output_times =  [0.0, 4.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0]
 
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
@@ -256,7 +256,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 0
+    clawdata.checkpt_style = 2
 
     if clawdata.checkpt_style == 0:
       # Do not checkpoint at all
@@ -268,7 +268,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [0.1,0.15]
+      clawdata.checkpt_times = [1.0]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)
@@ -289,26 +289,20 @@ def setrun(claw_pkg='amrclaw'):
         for y in ygauges:
             gauges.append([gcount, x, y, clawdata.upper[2]-1, 0.0, 1e9])
             gcount = gcount + 1
-    # above fault place
-    #xgauges = np.linspace(probdata.fault_xcenter-0.5*probdata.fault_width,probdata.fault_xcenter+0.5*probdata.fault_width,100)
-    #ygauges = np.linspace(probdata.fault_ycenter-0.5*probdata.fault_length,probdata.fault_ycenter+0.5*probdata.fault_length,100)
-    #for x in xgauges:
-    #    for y in ygauges:
-    #        gauges.append([gcount, x, y, -probdata.fault_depth+1, 0.0, 1e9])
-    #        gcount = gcount + 1
+    
     # ---------------
     # AMR parameters:
     # ---------------
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 2
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2]
-    amrdata.refinement_ratios_y = [4,4,2]
-    amrdata.refinement_ratios_z = [4,4,2]
-    amrdata.refinement_ratios_t = [4,4,2]
+    amrdata.refinement_ratios_x = [2,2,2,2]
+    amrdata.refinement_ratios_y = [2,2,2,2]
+    amrdata.refinement_ratios_z = [2,2,2,2]
+    amrdata.refinement_ratios_t = [2,2,2,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
@@ -347,30 +341,26 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
-    xbuffer = 0.5*probdata.fault_width
-    ybuffer = 0.5*probdata.fault_length
-    zbuffer = min(xbuffer,ybuffer)
-    xcb = [probdata.fault_xcenter-xbuffer, probdata.fault_xcenter+xbuffer]
-    ycb = [probdata.fault_ycenter-ybuffer, probdata.fault_ycenter+ybuffer]
+    zbuffer = dz
+    xcb = [probdata.fault_xcenter-0.5*probdata.fault_width,probdata.fault_ycenter+0.5*probdata.fault_width]
+    ycb = [probdata.fault_ycenter-0.5*probdata.fault_length,probdata.fault_ycenter+0.5*probdata.fault_length]
 
     # high-resolution region to surround the fault during slip
-    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 0,1,
-                    xcb[0],xcb[1], ycb[0],ycb[1],
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 
+                    0,1,
+                    xcb[0],xcb[1],
+                    ycb[0],ycb[1],
                     -probdata.fault_depth-dz, -probdata.fault_depth+dz])
 
     # decreasing-resolution for cells further away from fault
     for j in range(amrdata.amr_levels_max-1):
-        regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
-                    xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
-                    ycb[0]-(j+1)*ybuffer,ycb[1]+(j+1)*ybuffer,
-                    -probdata.fault_depth-(j+1)*zbuffer,0.0])
+        regions.append([1,amrdata.amr_levels_max-j, 
+                    0,1e9,
+                    -1e9,1e9,
+                    -1e9,1e9,
+                    -2.0*probdata.fault_depth-j*zbuffer,0.0])
+
     regions.append([1,1, 0,1e9, -1.e9,1e9, -1e9,1e9,-1e9, 0.])
-
-#    regions.append([1,2, 0,1e9, -90e3, 140e3, -90e3, 140e3, -150e3, 0.])
-#    regions.append([1,3, 0,1e9, -75e3, 125e3, -75e3, 125e3, -80e3, 0.])
-#    regions.append([1,2, 0,1e9, -50e3, 105e3, -50e3, 105e3, -70e3, 0.])
-
-
 
     #  ----- For developers -----
     # Toggle debugging print statements:

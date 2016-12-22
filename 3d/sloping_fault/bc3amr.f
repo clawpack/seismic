@@ -296,7 +296,7 @@ c     # periodic:   handled elsewhere in amr
       go to 499
 
   430 continue
-c     # solid wall (assumes 3'rd component is velocity or momentum in y):
+c     # solid wall (assumes 7'th component is velocity or momentum in y):
       do 435 m=1,meqn
          do 435 j=jbeg,ncol
             do 435 i=1,nrow
@@ -307,7 +307,7 @@ c     # negate the normal velocity:
       do 436 j=jbeg,ncol
          do 436 i=1,nrow
             do 436 k = 1,nfil
-               val(3,i,j,k) = -val(3,i,j,k)
+               val(7,i,j,k) = -val(7,i,j,k)
   436       continue
       go to 499
 
