@@ -63,22 +63,28 @@ def setrun(claw_pkg='amrclaw'):
     # Number of grid cells:
     num_cells_fault = 10
     dx = probdata.fault_width/num_cells_fault
-    ## specify dy using dx
-    num_cells_fault_to_floor = np.rint(probdata.fault_depth/dx)
-    dy = probdata.fault_depth/num_cells_fault_to_floor
-    num_cells_water = int(np.ceil(probdata.water_depth/dy))
-    num_cells_below_floor = int(np.ceil(probdata.domain_depth)/dy)
-    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx)) # mx
-    clawdata.num_cells[1] = num_cells_below_floor + num_cells_water # my
 
-    # Lower and upper edges of computational domain:
-    ## note the size of domain is likely expanded here
-    num_cells_remain = clawdata.num_cells[0] - num_cells_fault
-    clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - np.floor(num_cells_remain/2.0)*dx   # xlower
-    clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + np.ceil(num_cells_remain/2.0)*dx     # xupper
-    clawdata.lower[1] = -num_cells_below_floor*dy       # ylower
-    clawdata.upper[1] = num_cells_water*dy          # yupper
+    # determine cell number and set computational boundaries
+    target_num_cells = np.rint(probdata.domain_width/dx)    # x direction
+    num_cells_below = np.rint((target_num_cells - num_cells_fault)/2.0)
+    num_cells_above = target_num_cells - num_cells_below - num_cells_fault
+    clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - num_cells_below*dx
+    clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + num_cells_above*dx
+    clawdata.num_cells[0] = int(num_cells_below + num_cells_fault + num_cells_above)
+
+    num_cells_above_fault = np.rint(probdata.fault_depth/dx) # y direction
+    dy = probdata.fault_depth/num_cells_above_fault
+    num_cells_water = np.ceil(probdata.water_depth/dy)
+    target_num_cells_below_floor = np.rint(probdata.domain_depth/dy)
+    num_cells_below_fault = target_num_cells_below_floor - num_cells_above_fault
+    clawdata.lower[1] = -probdata.fault_depth - num_cells_below_fault*dy
+    clawdata.upper[1] = num_cells_water*dy
+    clawdata.num_cells[1] = int(num_cells_below_fault + num_cells_above_fault + num_cells_water)
     probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
+
+    # Note adjustments in computational domain size
+    probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
+    probdata.domain_depth = clawdata.upper[1] - clawdata.lower[1]
 
     # ---------------
     # Size of system:

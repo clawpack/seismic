@@ -109,7 +109,7 @@ def make_dtopo(xtopo, times):
     from scipy.interpolate import interp1d
 
     # custom dtopotools includes DTopography1d
-    import dtopotools_horiz_okada_and_1d as dtopotools
+    import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 
     goffset = 0  # gauges at top surface
     ngauges = 100

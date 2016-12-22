@@ -32,11 +32,12 @@ FFLAGS ?= -fopenmp
 # ---------------------------------
 
 AMRLIB = $(CLAW)/amrclaw/src/2d
+SEISLIB = $(CLAW)/seismic/src/2d
 include $(AMRLIB)/Makefile.amr_2d
 
 # ---------------------------------------
 # package sources specifically to exclude
-# (i.e. if a custom replacement source 
+# (i.e. if a custom replacement source
 #  under a different name is provided)
 # ---------------------------------------
 
@@ -49,6 +50,7 @@ EXCLUDE_SOURCES = \
 # ----------------------------------------
 
 MODULES = \
+  $(SEISLIB)/fault_module.f90
 
 SOURCES = \
   qinit.f \
@@ -57,10 +59,9 @@ SOURCES = \
   setaux.f90 \
   mapc2p.f90 \
   b4step2.f90 \
-  ../rp/rpn2_vc_elasticity_mapped_fault.f90 \
-  ../rp/rpt2_vc_elasticity_mapped.f90 
+  $(CLAW)/seismic/src/rp/rpn2_vc_elasticity_mapped_fault.f90 \
+  $(CLAW)/seismic/src/rp/rpt2_vc_elasticity_mapped_fault.f90 \
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
-

@@ -13,10 +13,6 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
     real(kind=8) :: xccorn(4),yccorn(4),xpcorn(4),ypcorn(4)
     real(kind=8) :: norm, xn, yn, areap, b2c
 
-    real (kind=8) :: center(2), theta, xcb(2), mindepth
-    common /fault/  center, theta, xcb, mindepth
-
-
 ! c     #   (lambda = nu*E/((1+nu)(1-2nu))), E=young modulus, nu=poisson ration
 ! c     #   aux(1,i,j) is the density of the elastic material
 ! c     #   aux(2,i,j) is the lambda Lame parameter for elasticity
@@ -110,15 +106,8 @@ subroutine setaux(mbc,mx,my,xlower,ylower,dx,dy,maux,aux)
           areap = 0.5*dabs(areap)
           aux(12,i,j) = areap/(dx*dy)
 
-          ! set slip:
-          xccorn(1) = xlower + float(i-1)*dx
-          yccorn(1) = ylower + float(j-1)*dy
-          if ((abs(yccorn(1)-center(2)) < 0.5d0*dy) .and. &
-              (xccorn(1) >= xcb(1)) .and. (xccorn(1) <= xcb(2))) then
-                aux(13,i,j) = exp(-((xccorn(1)-center(1))/(center(1)-xcb(1)))**2)
-            else
-                aux(13,i,j) = 0.d0
-            endif
+          ! Initialize slip to zero
+          aux(13,i,j) = 0.d0
 
         end do
       end do
