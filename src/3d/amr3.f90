@@ -475,7 +475,7 @@ program amr3
         ! Call user routine to set up problem parameters:
         call setprob()
 
-        call set_gauges(rest, nvar)
+        call set_gauges(rest, nvar,naux)
         call set_regions()
         call set_slices()
     else
@@ -486,7 +486,7 @@ program amr3
 
         ! Call user routine to set up problem parameters:
         call setprob()
-        call set_gauges(rest, nvar)
+        call set_gauges(rest, nvar,naux)
         call set_regions()
         call set_slices()
 
