@@ -6,7 +6,11 @@
 
     implicit none
 
-    call load_fault('fault.data')
+    character*12 :: fname
+
+    fname = 'fault.data'
+
+    call load_fault(fname)
 
     return
     end
