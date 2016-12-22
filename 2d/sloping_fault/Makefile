@@ -37,7 +37,7 @@ include $(AMRLIB)/Makefile.amr_2d
 
 # ---------------------------------------
 # package sources specifically to exclude
-# (i.e. if a custom replacement source 
+# (i.e. if a custom replacement source
 #  under a different name is provided)
 # ---------------------------------------
 
@@ -60,9 +60,8 @@ SOURCES = \
   mapc2p.f90 \
   b4step2.f90 \
   $(CLAW)/seismic/src/rp/rpn2_vc_elasticity_mapped_fault.f90 \
-  $(CLAW)/seismic/src/rp/rpt2_vc_elasticity_mapped.f90 
+  $(CLAW)/seismic/src/rp/rpt2_vc_elasticity_mapped_fault.f90 \
 
 #-------------------------------------------------------------------
 # Include Makefile containing standard definitions and make options:
 include $(CLAWMAKE)
-

@@ -78,7 +78,7 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_dim = num_dim
 
     # Number of grid cells:
-    num_cells_fault = 5
+    num_cells_fault = 10
     dx = fault_width/num_cells_fault
 
     # determine cell number and set computational boundaries
@@ -146,7 +146,7 @@ def setrun(claw_pkg='amrclaw'):
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
         clawdata.num_output_times = 50
-        clawdata.tfinal = 50.0
+        clawdata.tfinal = 100.0
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
@@ -270,7 +270,8 @@ def setrun(claw_pkg='amrclaw'):
     gauges = rundata.gaugedata.gauges
     # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
     # top edge:
-    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, 100)
+    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1,
+                            np.rint(probdata.domain_width/1e3))
     for gaugeno,x in enumerate(xgauges):
         gauges.append([gaugeno,x,clawdata.upper[1]-1,0,1e10])
     ## bottom edge:
@@ -322,13 +323,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 4
+    amrdata.amr_levels_max = 6
 
     # List of refinement ratios at each level (length at least
     # amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2]
-    amrdata.refinement_ratios_y = [4,4,2]
-    amrdata.refinement_ratios_t = [4,4,2]
+    amrdata.refinement_ratios_x = [2,2,2,2,2]
+    amrdata.refinement_ratios_y = [2,2,2,2,2]
+    amrdata.refinement_ratios_t = [2,2,2,2,2]
 
 
     # Specify type of each aux variable in amrdata.auxtype.
@@ -347,7 +348,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # Flag for refinement using routine flag2refine:
     amrdata.flag2refine = True      # use this?
-    amrdata.flag2refine_tol = 0.0001  # tolerance used in this routine
+    amrdata.flag2refine_tol = 1.0e-4 # tolerance used in this routine
     # User can modify flag2refine to change the criterion for flagging.
     # Default: check maximum absolute difference of first component of q
     # between a cell and each of its neighbors.
@@ -375,19 +376,19 @@ def setrun(claw_pkg='amrclaw'):
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
-    xbuffer = 0.5*fault_width
-    ybuffer = xbuffer
-    xcb = [fault_center-xbuffer,fault_center+xbuffer]
+    ybuffer = dy
 
     # high-resolution region to surround the fault during slip
     regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max,
-                    0,rupture_rise_time, xcb[0],xcb[1],
+                    0,rupture_rise_time,
+                    fault_center-0.5*fault_width,fault_center+0.5*fault_width,
                     -fault_depth-dx, -fault_depth+dx])
 
     for j in range(amrdata.amr_levels_max-1):
-        regions.append([1,amrdata.amr_levels_max-j, 0,1e9,
-                    xcb[0]-(j+1)*xbuffer,xcb[1]+(j+1)*xbuffer,
-                    -fault_depth-(j+1)*ybuffer,0.0])
+        regions.append([1,amrdata.amr_levels_max-j,
+                    0,1e9,
+                    -1e9,1e9,
+                    -2.0*fault_depth-j*ybuffer,0.0])
 
     regions.append([1,1, 0,1e9, -1.e9,1.e9, -1.e9,0.0])
     #  ----- For developers -----

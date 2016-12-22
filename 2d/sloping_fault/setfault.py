@@ -5,9 +5,9 @@ reload(dtopotools)
 fault = dtopotools.Fault(coordinate_specification='top center')
 fault.subfaults = []
 
-width = 50735.0
-theta = 0.17
-fault_centroid = [25000.0,-19300.0]
+width = 50000.0
+theta = 0.20
+fault_centroid = [25000.0,-20000.0]
 slip = 1.0
 mu = 3e10
 rupture_time = 0.0

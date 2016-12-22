@@ -36,6 +36,7 @@ SEISLIB = $(CLAW)/seismic/src/3d
 #include $(AMRLIB)/Makefile.amr_3d
 
 MODULES = \
+  $(CLAW)/classic/src/utility_module.f90 \
   $(SEISLIB)/amr_module.f90 \
   $(SEISLIB)/regions_module.f90 \
   $(SEISLIB)/slices_module.f90 \
