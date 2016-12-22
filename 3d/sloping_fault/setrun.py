@@ -45,7 +45,7 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
     probdata.add_param('fault_width', 50e3, 'width of fault (in x direction)')
     probdata.add_param('fault_length', 50e3, 'width of fault (in y direction)')
-    probdata.add_param('fault_dip', 0.2, 'angle of fault dip')
+    probdata.add_param('fault_dip', 0.0, 'angle of fault dip')
     probdata.add_param('fault_depth', 20e3, 'depth of fault centroid')
 
     #------------------------------------------------------------------
@@ -126,13 +126,13 @@ def setrun(claw_pkg='amrclaw'):
     # Specify at what times the results should be written to fort.q files.
     # Note that the time integration stops after the final output time.
 
-    clawdata.output_style = 2
+    clawdata.output_style = 1
 
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
         clawdata.num_output_times = 50
-        clawdata.tfinal = 100.0 #6e-5 #0.0001800000 #0.00003
+        clawdata.tfinal = 50.0 #6e-5 #0.0001800000 #0.00003
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:

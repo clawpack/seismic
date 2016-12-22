@@ -50,9 +50,9 @@ SOURCES = \
   ./setaux.f90 \
   ./setaux1d.f90 \
   ./setprob.f90 \
-  ../rp/rpn3_vc_elasticity_mapped_Yinvariant_fault.f90 \
-  ../rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
-  ../rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
+  $(CLAW)/seismic/src/rp/rpn3_vc_elasticity_mapped_Yinvariant_fault.f90 \
+  $(CLAW)/seismic/src/rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
+  $(CLAW)/seismic/src/rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
   $(SEISLIB)/amr3.f90 \
   $(SEISLIB)/flag2refine.f90 \
   $(SEISLIB)/init_alloc.f90 \

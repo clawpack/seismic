@@ -9,25 +9,8 @@ function setplot is called to set the plot parameters.
 
 import numpy as np
 import os, shutil
-from mapc2p import mapc2p
+from mapping import Mapping
 from clawpack.clawutil.data import ClawData
-cscale = 8 # scale color limits
-
-probdata = ClawData()
-probdata.read('setprob.data',force=True)
-
-width = probdata.fault_width
-theta = probdata.fault_dip
-xcenter = probdata.fault_xcenter
-zcenter = -probdata.fault_depth
-
-xp1 = xcenter - 0.5*width*np.cos(theta)
-xp2 = xcenter + 0.5*width*np.cos(theta)
-zp1 = zcenter + 0.5*width*np.sin(theta)
-zp2 = zcenter - 0.5*width*np.sin(theta)
-
-xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
-zlimits = [-probdata.domain_depth,0.0]
 
 #--------------------------
 def setplot(plotdata):
@@ -47,23 +30,48 @@ def setplot(plotdata):
 
     os.chdir('..')
 
+    mapping = Mapping()
+
+    xp1 = mapping.xp1
+    xp2 = mapping.xp2
+    zp1 = mapping.zp1
+    zp2 = mapping.zp2
+    xcenter = mapping.xcenter
+
+    if (slice_number is 2):
+        mapping.set_slice_xval(0.0)
+    
+    probdata = ClawData()
+    probdata.read('setprob.data',force=True)
 
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
 
-    def plot_interfaces(current_data):
-        from pylab import linspace, plot, sin, pi
+    def mapc2p(x1,x2):
+        if (slice_number is 1):
+            xp1,xp2 = mapping.mapc2p_xy(x1,x2)
+        if (slice_number is 2):
+            xp1,xp2 = mapping.mapc2p_yz(x1,x2)
+        elif (slice_number is 3):
+            xp1,xp2 = mapping.mapc2p_xz(x1,x2)
+       
+        return xp1,xp2
+
+    def plot_fault(current_data):
+        if (slice_number is 3):
+            plot_fault_xz(current_data)
+
+    def plot_fault_xz(current_data):
+        from pylab import linspace, plot
         xl = linspace(xp1,xp2,100)
         zl = linspace(zp1,zp2,100)
-        #yl = -8e3 - sin(10*pi/180.)*xl
         plot(xl,zl,'k')
-
 
     def sigmatr(current_data):
         # return -trace(sigma)
         q = current_data.q
-        return -(q[0,:,:] + q[1,:,:])
+        return -(q[0,:,:] + q[1,:,:] + q[2,:,:])
 
     # Figure for trace(sigma)
     plotfigure = plotdata.new_plotfigure(name='trace', figno=1)
@@ -72,11 +80,11 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(211)'
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = zlimits
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
     plotaxes.title = '-trace(sigma)'
     plotaxes.scaled = True
-    plotaxes.afteraxes = plot_interfaces
+    plotaxes.afteraxes = plot_fault
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
@@ -93,11 +101,11 @@ def setplot(plotdata):
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(212)'
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = zlimits
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
     plotaxes.title = 'z-velocity'
     plotaxes.scaled = True
-    plotaxes.afteraxes = plot_interfaces
+    plotaxes.afteraxes = plot_fault
     
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
@@ -116,8 +124,8 @@ def setplot(plotdata):
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = xlimits
-    plotaxes.ylimits = zlimits
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
     plotaxes.title = 'Level 4 grid patches'
     plotaxes.scaled = True
 

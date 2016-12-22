@@ -60,10 +60,7 @@ subroutine setaux1d(ixyz,mbc,mx1,maxm,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux
           (xcb(1) <= x2val) .and. (x2val <= xcb(2)) .and. &
           (ycb(1) <= x3val) .and. (x3val <= ycb(2))) then
 
-        aux(6,i,iout) = exp(-( &
-                           ((x2val-center(1))/(center(1)-xcb(1)))**2 &
-                           + ((x3val-center(2))/(center(2)-ycb(1)))**2 &
-                           ))
+        aux(6,i,iout) = 1.d0
       else
         aux(6,i,iout) = 0.d0
       end if

@@ -37,8 +37,7 @@ subroutine setprob
     ycb(1) = center(2) - 0.5d0*length
     ycb(2) = center(2) + 0.5d0*length
 
-    mindepth = dmin1(dabs(center(3) - 0.5d0*width*dsin(theta)), &
-                      dabs(center(3) + 0.5d0*width*dsin(theta)))
+    mindepth = -center(3)
 
     return
 end
