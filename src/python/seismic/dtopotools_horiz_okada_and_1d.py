@@ -45,6 +45,14 @@ from clawpack.geoclaw.data import DEG2RAD, LAT2METER
 # Poisson ratio for Okada
 poisson = 0.25
 
+fault_column_list = ['mu','dip','width','depth','slip','rake','strike','length',
+                'longitude','latitude','rupture_time','rise_time']
+
+fault_column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
+            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
+
+
+
 # ==============================================================================
 #  Units dictionaries
 # ==============================================================================
@@ -612,8 +620,8 @@ class Fault(object):
                             "either for fault or for each subfault")
 
 
-    def read(self, path, column_map, coordinate_specification="centroid",
-                                     rupture_type="static", skiprows=0,
+    def read(self, path, column_map=fault_column_map, coordinate_specification="centroid",
+                                     rupture_type="static", skiprows=4,
                                      delimiter=None, input_units={}, defaults=None):
         r"""Read in subfault specification at *path*.
 
@@ -678,7 +686,7 @@ class Fault(object):
             self.subfaults.append(new_subfault)
 
 
-    def write(self, path, style=None, column_list=None, output_units={},
+    def write(self, path, style=None, column_list=fault_column_list, output_units={},
                     delimiter='  '):
         r"""
         Write subfault format file with one line for each subfault.
