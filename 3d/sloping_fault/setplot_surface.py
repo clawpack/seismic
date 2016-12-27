@@ -59,6 +59,7 @@ def setplot(plotdata):
     clevels = np.linspace(-okada_max,okada_max,10)
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
+    plotdata.format = 'binary'
 
     def plot_okada_contour(current_data):
         from pylab  import gca
