@@ -59,9 +59,9 @@ module amr_module
     integer, parameter :: iplane = 1
     integer, parameter :: jplane = 2
     integer, parameter :: kplane = 3
-    integer, parameter :: maxgr = 15000
+    integer, parameter :: maxgr = 30000
     integer, parameter :: maxlv = 10
-    integer, parameter :: maxcl = 15000
+    integer, parameter :: maxcl = 30000
 
     ! The max1d parameter should be changed if using OpenMP grid based 
     ! looping, suggest setting max1d = 32 for 3d 
@@ -78,7 +78,7 @@ module amr_module
     ! and on restarting.  note use of sentinel in listStart
 
     integer :: listOfGrids(maxgr),listStart(0:maxlv+1)
-    integer, parameter :: bndListSize = 8*maxgr
+    integer, parameter :: bndListSize = 20*maxgr
     integer :: bndList(bndListSize,2) ! guess size, average # nbors 6? manage as linnked list
 
     real(kind=8) hxposs(maxlv),hyposs(maxlv),hzposs(maxlv), &

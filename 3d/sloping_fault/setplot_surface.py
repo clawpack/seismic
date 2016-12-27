@@ -28,7 +28,7 @@ def setplot(plotdata):
     Output: a modified version of plotdata.
 
     """
-    slice_number = 2
+    slice_number = 1 # set to surface slice number
     os.chdir(plotdata.outdir)
     for filename in os.listdir('.'):
         if (filename.startswith('slice_%d' % slice_number)):
@@ -53,93 +53,81 @@ def setplot(plotdata):
     probdata.read(plotdata.outdir + '/setprob.data',force=True)
     xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
     ylimits = [ycenter-0.5*probdata.domain_length,ycenter+0.5*probdata.domain_length]
-    zlimits = [-probdata.domain_depth,0.0]
-
-    def plot_fault_xz(current_data):
-        from pylab import linspace, plot
-        xl = linspace(xp1,xp2,100)
-        zl = linspace(zp1,zp2,100)
-        plot(xl,zl,'k')
-
-    if (slice_number is 1):
-        x1limits = xlimits
-        x2limits = ylimits
-        mapc2p = mapping.mapc2p_xy
-        plot_fault = None
-    elif (slice_number is 2):
-        x1limits = ylimits
-        x2limits = zlimits
-        mapping.set_slice_xval(0.0)
-        mapc2p = mapping.mapc2p_yz
-        plot_fault = None
-    elif (slice_number is 3):
-        x1limits = xlimits
-        x2limits = zlimits
-        mapc2p = mapping.mapc2p_xz
-        plot_fault = plot_fault_xz
+    clevels = np.linspace(-0.5,0.5,21)
 
     from clawpack.visclaw import colormaps
 
+    xc = np.linspace(-150e3,200e3,350)
+    yc = np.linspace(-87.5e3,87.5e3,175)
+    fault.create_dtopography(xc/111.e3,yc/111.e3,[1.0])
+
     plotdata.clearfigures()  # clear any old figures,axes,items data
 
-    def sigmatr(current_data):
-        # return -trace(sigma)
-        q = current_data.q
-        return -(q[0,:,:] + q[1,:,:] + q[2,:,:])
+    def plot_okada_contour(current_data):
+        from pylab  import gca
+        
+        kwargs = {'levels':clevels,'colors':'g','linewidths':2}
+        ax = gca()
+        fault.plot_okada_contour(axes=ax,kwargs=kwargs)
 
-    # Figure for trace(sigma)
+    def plot_okada(current_data):
+        from pylab import gca
+
+        kwargs = {'cmap':'seismic','vmin':clevels[0],'vmax':clevels[-1]}
+        ax = gca()
+        fault.plot_okada(axes=ax,dim=2,kwargs=kwargs)
+        kwargs = {'levels':clevels,'colors':'g','linewidths':2}
+        fault.plot_okada_contour(axes=ax,kwargs=kwargs)
+
+    # Figure for vertical displacement
     plotfigure = plotdata.new_plotfigure(name='trace', figno=1)
     plotfigure.kwargs = {'figsize':(10,8)}
 
-    # Set up for axes in this figure:
+    # Set axes for numerical solution:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(211)'
-    plotaxes.xlimits = x1limits
-    plotaxes.ylimits = x2limits
-    plotaxes.title = '-trace(sigma)'
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
+    plotaxes.title = 'Numerical solution'
     plotaxes.scaled = True
-    plotaxes.afteraxes = plot_fault
+    plotaxes.afteraxes = plot_okada_contour
 
     # Set up for item on these axes:
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = sigmatr
+    plotitem.plot_var = 9
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -1e6
-    plotitem.pcolor_cmax = 1e6
+    plotitem.pcolor_cmin = -0.5
+    plotitem.pcolor_cmax = 0.5
     plotitem.add_colorbar = False
     plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
 
-    # Set up for axes in this figure:
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_contour')
+    plotitem.plot_var = 9
+    plotitem.contour_colors = 'k'
+    plotitem.contour_levels = clevels
+    plotitem.amr_contour_show = [0,0,0,1]
+    plotitem.amr_celledges_show = [0]
+    plotitem.amr_patchedges_show = [0]
+
+    # Set axes for Okada solution:
     plotaxes = plotfigure.new_plotaxes()
     plotaxes.axescmd = 'subplot(212)'
-    plotaxes.xlimits = x1limits
-    plotaxes.ylimits = x2limits
-    plotaxes.title = 'x-velocity'
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
+    plotaxes.title_with_t = False
+    plotaxes.title = 'Okada solution'
     plotaxes.scaled = True
-    plotaxes.afteraxes = plot_fault
-    
-    # Set up for item on these axes:
-    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
-    plotitem.plot_var = 6
-    plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -1e-1
-    plotitem.pcolor_cmax = 1e-1
-    plotitem.add_colorbar = False
-    plotitem.amr_celledges_show = [0]
-    plotitem.amr_patchedges_show = [0]
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
-
+    plotaxes.afteraxes = plot_okada
+ 
     # Figure for grid cells
     plotfigure = plotdata.new_plotfigure(name='cells', figno=2)
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-    plotaxes.xlimits = x1limits
-    plotaxes.ylimits = x2limits
+    plotaxes.xlimits = xlimits
+    plotaxes.ylimits = ylimits
     plotaxes.title = 'Level 4 grid patches'
     plotaxes.scaled = True
 
@@ -148,8 +136,6 @@ def setplot(plotdata):
     plotitem.amr_patch_bgcolor = ['#ffeeee', '#eeeeff', '#eeffee', '#ffffff']
     plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0,0,0,1]
-    plotitem.MappedGrid = True
-    plotitem.mapc2p = mapc2p
 
     # Parameters used only when creating html and/or latex hardcopy
     # e.g., via clawpack.visclaw.frametools.printframes:

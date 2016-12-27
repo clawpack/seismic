@@ -50,6 +50,7 @@ SOURCES = \
   ./setaux.f90 \
   ./setaux1d.f90 \
   ./setprob.f90 \
+  ./src3.f90 \
   $(CLAW)/seismic/src/rp/rpn3_vc_elasticity_mapped_Yinvariant_fault.f90 \
   $(CLAW)/seismic/src/rp/rpt3_vc_elasticity_mapped_Yinvariant.f90 \
   $(CLAW)/seismic/src/rp/rptt3_vc_elasticity_mapped_Yinvariant.f90 \
@@ -62,7 +63,6 @@ SOURCES = \
   $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/qad.f \
-  $(AMRLIB)/src3.f90 \
   $(AMRLIB)/src1d.f90 \
   $(AMRLIB)/bound.f \
   $(AMRLIB)/stepgrid_dimSplit.f \

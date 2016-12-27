@@ -40,11 +40,11 @@ def setrun(claw_pkg='amrclaw'):
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
     probdata.add_param('domain_depth', 300e3, 'depth of domain')
     probdata.add_param('domain_width', 600e3, 'width of domain (in x direction)')
-    probdata.add_param('domain_length', 600e3, 'length of domain (in y direction)')
+    probdata.add_param('domain_length', 300e3, 'length of domain (in y direction)')
     probdata.add_param('fault_xcenter', 25e3, 'centroid of fault (x)')
     probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
     probdata.add_param('fault_width', 50e3, 'width of fault (in x direction)')
-    probdata.add_param('fault_length', 50e3, 'width of fault (in y direction)')
+    probdata.add_param('fault_length', 25e3, 'width of fault (in y direction)')
     probdata.add_param('fault_dip', 0.0, 'angle of fault dip')
     probdata.add_param('fault_depth', 20e3, 'depth of fault centroid')
 
@@ -66,23 +66,37 @@ def setrun(claw_pkg='amrclaw'):
     num_cells_fault_length = 5
     dx = probdata.fault_width/num_cells_fault_width
     dy = probdata.fault_length/num_cells_fault_length
-    ## specify dz using dx,dy
-    num_cells_above = np.rint(probdata.fault_depth/min(dx,dy))
-    dz = probdata.fault_depth/num_cells_above
-    clawdata.num_cells[0] = int(np.ceil(probdata.domain_width/dx/2.0))*2
-    clawdata.num_cells[1] = int(np.ceil(probdata.domain_length/dy/2.0))*2
-    clawdata.num_cells[2] = int(np.ceil(probdata.domain_depth/dz/2.0))*2
 
-    # Lower and upper edgse of computational domain:
-    ## note the size of domain is likely expanded here
-    num_cells_remain = clawdata.num_cells[0] - num_cells_fault_width
-    clawdata.lower[0] = probdata.fault_xcenter-0.5*probdata.fault_width - np.floor(num_cells_remain/2.0)*dx
-    clawdata.upper[0] = probdata.fault_xcenter+0.5*probdata.fault_width + np.floor(num_cells_remain/2.0)*dx
-    num_cells_remain = clawdata.num_cells[1] - num_cells_fault_length
-    clawdata.lower[1] = probdata.fault_ycenter-0.5*probdata.fault_length - np.floor(num_cells_remain/2.0)*dy
-    clawdata.upper[1] = probdata.fault_ycenter+0.5*probdata.fault_length + np.floor(num_cells_remain/2.0)*dy
-    clawdata.lower[2] = -clawdata.num_cells[2]*dz
+    # determine cell number and set computational boundaries
+    target_num_cells = np.rint(probdata.domain_width/dx)    # x direction
+    num_cells_below = np.rint((target_num_cells - num_cells_fault_width)/2.0)
+    num_cells_above = target_num_cells - num_cells_below - num_cells_fault_width
+    if (int(num_cells_below + num_cells_fault_width + num_cells_above) % 2 == 1):
+        num_cells_above += 1
+    clawdata.lower[0] = probdata.fault_xcenter-0.5*probdata.fault_width-num_cells_below*dx
+    clawdata.upper[0] = probdata.fault_xcenter+0.5*probdata.fault_width+num_cells_above*dx
+    clawdata.num_cells[0] = int(num_cells_below + num_cells_fault_width + num_cells_above)
+
+    target_num_cells = np.rint(probdata.domain_length/dy)    # y direction
+    num_cells_below = np.rint((target_num_cells - num_cells_fault_length)/2.0)
+    num_cells_above = target_num_cells - num_cells_below - num_cells_fault_length
+    if (int(num_cells_below + num_cells_fault_length + num_cells_above) % 2 == 1):
+        num_cells_above += 1
+    clawdata.lower[1] = probdata.fault_ycenter-0.5*probdata.fault_length-num_cells_below*dy
+    clawdata.upper[1] = probdata.fault_ycenter+0.5*probdata.fault_length+num_cells_above*dy
+    clawdata.num_cells[1] = int(num_cells_below + num_cells_fault_length + num_cells_above)
+
+    num_cells_above = np.rint(probdata.fault_depth/min(dx,dy))    # z direction
+    dz = probdata.fault_depth/num_cells_above
+    target_num_cells = np.rint(probdata.domain_depth/dz)
+    num_cells_below = target_num_cells - num_cells_above
+    if (int(num_cells_below + num_cells_above) % 2 == 1):
+        num_cells_below += 1
+    clawdata.lower[2] = -probdata.fault_depth - num_cells_below*dz
     clawdata.upper[2] = 0.0
+    clawdata.num_cells[2] = int(num_cells_below + num_cells_above)
+
+    # adjust probdata
     probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
     probdata.domain_length = clawdata.upper[1] - clawdata.lower[1]
     probdata.domain_depth = clawdata.upper[2] - clawdata.lower[2]
@@ -92,7 +106,7 @@ def setrun(claw_pkg='amrclaw'):
     # ---------------
 
     # Number of equations in the system:
-    clawdata.num_eqn = 9
+    clawdata.num_eqn = 10
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
     clawdata.num_aux = 1
@@ -126,7 +140,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify at what times the results should be written to fort.q files.
     # Note that the time integration stops after the final output time.
 
-    clawdata.output_style = 1
+    clawdata.output_style = 2
 
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
@@ -224,7 +238,7 @@ def setrun(claw_pkg='amrclaw'):
     #   src_split == 0 or 'none'    ==> no source term (src routine never called)
     #   src_split == 1 or 'godunov' ==> Godunov (1st order) splitting used,
     #   src_split == 2 or 'strang'  ==> Strang (2nd order) splitting used,  not recommended.
-    clawdata.source_split = 0  # use axi-symmetric source initially
+    clawdata.source_split = 'godunov'
 
 
     # --------------------
@@ -268,7 +282,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [1.0]
+      clawdata.checkpt_times = [1.0,40.0]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)
@@ -282,13 +296,13 @@ def setrun(claw_pkg='amrclaw'):
     gauges = rundata.gaugedata.gauges
 
     # gauges for surface displacement
-    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1,100)
-    ygauges = np.linspace(clawdata.lower[1]+1, clawdata.upper[1]-1,100)
-    gcount = 0
-    for x in xgauges:
-        for y in ygauges:
-            gauges.append([gcount, x, y, clawdata.upper[2]-1, 0.0, 1e9])
-            gcount = gcount + 1
+    #xgauges = np.linspace(-150e3,200e3,350)
+    #ygauges = np.linspace(-87.5e3,87.5e3,350)
+    #gcount = 0
+    #for x in xgauges:
+    #    for y in ygauges:
+    #        gauges.append([gcount, x, y, clawdata.upper[2]-1, 0.0, 1e9])
+    #        gcount = gcount + 1
     
     # ---------------
     # AMR parameters:
@@ -296,13 +310,13 @@ def setrun(claw_pkg='amrclaw'):
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 2
+    amrdata.amr_levels_max = 4
 
     # List of refinement ratios at each level (length at least amr_level_max-1)
-    amrdata.refinement_ratios_x = [2,2,2,2]
-    amrdata.refinement_ratios_y = [2,2,2,2]
-    amrdata.refinement_ratios_z = [2,2,2,2]
-    amrdata.refinement_ratios_t = [2,2,2,2]
+    amrdata.refinement_ratios_x = [2,2,2]
+    amrdata.refinement_ratios_y = [2,2,2]
+    amrdata.refinement_ratios_z = [2,2,2]
+    amrdata.refinement_ratios_t = [2,2,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
