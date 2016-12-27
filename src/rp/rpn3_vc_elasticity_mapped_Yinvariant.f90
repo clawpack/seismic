@@ -118,10 +118,10 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         ny = auxl(8,i)
         nz = auxl(9,i)
         arearatio = auxl(10,i)
-        
+
         ! ***the remainder only works for y-invariant mapping ***
         if (ixyz .eq. 2) then
-            tx = 0.d0 
+            tx = 0.d0
             ty = 0.d0
             tz = 1.d0
             ttx = 1.d0
@@ -135,22 +135,22 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
             tty = 0.d0
             ttz = nx
         end if
-            
+
         ! Compute normal/tangent jumps in stress/velocity
         dsig_n = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*nx &
                 +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*ny &
-                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*nz 
+                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*nz
         du_n = du*nx + dv*ny + dw*nz
-        
+
         dsig_t = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*tx &
                 +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*ty &
-                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*tz 
+                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*tz
         du_t = du*tx + dv*ty + dw*tz
 
 
-        dsig_tt = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*ttx & 
+        dsig_tt = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*ttx &
                  +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*tty &
-                 +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*ttz 
+                 +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*ttz
         du_tt = du*ttx + dv*tty + dw*ttz
 
         ! material properties in cells i (on right) and i-1 (on left):
@@ -174,7 +174,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         end if
         a1 = (cpr*dsig_n + bulkr*du_n) / det
         a2 = (cpl*dsig_n - bulkl*du_n) / det
-        
+
         ! Compute the S-wave strengths
         det = mul*csr + mur*csl
         if (det .eq. 0.d0) then
@@ -183,12 +183,13 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
             a5 = 0.d0
             a6 = 0.d0
         else
-            a3 = (csr*dsig_t + mur*du_t) / det 
+            a3 = (csr*dsig_t + mur*du_t) / det
             a4 = (csr*dsig_tt + mur*du_tt) / det
-            a5 = (csl*dsig_t - mul*du_t) / det 
+            a5 = (csl*dsig_t - mul*du_t) / det
             a6 = (csl*dsig_tt - mul*du_tt) / det
-        end if         
+        end if
 
+        ! Compute waves
         wave(:,1,i) = 0.d0
         wave(sig_xx,1,i) = a1 * (laml + 2.d0*mul*nx*nx)
         wave(sig_yy,1,i) = a1 * (laml + 2.d0*mul*ny*ny)
@@ -222,7 +223,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         wave(:,4,i) = 0.d0
         wave(sig_xx,4,i) = a4 * 2.d0*mul*nx*ttx
         wave(sig_zz,4,i) = a4 * 2.d0*mul*nz*ttz
-        wave(sig_xy,4,i) = a4 * mul*(nx*tty + ny*ttx) 
+        wave(sig_xy,4,i) = a4 * mul*(nx*tty + ny*ttx)
         wave(sig_yz,4,i) = a4 * mul*(ny*ttz + nz*tty)
         wave(sig_xz,4,i) = a4 * mul*(nx*ttz + nz*ttx)
         wave(u,4,i) = a4 * csl*ttx
@@ -242,7 +243,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         wave(:,6,i) = 0.d0
         wave(sig_xx,6,i) = a6 * 2.d0*mur*nx*ttx
         wave(sig_zz,6,i) = a6 * 2.d0*mur*nz*ttz
-        wave(sig_xy,6,i) = a6 * mur*(nx*tty + ny*ttx) 
+        wave(sig_xy,6,i) = a6 * mur*(nx*tty + ny*ttx)
         wave(sig_yz,6,i) = a6 * mur*(ny*ttz + nz*tty)
         wave(sig_xz,6,i) = a6 * mur*(nx*ttz + nz*ttx)
         wave(u,6,i) = -a6 * csr*ttx

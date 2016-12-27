@@ -7,7 +7,7 @@ fault.subfaults = []
 
 width = 50000.0
 length = 25000.0
-theta = 0.0
+theta = 0.2
 fault_centroid = [25000.0,0.0,-20000.0]
 slip = 1.0
 mu = 3e10

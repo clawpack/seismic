@@ -23,7 +23,7 @@ def setplot(plotdata):
     Output: a modified version of plotdata.
 
     """
-    slice_number = 2
+    slice_number = 3
     os.chdir(plotdata.outdir)
     for filename in os.listdir('.'):
         if (filename.startswith('slice_%d' % slice_number)):
