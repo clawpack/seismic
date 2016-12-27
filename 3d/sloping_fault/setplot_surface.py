@@ -37,7 +37,7 @@ def setplot(plotdata):
     os.chdir('..')
 
     fault = dtopotools.Fault(coordinate_specification='top center')
-    fault.read('fault.data',column_map=column_map,skiprows=4)
+    fault.read('fault.data')
 
     mapping = Mapping(fault)
 

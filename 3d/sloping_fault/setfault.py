@@ -23,8 +23,6 @@ dlatitude = (length/111.e3) / nsubfaults_strike
 subfault_width = width/nsubfaults_dip
 subfault_length = length/nsubfaults_strike
 x = arange(fault_centroid[0]-0.5*width,fault_centroid[0]+0.5*width,subfault_width)
-column_list = ['mu','dip','width','depth','slip','rake','strike','length',
-                'longitude','latitude','rupture_time','rise_time']
 
 for i in range(nsubfaults_dip):
     for j in range(nsubfaults_strike):
@@ -45,4 +43,4 @@ for i in range(nsubfaults_dip):
 
         fault.subfaults.append(subfault)
 
-fault.write('fault.data',column_list=column_list)
+fault.write('fault.data')

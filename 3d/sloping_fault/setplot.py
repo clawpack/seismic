@@ -13,11 +13,6 @@ from mapping import Mapping
 from clawpack.clawutil.data import ClawData
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 
-
-column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
-
-
 #--------------------------
 def setplot(plotdata):
 #--------------------------
@@ -37,7 +32,7 @@ def setplot(plotdata):
     os.chdir('..')
 
     fault = dtopotools.Fault(coordinate_specification='top center')
-    fault.read('fault.data',column_map=column_map,skiprows=4)
+    fault.read('fault.data')
 
     mapping = Mapping(fault)
 
