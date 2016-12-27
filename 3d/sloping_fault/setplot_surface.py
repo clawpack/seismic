@@ -13,11 +13,6 @@ from mapping import Mapping
 from clawpack.clawutil.data import ClawData
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 
-
-column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
-
-
 #--------------------------
 def setplot(plotdata):
 #--------------------------
@@ -53,7 +48,6 @@ def setplot(plotdata):
     probdata.read(plotdata.outdir + '/setprob.data',force=True)
     xlimits = [xcenter-0.5*probdata.domain_width,xcenter+0.5*probdata.domain_width]
     ylimits = [ycenter-0.5*probdata.domain_length,ycenter+0.5*probdata.domain_length]
-    clevels = np.linspace(-0.5,0.5,21)
 
     from clawpack.visclaw import colormaps
 
@@ -61,22 +55,25 @@ def setplot(plotdata):
     yc = np.linspace(-87.5e3,87.5e3,175)
     fault.create_dtopography(xc/111.e3,yc/111.e3,[1.0])
 
+    okada_max = np.max(fault.dtopo.dZ[0,:,:])
+    clevels = np.linspace(-okada_max,okada_max,10)
+
     plotdata.clearfigures()  # clear any old figures,axes,items data
 
     def plot_okada_contour(current_data):
         from pylab  import gca
         
-        kwargs = {'levels':clevels,'colors':'g','linewidths':2}
+        kwargs = {'levels':clevels,'colors':'g'}
         ax = gca()
         fault.plot_okada_contour(axes=ax,kwargs=kwargs)
 
     def plot_okada(current_data):
         from pylab import gca
 
-        kwargs = {'cmap':'seismic','vmin':clevels[0],'vmax':clevels[-1]}
+        kwargs = {'cmap':colormaps.blue_white_red,'vmin':clevels[0],'vmax':clevels[-1]}
         ax = gca()
         fault.plot_okada(axes=ax,dim=2,kwargs=kwargs)
-        kwargs = {'levels':clevels,'colors':'g','linewidths':2}
+        kwargs = {'levels':clevels,'colors':'g','linewidths':3}
         fault.plot_okada_contour(axes=ax,kwargs=kwargs)
 
     # Figure for vertical displacement
@@ -96,8 +93,8 @@ def setplot(plotdata):
     plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
     plotitem.plot_var = 9
     plotitem.pcolor_cmap = colormaps.blue_white_red
-    plotitem.pcolor_cmin = -0.5
-    plotitem.pcolor_cmax = 0.5
+    plotitem.pcolor_cmin = clevels[0]
+    plotitem.pcolor_cmax = clevels[-1]
     plotitem.add_colorbar = False
     plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]
@@ -107,6 +104,7 @@ def setplot(plotdata):
     plotitem.plot_var = 9
     plotitem.contour_colors = 'k'
     plotitem.contour_levels = clevels
+    plotitem.kwargs = {'linewidths':3}
     plotitem.amr_contour_show = [0,0,0,1]
     plotitem.amr_celledges_show = [0]
     plotitem.amr_patchedges_show = [0]
