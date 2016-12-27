@@ -18,8 +18,6 @@ longitude0 = (fault_centroid[0]-0.5*width)/111.e3
 dlongitude = (width/111.e3) / nsubfaults
 subfault_width = width/nsubfaults
 x = arange(fault_centroid[0]-0.5*width,fault_centroid[0]+0.5*width,subfault_width)
-column_list = ['mu','dip','width','depth','slip','rake','strike','length',
-                'longitude','latitude','rupture_time','rise_time']
 
 for i in range(nsubfaults):
     subfault = dtopotools.SubFault()
@@ -39,4 +37,4 @@ for i in range(nsubfaults):
 
     fault.subfaults.append(subfault)
 
-fault.write('fault.data',column_list=column_list)
+fault.write('fault.data')
