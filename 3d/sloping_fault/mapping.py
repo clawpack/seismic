@@ -42,30 +42,27 @@ class Mapping(object):
 
         subfaultF = fault.subfaults[0]
         subfaultL = fault.subfaults[-1]
+        theta = subfaultL.dip/180.0*numpy.pi
 
-        xcl = subfaultF.longitude*LAT2METER
-        xcr = subfaultL.longitude*LAT2METER + subfaultL.width
-        fault_width = xcr - xcl
-        xcenter = 0.5*(xcl + xcr)
+        xp1 = subfaultF.longitude*LAT2METER
+        yp1 = subfaultF.latitude*LAT2METER - 0.5*subfaultF.length
+        zp1 = -subfaultF.depth
+ 
+        xp2 = subfaultL.longitude*LAT2METER + np.cos(theta)*subfaultL.width
+        yp2 = subfaultL.latitude*LAT2METER + 0.5*subfaultL.length
+        zp2 = -subfaultL.depth - np.sin(theta)*subfaultL.width
 
-        ycl = subfaultF.latitude*LAT2METER - 0.5*subfaultF.length
-        ycr = subfaultL.latitude*LAT2METER + 0.5*subfaultL.length
-        fault_length = ycr - ycl
-        ycenter = 0.5*(ycl + ycr)
+        xcenter = 0.5*(xp1 + xp2)
+        ycenter = 0.5*(yp1 + yp2)
+        zcenter = 0.5*(zp1 + zp2)
+        fault_width = np.sqrt((xp2-xp1)**2 + (zp2-zp1)**2)
+        fault_length = yp2 - yp1
 
-        theta = subfaultF.dip/180.0*numpy.pi
-
-        fault_depth = 0.5*(subfaultF.depth + subfaultL.depth
-                    + np.sin(theta)*subfaultL.width)
-        zcenter = -fault_depth
-
-        xp1 = xcenter - 0.5*fault_width*cos(theta)
-        xp2 = xcenter + 0.5*fault_width*cos(theta)
-        zp1 = zcenter + 0.5*fault_width*sin(theta)
-        zp2 = zcenter - 0.5*fault_width*sin(theta)
+        xcl = xcenter - 0.5*fault_width
+        xcr = xcenter + 0.5*fault_width
 
         self.fault_width = fault_width
-        self.fault_depth = fault_depth
+        self.fault_depth = -zcenter
         self.xcenter = xcenter
         self.ycenter = ycenter
         self.zcenter = zcenter

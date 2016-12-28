@@ -18,7 +18,7 @@ contains
         character*12, intent(in) :: fname
 
         integer :: i
-        real(kind=8) :: input_line(12)
+        real(kind=8) :: input_line(12), xp1, yp1, xp2, yp2, total_width
 
         call opendatafile(7, fname)
 
@@ -39,12 +39,19 @@ contains
           subfaults(i)%rupture_time = input_line(11)
           subfaults(i)%rise_time = input_line(12)
         end do
-  
-        xcb(1) = subfaults(1)%longitude*LAT2METER
-        xcb(2) = subfaults(nsubfaults)%longitude*LAT2METER + dcos(theta)*subfaults(nsubfaults)%width
-        center(1) = 0.5d0*(xcb(1) + xcb(2))
-        center(2) = -0.5d0*(subfaults(1)%depth + subfaults(nsubfaults)%depth + &
-                    dsin(theta)*subfaults(nsubfaults)%width)
+         
+        xp1 = subfaults(1)%longitude*LAT2METER
+        yp1 = -subfaults(1)%depth
+
+        xp2 = subfaults(nsubfaults)%longitude*LAT2METER + dcos(theta)*subfaults(nsubfaults)%width
+        yp2 = -subfaults(nsubfaults)%depth - dsin(theta)*subfaults(nsubfaults)%width
+
+        center(1) = 0.5d0*(xp1 + xp2)
+        center(2) = 0.5d0*(yp1 + yp2)
+        total_width = dsqrt((xp2-xp1)**2 + (yp2-yp1)**2)      
+        
+        xcb(1) = center(1) - 0.5d0*total_width
+        xcb(2) = center(1) + 0.5d0*total_width
 
         close(7)
 

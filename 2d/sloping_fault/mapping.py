@@ -1,8 +1,8 @@
 import numpy
 from pylab import *
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
-from clawpack.geoclaw.data import LAT2METER
 reload(dtopotools)
+from clawpack.geoclaw.data import LAT2METER
 
 def test(mfault):
 
@@ -11,11 +11,8 @@ def test(mfault):
     probdata = ClawData()
     probdata.read('setprob.data',force=True)
 
-    column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-                'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
-
-    fault = dtopotools.Fault(coordinate_specification='top_center')
-    fault.read('fault.data',column_map=column_map,skiprows=4)
+    fault = dtopotools.Fault()
+    fault.read('fault.data')
 
     mapping = Mapping(fault)
 
@@ -46,33 +43,25 @@ class Mapping(object):
 
     def __init__(self, fault):
 
-        fault_width = 0.0
-        for subfault in fault.subfaults:
-            fault_width += subfault.width
-
-        subfaultL = fault.subfaults[0]
-        subfaultR = fault.subfaults[-1]
+        subfaultF = fault.subfaults[0]
+        subfaultL = fault.subfaults[-1]
         theta = subfaultL.dip/180.0*numpy.pi
-        fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
-                    + np.sin(theta)*subfaultR.width)
-        fault_center = 0.5*(subfaultL.longitude*LAT2METER + subfaultR.longitude*LAT2METER
-                    + np.cos(theta)*subfaultR.width)
 
-        xcenter = fault_center
-        ycenter = -fault_depth
+        xp1 = subfaultF.longitude*LAT2METER
+        yp1 = -subfaultF.depth
+ 
+        xp2 = subfaultL.longitude*LAT2METER + np.cos(theta)*subfaultL.width
+        yp2 = -subfaultL.depth - np.sin(theta)*subfaultL.depth
+
+        xcenter = 0.5*(xp1 + xp2)
+        ycenter = 0.5*(yp1 + yp2)
+        fault_width = np.sqrt((xp2-xp1)**2 + (yp2-yp1)**2)
 
         xcl = xcenter - 0.5*fault_width
         xcr = xcenter + 0.5*fault_width
 
-        xp1 = xcenter - 0.5*fault_width*cos(theta)
-        xp2 = xcenter + 0.5*fault_width*cos(theta)
-        yp1 = ycenter + 0.5*fault_width*sin(theta)
-        yp2 = ycenter - 0.5*fault_width*sin(theta)
-
-        tol = min(abs(yp1),abs(yp2))
-
         self.fault_width = fault_width
-        self.fault_depth = fault_depth
+        self.fault_depth = -ycenter
         self.xcenter = xcenter
         self.ycenter = ycenter
         self.theta = theta

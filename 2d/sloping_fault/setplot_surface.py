@@ -24,7 +24,7 @@ def setplot(plotdata):
     Output: a modified version of plotdata.
 
     """
-    fault = dtopotools.Fault(coordinate_specification='top center')
+    fault = dtopotools.Fault()
     fault.read(plotdata.outdir + '/fault.data')
 
     mapping = Mapping(fault)

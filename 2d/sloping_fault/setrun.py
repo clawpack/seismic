@@ -45,7 +45,7 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Read in fault information
     #------------------------------------------------------------------
-    fault = dtopotools.Fault(coordinate_specification='top center')
+    fault = dtopotools.Fault()
     fault.read('fault.data')
 
     mapping = Mapping(fault)
