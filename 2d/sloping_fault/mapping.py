@@ -53,8 +53,6 @@ class Mapping(object):
         xp2 = subfaultL.longitude*LAT2METER + np.cos(theta)*subfaultL.width
         yp2 = -subfaultL.depth - np.sin(theta)*subfaultL.width
 
-        print(xp1,yp1,xp2,yp2)
-
         xcenter = 0.5*(xp1 + xp2)
         ycenter = 0.5*(yp1 + yp2)
         fault_width = np.sqrt((xp2-xp1)**2 + (yp2-yp1)**2)
