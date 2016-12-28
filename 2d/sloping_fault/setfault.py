@@ -13,7 +13,7 @@ slip = 1.0
 mu = 3e10
 rupture_time = 0.0
 rise_time = 1.0
-nsubfaults = 50
+nsubfaults = 1
 
 longitude0 = (fault_centroid[0]-0.5*width)/LAT2METER
 dlongitude = (width/LAT2METER) / nsubfaults

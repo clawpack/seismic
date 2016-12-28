@@ -55,7 +55,6 @@ def setrun(claw_pkg='amrclaw'):
 
     rupture_rise_time = 0.0
     for subfault in fault.subfaults:
-        fault_width += subfault.width
         rupture_rise_time = max(rupture_rise_time,subfault.rupture_time
                                     + subfault.rise_time)
     #------------------------------------------------------------------

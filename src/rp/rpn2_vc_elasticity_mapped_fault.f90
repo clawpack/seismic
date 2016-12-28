@@ -149,32 +149,32 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
     ! Compute the waves.
     wave(:,1,i) = 0.d0
-    wave(1,1,i) = a1 * (alaml + 2*amul*nx2)
-    wave(2,1,i) = a1 * (alaml + 2*amul*ny2)
-    wave(3,1,i) = a1 * (2*amul*nxy)
+    wave(1,1,i) = a1 * (alaml + 2.d0*amul*nx2)
+    wave(2,1,i) = a1 * (alaml + 2.d0*amul*ny2)
+    wave(3,1,i) = a1 * (2.d0*amul*nxy)
     wave(4,1,i) = a1 * cpl * nx
     wave(5,1,i) = a1 * cpl * ny
     s(1,i) = -cpl
 
     wave(:,2,i) = 0.d0
-    wave(1,2,i) = a2 * (alamr + 2*amur*nx2)
-    wave(2,2,i) = a2 * (alamr + 2*amur*ny2)
-    wave(3,2,i) = a2 * (2*amur*nxy)
+    wave(1,2,i) = a2 * (alamr + 2.d0*amur*nx2)
+    wave(2,2,i) = a2 * (alamr + 2.d0*amur*ny2)
+    wave(3,2,i) = a2 * (2.d0*amur*nxy)
     wave(4,2,i) = - a2 * cpr * nx
     wave(5,2,i) = - a2 * cpr * ny
     s(2,i) = cpr
 
     wave(:,3,i) = 0.d0
-    wave(1,3,i) = - a3 * (2*nxy*amul)
-    wave(2,3,i) = a3 * (2*nxy*amul)
+    wave(1,3,i) = - a3 * (2.d0*nxy*amul)
+    wave(2,3,i) = a3 * (2.d0*nxy*amul)
     wave(3,3,i) = a3 * amul*(nx2 - ny2)
     wave(4,3,i) = - a3 * csl * ny
     wave(5,3,i) = a3 * csl * nx
     s(3,i) = -csl
 
     wave(:,4,i) = 0.d0
-    wave(1,4,i) = - a4 * (2*nxy*amur)
-    wave(2,4,i) = a4 * (2*nxy*amur)
+    wave(1,4,i) = - a4 * (2.d0*nxy*amur)
+    wave(2,4,i) = a4 * (2.d0*nxy*amur)
     wave(3,4,i) = a4 * amur*(nx2 - ny2)
     wave(4,4,i) =  a4 * csr * ny
     wave(5,4,i) = -a4 * csr * nx
