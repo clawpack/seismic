@@ -49,7 +49,7 @@ contains
         center(1) = 0.5d0*(xp1 + xp2)
         center(2) = 0.5d0*(yp1 + yp2)
         total_width = dsqrt((xp2-xp1)**2 + (yp2-yp1)**2)      
-        
+
         xcb(1) = center(1) - 0.5d0*total_width
         xcb(2) = center(1) + 0.5d0*total_width
 
