@@ -1,6 +1,7 @@
 import numpy
 from pylab import *
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+from clawpack.geoclaw.data import LAT2METER
 reload(dtopotools)
 
 def test(mfault):
@@ -42,7 +43,7 @@ def test(mfault):
 
 
 class Mapping(object):
-  
+
     def __init__(self, fault):
 
         fault_width = 0.0
@@ -54,7 +55,7 @@ class Mapping(object):
         theta = subfaultL.dip/180.0*numpy.pi
         fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
                     + np.sin(theta)*subfaultR.width)
-        fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
+        fault_center = 0.5*(subfaultL.longitude*LAT2METER + subfaultR.longitude*LAT2METER
                     + np.cos(theta)*subfaultR.width)
 
         xcenter = fault_center
@@ -62,7 +63,7 @@ class Mapping(object):
 
         xcl = xcenter - 0.5*fault_width
         xcr = xcenter + 0.5*fault_width
- 
+
         xp1 = xcenter - 0.5*fault_width*cos(theta)
         xp2 = xcenter + 0.5*fault_width*cos(theta)
         yp1 = ycenter + 0.5*fault_width*sin(theta)

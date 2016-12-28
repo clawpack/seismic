@@ -1,6 +1,7 @@
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 from numpy import arange,sin,pi
 reload(dtopotools)
+from clawpack.geoclaw.data import LAT2METER
 
 fault = dtopotools.Fault(coordinate_specification='top center')
 fault.subfaults = []
@@ -13,13 +14,13 @@ slip = 1.0
 mu = 3e10
 rupture_time = 0.0
 rise_time = 1.0
-nsubfaults_dip = 40
-nsubfaults_strike = 20
+nsubfaults_dip = 2
+nsubfaults_strike = 1
 
-longitude0 = (fault_centroid[0]-0.5*width)/111.e3
-latitude0 = (fault_centroid[1]-0.5*length)/111.e3
-dlongitude = (width/111.e3) / nsubfaults_dip
-dlatitude = (length/111.e3) / nsubfaults_strike
+longitude0 = (fault_centroid[0]-0.5*width)/LAT2METER
+latitude0 = fault_centroid[1]/LAT2METER
+dlongitude = (width/LAT2METER) / nsubfaults_dip
+dlatitude = (length/LAT2METER) / nsubfaults_strike
 subfault_width = width/nsubfaults_dip
 subfault_length = length/nsubfaults_strike
 x = arange(fault_centroid[0]-0.5*width,fault_centroid[0]+0.5*width,subfault_width)
@@ -36,7 +37,7 @@ for i in range(nsubfaults_dip):
         subfault.strike = 0
         subfault.length = subfault_length
         subfault.longitude = longitude0 + dlongitude*i
-        subfault.latitude = latitude0 + dlatitude*(j+0.5)
+        subfault.latitude = latitude0 - 0.5*length/LAT2METER + dlatitude*(j+0.5)
         subfault.coordinate_specification = 'top center'
         subfault.rupture_time = rupture_time
         subfault.rise_time = rise_time

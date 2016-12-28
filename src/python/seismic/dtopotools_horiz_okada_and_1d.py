@@ -1144,24 +1144,24 @@ class Fault(object):
                 figure()
                 axes = subplot(111)
             if (dim is 1):
-                axes.plot(self.dtopo.x*111.e3,self.dtopo.dZ[0,0,:],**kwargs)
+                axes.plot(self.dtopo.x*LAT2METER,self.dtopo.dZ[0,0,:],**kwargs)
             elif (dim is 2):
                 X,Y = numpy.meshgrid(self.dtopo.x,self.dtopo.y)
-                axes.pcolormesh(X*111.e3,Y*111.e3,self.dtopo.dZ[0,:,:],**kwargs)
+                axes.pcolormesh(X*LAT2METER,Y*LAT2METER,self.dtopo.dZ[0,:,:],**kwargs)
         elif (displacement is 'horizontal'):
             if axes is None:
                 from pylab import figure, subplot
                 figure()
                 axes = subplot(111)
             if (dim is 1):
-                axes.plot(self.dtopo.x*111.e3,self.dtopo.dY[0,0,:],**kwargs)
+                axes.plot(self.dtopo.x*LAT2METER,self.dtopo.dY[0,0,:],**kwargs)
 
     def plot_okada_contour(self, axes=None, kwargs={}):
         if (self.dtopo is None):
 	    raise ValueError("Need to call create_dtopography before plot_okada_contour")
-     
+
         X,Y = numpy.meshgrid(self.dtopo.x,self.dtopo.y)
-        axes.contour(X*111.e3,Y*111.e3,self.dtopo.dZ[0,:,:],**kwargs)
+        axes.contour(X*LAT2METER,Y*LAT2METER,self.dtopo.dZ[0,:,:],**kwargs)
 
 # ==============================================================================
 #  Sub-Fault Class

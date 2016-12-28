@@ -12,6 +12,7 @@ import os, shutil
 from mapping import Mapping
 from clawpack.clawutil.data import ClawData
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+from clawpack.geoclaw.data import LAT2METER
 
 #--------------------------
 def setplot(plotdata):
@@ -53,7 +54,7 @@ def setplot(plotdata):
 
     xc = np.linspace(-150e3,200e3,350)
     yc = np.linspace(-87.5e3,87.5e3,175)
-    fault.create_dtopography(xc/111.e3,yc/111.e3,[1.0])
+    fault.create_dtopography(xc/LAT2METER,yc/LAT2METER.e3,[1.0])
 
     okada_max = np.max(fault.dtopo.dZ[0,:,:])
     clevels = np.linspace(-okada_max,okada_max,10)
@@ -63,7 +64,7 @@ def setplot(plotdata):
 
     def plot_okada_contour(current_data):
         from pylab  import gca
-        
+
         kwargs = {'levels':clevels,'colors':'g'}
         ax = gca()
         fault.plot_okada_contour(axes=ax,kwargs=kwargs)
@@ -119,7 +120,7 @@ def setplot(plotdata):
     plotaxes.title = 'Okada solution'
     plotaxes.scaled = True
     plotaxes.afteraxes = plot_okada
- 
+
     # Figure for grid cells
     plotfigure = plotdata.new_plotfigure(name='cells', figno=2)
 

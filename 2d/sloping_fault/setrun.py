@@ -10,6 +10,7 @@ import os
 import numpy as np
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
 reload(dtopotools)
+from mapping import Mapping
 
 #------------------------------
 def setrun(claw_pkg='amrclaw'):
@@ -44,25 +45,19 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Read in fault information
     #------------------------------------------------------------------
-    column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-                'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
     fault = dtopotools.Fault(coordinate_specification='top center')
-    fault.read('fault.data',column_map=column_map,skiprows=4)
+    fault.read('fault.data')
 
-    fault_width = 0.0
+    mapping = Mapping(fault)
+    fault_width = mapping.fault_width
+    fault_depth = mapping.fault_depth
+    fault_center = mapping.xcenter
+
     rupture_rise_time = 0.0
     for subfault in fault.subfaults:
         fault_width += subfault.width
         rupture_rise_time = max(rupture_rise_time,subfault.rupture_time
                                     + subfault.rise_time)
-
-    subfaultL = fault.subfaults[0]
-    subfaultR = fault.subfaults[-1]
-    fault_depth = 0.5*(subfaultL.depth + subfaultR.depth
-                + np.sin(subfaultR.dip/180.0*np.pi)*subfaultR.width)
-    fault_center = 0.5*(subfaultL.longitude*111.e3 + subfaultR.longitude*111.e3
-                + np.cos(subfaultR.dip/180.0*np.pi)*subfaultR.width)
-
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
     #------------------------------------------------------------------
@@ -308,7 +303,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [1.0]
+      clawdata.checkpt_times = [rupture_rise_time]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)

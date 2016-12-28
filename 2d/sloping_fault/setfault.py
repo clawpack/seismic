@@ -1,4 +1,5 @@
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+from clawpack.geoclaw.data import LAT2METER
 from numpy import arange,sin,pi
 reload(dtopotools)
 
@@ -14,8 +15,8 @@ rupture_time = 0.0
 rise_time = 1.0
 nsubfaults = 50
 
-longitude0 = (fault_centroid[0]-0.5*width)/111.e3
-dlongitude = (width/111.e3) / nsubfaults
+longitude0 = (fault_centroid[0]-0.5*width)/LAT2METER
+dlongitude = (width/LAT2METER) / nsubfaults
 subfault_width = width/nsubfaults
 x = arange(fault_centroid[0]-0.5*width,fault_centroid[0]+0.5*width,subfault_width)
 
