@@ -179,6 +179,7 @@ c
          endif
 c
          if (maux1d .gt. 0)  then
+c          set material and mapping variables
            call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval-0.5d0*dy, zval-0.5d0*dz, dx,dy,dz,t,maux1d,aux1,1)
            call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
@@ -199,7 +200,19 @@ c
      &           yval+0.5d0*dy, zval, dx,dy,dz,t,maux1d,aux3,2)
            call setaux1d(1,mbc,mx,maxm,xlow+mbc*dx,
      &           yval+0.5d0*dy, zval+0.5d0*dz, dx,dy,dz,t,maux1d,aux3,3)
-         endif
+c           set slip from 2d aux
+           do 22 i = 1-mbc, mx+mbc
+             aux1(6,i,1) = aux(1,i,j-1,k-1)
+             aux1(6,i,2) = aux(1,i,j-1,k)
+             aux1(6,i,3) = aux(1,i,j-1,k+1)
+             aux2(6,i,1) = aux(1,i,j,k-1)
+             aux2(6,i,2) = aux(1,i,j,k)
+             aux2(6,i,3) = aux(1,i,j,k+1)
+             aux3(6,i,1) = aux(1,i,j+1,k-1)
+             aux3(6,i,2) = aux(1,i,j+1,k)
+             aux3(6,i,3) = aux(1,i,j+1,k+1)
+   22      continue
+          endif
 
 c
 c           # Store the value of j and k along this slice in the common block
@@ -318,6 +331,17 @@ c
      &           zval+0.5d0*dz, xval, dy,dz,dx,t,maux1d,aux3,2)
            call setaux1d(2,mbc,my,maxm,ylow+mbc*dy,
      &           zval+0.5d0*dz, xval+0.5d0*dx, dy,dz,dx,t,maux1d,aux3,3)
+           do 72 j = 1-mbc, my+mbc
+             aux1(6,j,1) = aux(1,i-1,j,k-1)
+             aux1(6,j,2) = aux(1,i,j,k-1)
+             aux1(6,j,3) = aux(1,i+1,j,k-1)
+             aux2(6,j,1) = aux(1,i-1,j,k)
+             aux2(6,j,2) = aux(1,i,j,k)
+             aux2(6,j,3) = aux(1,i+1,j,k)
+             aux3(6,j,1) = aux(1,i-1,j,k+1)
+             aux3(6,j,2) = aux(1,i,j,k+1)
+             aux3(6,j,3) = aux(1,i+1,j,k+1)
+   72        continue
          endif
 c
 c           # Store the value of i and k along this slice in the common block
@@ -444,6 +468,17 @@ c
      &           xval+0.5d0*dx, yval, dz,dx,dy,t,maux1d,aux3,2)
            call setaux1d(3,mbc,mz,maxm,zlow+mbc*dz,
      &           xval+0.5d0*dx, yval+0.5d0*dy, dz,dx,dy,t,maux1d,aux3,3)
+           do 131 k = 1-mbc, mz+mbc
+            aux1(6,k,1) = aux(1,i-1,j-1,k)
+            aux1(6,k,2) = aux(1,i-1,j,k)
+            aux1(6,k,3) = aux(1,i-1,j+1,k)
+            aux2(6,k,1) = aux(1,i,j-1,k)
+            aux2(6,k,2) = aux(1,i,j,k)
+            aux2(6,k,3) = aux(1,i,j+1,k)
+            aux3(6,k,1) = aux(1,i+1,j-1,k)
+            aux3(6,k,2) = aux(1,i+1,j,k)
+            aux3(6,k,3) = aux(1,i+1,j+1,k)
+ 131        continue
          endif
 c
 c           # Store the value of i and j along this slice in the common block

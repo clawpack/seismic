@@ -45,7 +45,7 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
     probdata.add_param('fault_width', 50e3, 'width of fault (in x direction)')
     probdata.add_param('fault_length', 25e3, 'width of fault (in y direction)')
-    probdata.add_param('fault_dip', 0.0, 'angle of fault dip')
+    probdata.add_param('fault_dip', 0.2, 'angle of fault dip')
     probdata.add_param('fault_depth', 20e3, 'depth of fault centroid')
 
     #------------------------------------------------------------------
@@ -109,10 +109,10 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.num_eqn = 10
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 1
+    clawdata.num_aux = 2
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.capa_index = 1
+    clawdata.capa_index = 2
 
 
     # -------------
@@ -161,7 +161,7 @@ def setrun(claw_pkg='amrclaw'):
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 
-    clawdata.output_format = 'binary'      # 'ascii' or 'binary'
+    clawdata.output_format = 'ascii'      # 'ascii' or 'binary'
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'none'  # could be list
@@ -322,7 +322,7 @@ def setrun(claw_pkg='amrclaw'):
     # This must be a list of length num_aux, each element of which is one
     # of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-    amrdata.aux_type = ['capacity']
+    amrdata.aux_type = ['zleft','capacity']
 
     # Flag for refinement based on Richardson error estimater:
     amrdata.flag_richardson = False    # use Richardson?

@@ -118,6 +118,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         ny = auxl(8,i)
         nz = auxl(9,i)
         arearatio = auxl(10,i)
+        slip = auxl(6,i)
 
         ! ***the remainder only works for y-invariant mapping ***
         if (ixyz .eq. 2) then
@@ -175,8 +176,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         a2 = (cpl*dsig_n - bulkl*du_n) / det
 
         ! Compute the S-wave strengths depending on if slip is imposed:
-        slip = auxl(6,i)
-        if (dabs(slip) > 1.d-10) then
+        if (ixyz == 3 .and. dabs(slip) > 1.d-10) then
             a3 = (qr(7,i-1)*nz - qr(8,i-1)*nx - 0.5d0*slip)/csl
             a4 = 0.d0
             a5 = (ql(7,i)  *nz - ql(8,i)  *nx + 0.5d0*slip)/csr

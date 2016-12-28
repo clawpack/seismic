@@ -44,6 +44,7 @@ MODULES = \
 
 SOURCES = \
   ./advanc_debug.f \
+  ./b4step3.f90 \
   ./bc3amr.f \
   ./mapc2p.f90 \
   ./qinit.f90 \
@@ -60,7 +61,6 @@ SOURCES = \
   $(SEISLIB)/step3.f \
   $(SEISLIB)/stepgrid.f \
   $(SEISLIB)/tick.f \
-  $(AMRLIB)/b4step3.f90 \
   $(AMRLIB)/opendatafile.f \
   $(AMRLIB)/qad.f \
   $(AMRLIB)/src1d.f90 \

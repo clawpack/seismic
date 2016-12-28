@@ -76,7 +76,7 @@ def setplot(plotdata):
     from clawpack.visclaw import colormaps
 
     plotdata.clearfigures()  # clear any old figures,axes,items data
-    plotdata.format = 'binary'
+#    plotdata.format = 'binary'
 
     def sigmatr(current_data):
         # return -trace(sigma)

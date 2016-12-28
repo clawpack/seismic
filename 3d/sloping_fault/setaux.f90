@@ -27,6 +27,9 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
         do i=1-mbc,mx + mbc
           xcell = xlower + (i-0.5d0)*dx
 
+          ! set slip to zero here... actually set in b4step
+          aux(1,i,j,k) = 0.d0
+
           ! compute capacity function value ( volume = (vol of lower face in y direction)*dy )
           call mapc2p(xcell - 0.5d0*dx, ycell - 0.5d0*dy, zcell - 0.5d0*dz, xpcorn(1), ypcorn(1), zpcorn(1))
           call mapc2p(xcell - 0.5d0*dx, ycell - 0.5d0*dy, zcell + 0.5d0*dz, xpcorn(2), ypcorn(2), zpcorn(2))
@@ -34,7 +37,7 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
           call mapc2p(xcell + 0.5d0*dx, ycell - 0.5d0*dy, zcell - 0.5d0*dz, xpcorn(4), ypcorn(4), zpcorn(4))
           ! only need area ratio from cross-product of diagonals, which will point in the y direction
           mag = dabs((xpcorn(3) - xpcorn(1))*(zpcorn(2) - zpcorn(4)) - (xpcorn(2) - xpcorn(4))*(zpcorn(3) - zpcorn(1)))
-          aux(1,i,j,k) = 0.5d0*mag/(dx*dz)
+          aux(2,i,j,k) = 0.5d0*mag/(dx*dz)
 
 
         end do

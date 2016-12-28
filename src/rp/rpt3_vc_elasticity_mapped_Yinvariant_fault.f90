@@ -255,7 +255,8 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
 
         ! Compute the S-wave strengths depending on slip (a3,a4 downward, a5,a6 upward)
         det = mub*cs + mu*csb
-        if (det < 1.d-10 .or. slipb > 1.d-10) then
+        if (det < 1.d-10 .or. &
+          (ixyz + icoor == 4 .and. slipb > 1.d-10)) then
           a3 = 0.d0
           a4 = 0.d0
         else
@@ -264,7 +265,8 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         end if
 
         det = mua*cs + mu*csa
-        if (det < 1.d-10 .or. slipa > 1.d-10) then
+        if (det < 1.d-10 .or. &
+          (ixyz + icoor == 4 .and. slipa > 1.d-10)) then
           a5 = 0.d0
           a6 = 0.d0
         else

@@ -12,7 +12,7 @@ subroutine setaux1d(ixyz,mbc,mx1,maxm,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux
     !       3 mu
     !       4 cp
     !       5 cs
-    !       6 slip
+    !       6 slip (obtained from 2d aux in step3.f)
     !       7 nx at lower wall in e1 direction
     !       8 ny at lower wall in e1 direction
     !       9 nz at lower wall in e1 direction
@@ -37,9 +37,6 @@ subroutine setaux1d(ixyz,mbc,mx1,maxm,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux
     real(kind=8) :: nx1, nx2, nx3
     integer :: i
 
-    real (kind=8) :: center(3), theta, xcb(2), ycb(2), mindepth
-    common /fault/  center, theta, xcb, ycb, mindepth
-
     lambda_cell = 60.d9  ! Pa
     mu_cell = 30.d9      ! Pa
     rho_cell = 2500.d0   ! kg/m**3
@@ -53,17 +50,6 @@ subroutine setaux1d(ixyz,mbc,mx1,maxm,x1lower,x2val,x3val,dx1,dx2,dx3,t,maux,aux
       aux(3,i,iout) = mu_cell
       aux(4,i,iout) = cp
       aux(5,i,iout) = cs
-
-      ! set slip
-      if ((ixyz == 3) .and. (t < 1.d0) .and. &
-          (abs(x1cell-0.5d0*dx1-center(3)) < 0.5d0*dx1) .and. &
-          (xcb(1) <= x2val) .and. (x2val <= xcb(2)) .and. &
-          (ycb(1) <= x3val) .and. (x3val <= ycb(2))) then
-
-        aux(6,i,iout) = 1.d0
-      else
-        aux(6,i,iout) = 0.d0
-      end if
 
       ! compute mapping info for lower face in e1 direction
       x1ccorn(1) = x1cell - 0.5d0*dx1 ! p1 dot e1
