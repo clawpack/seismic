@@ -93,8 +93,8 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
     nym = aux2(map+1,i1)
     slipm = aux2(13,i1)
     nx2m = nxm*nxm
-  	ny2m = nym*nym
-  	nxym = nxm*nym
+    ny2m = nym*nym
+    nxym = nxm*nym
 
   !Define direction of normal to grid edge normals for upgoing fluctuation
     nxp = aux3(map,i1)

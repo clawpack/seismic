@@ -274,32 +274,32 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 
         if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
             ! transverse direction is y
-            txb = 0.d0
+            txb = 1.d0
             tyb = 0.d0
-            tzb = 1.d0
-            ttxb = 1.d0
+            tzb = 0.d0
+            ttxb = 0.d0
             ttyb = 0.d0
-            ttzb = 0.d0
-            txa = 0.d0
+            ttzb = 1.d0
+            txa = 1.d0
             tya = 0.d0
-            tza = 1.d0
-            ttxa = 1.d0
+            tza = 0.d0
+            ttxa = 0.d0
             ttya = 0.d0
-            ttza = 0.d0
+            ttza = 1.d0
         else
             ! transverse direction is x or z
-            txb = 0.d0
-            tyb = 1.d0
-            tzb = 0.d0
-            ttxb = -nzb
-            ttyb = 0.d0
-            ttzb = nxb
-            txa = 0.d0
-            tya = 1.d0
-            tza = 0.d0
-            ttxa = -nza
-            ttya = 0.d0
-            ttza = nxa
+            txb = -nzb
+            tyb = 0.d0
+            tzb = nxb
+            ttxb = 0.d0
+            ttyb = 1.d0
+            ttzb = 0.d0
+            txa = -nza
+            tya = 0.d0
+            tza = nxa
+            ttxa = 0.d0
+            ttya = 1.d0
+            ttza = 0.d0
         end if
 
 
