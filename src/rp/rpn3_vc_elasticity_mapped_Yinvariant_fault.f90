@@ -114,24 +114,36 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         dv = ql(v,i) - qr(v,i-1)
         dw = ql(w,i) - qr(w,i-1)
 
+        slip = auxl(6,i)
         nx = auxl(7,i)
         ny = auxl(8,i)
         nz = auxl(9,i)
         arearatio = auxl(10,i)
-        slip = auxl(6,i)
+
+        ! Given normal, determine tangents so that t, tt form
+        ! orthogonal basis for face i-1/2 where tt = n x t
 
         ! ***the remainder only works for y-invariant mapping ***
-        if (ixyz .eq. 2) then
-            tx = 1.d0
-            ty = 0.d0
+        if (ixyz .eq. 1) 
+            tx = 0.d0
+            ty = 1.d0
             tz = 0.d0
-            ttx = 0.d0
+            ttx = -nz
             tty = 0.d0
-            ttz = 1.d0
-        else
-            tx = -nz
+            ttz = nx
+            slip = 0.d0
+        if (ixyz .eq. 2) then
+            tx = 0.d0
             ty = 0.d0
-            tz = nx
+            tz = 1.d0
+            ttx = 1.d0
+            tty = 0.d0
+            ttz = 0.d0
+            slip = 0.d0
+        else
+            tx = nz
+            ty = 0.d0
+            tz = -nx
             ttx = 0.d0
             tty = 1.d0
             ttz = 0.d0
@@ -176,10 +188,10 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         a2 = (cpl*dsig_n - bulkl*du_n) / det
 
         ! Compute the S-wave strengths depending on if slip is imposed:
-        if (ixyz == 3 .and. dabs(slip) > 1.d-10) then
-            a3 = (qr(7,i-1)*nz - qr(8,i-1)*nx - 0.5d0*slip)/csl
+        if (dabs(slip) > 1.d-10) then
+            a3 = (qr(7,i-1)*tx + qr(8,i-1)*tz - 0.5d0*slip)/csl
             a4 = 0.d0
-            a5 = (ql(7,i)  *nz - ql(8,i)  *nx + 0.5d0*slip)/csr
+            a5 = (ql(7,i)*tx + ql(8,i)*tz + 0.5d0*slip)/csr
             a6 = 0.d0
         else
             det = mul*csr + mur*csl

@@ -25,13 +25,13 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 !     #    ixyz indicates the direction of the original Riemann solve,
 !     #         called the x-like direction in the table below:
 
-!     #               x-like direction   y-like direction   z-like direction
-!     #      ixyz=1:        x                  y                  z
-!     #      ixyz=2:        y                  z                  x
-!     #      ixyz=3:        z                  x                  y
+!     #                e1 direction   e2 direction   e3 direction
+!     #      ixyz=1:         x              y              z
+!     #      ixyz=2:         y              z              x
+!     #      ixyz=3:         z              x              y
 
-!     #    icoor indicates direction in which the transverse solve should
-!     #         be performed.
+!     #    icoor indicates direction in which the double-transverse solve 
+!     #         should be performed.
 !     #      icoor=2: split in the y-like direction.
 !     #      icoor=3: split in the z-like direction.
 
@@ -58,9 +58,9 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 !     #    aux2(:,:,2) is a 1d slice of the aux array along the row
 !     #                 where the data ql, qr lie.
 !     #    aux1(:,:,2) and aux3(:,:,2) are neighboring rows in the
-!     #                 y-like direction
+!     #                 e2 direction
 !     #    aux2(:,:,1) and aux2(:,:,3) are neighboring rows in the
-!     #                z-like direction
+!     #                 e3 direction
 
 
     implicit none
@@ -272,36 +272,53 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
             endif
         endif
 
-        if (ixyz + icoor == 3 .or. ixyz + icoor == 6) then
-            ! transverse direction is y
+        if (mod(ixyz+icoor-1,3) == 1) then
+            ! double-transverse direction is x
+            txb = 0.d0
+            tyb = 1.d0
+            tzb = 0.d0
+            ttxb = -nzb
+            ttyb = 0.d0
+            ttzb = nxb
+            slipb = 0.d0
+            txa = 0.d0
+            tya = 1.d0
+            tza = 0.d0
+            ttxa = -nza
+            ttya = 0.d0
+            ttza = nxa
+            slipa = 0.d0
+        if (mod(ixyz+icoor-1,3) == 2) then
+            ! double-transverse direction is y
             txb = 1.d0
             tyb = 0.d0
             tzb = 0.d0
             ttxb = 0.d0
             ttyb = 0.d0
             ttzb = 1.d0
+            slipb = 0.d0
             txa = 1.d0
             tya = 0.d0
             tza = 0.d0
             ttxa = 0.d0
             ttya = 0.d0
             ttza = 1.d0
+            slipa = 0.d0
         else
-            ! transverse direction is x or z
-            txb = -nzb
+            ! double-transverse direction is z
+            txb = nzb
             tyb = 0.d0
-            tzb = nxb
+            tzb = -nxb
             ttxb = 0.d0
             ttyb = 1.d0
             ttzb = 0.d0
-            txa = -nza
+            txa = nza
             tya = 0.d0
-            tza = nxa
+            tza = -nxa
             ttxa = 0.d0
             ttya = 1.d0
             ttza = 0.d0
         end if
-
 
         ! Compute normal/tangent jumps in stress/velocity
         dsig_nb = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*nxb &
@@ -340,8 +357,7 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
 
         ! Compute the S-wave strengths depending on slip (a3,a4 downward, a5,a6 upward)
         det = mub*cs + mu*csb
-        if (det < 1.d-10 .or. &
-          (ixyz + icoor == 4 .and. slipb > 1.d-10)) then
+        if (det < 1.d-10 .or. slipb > 1.d-10)) then
           a3 = 0.d0
           a4 = 0.d0
         else
@@ -350,8 +366,7 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
         end if
 
         det = mua*cs + mu*csa
-        if (det < 1.d-10 .or. &
-          (ixyz + icoor == 4 .and. slipa > 1.d-10)) then
+        if (det < 1.d-10 .or. slipa > 1.d-10)) then
           a5 = 0.d0
           a6 = 0.d0
         else
