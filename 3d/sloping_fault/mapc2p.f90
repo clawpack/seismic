@@ -1,12 +1,11 @@
 subroutine mapc2p(xc, yc, zc, xp, yp, zp)
+
+    use fault_module, only: center, theta, xcb, ycb
+
     implicit none
 
     real(kind=8), intent(in) :: xc, yc, zc
     real(kind=8), intent(out) :: xp, yp, zp
-
-    ! Variables from setprob:
-    real (kind=8) :: center(3), theta, xcb(2), ycb(2), mindepth
-    common /fault/  center, theta, xcb, ycb, mindepth
 
     ! Local variables
     real (kind=8) :: ls, alpha, xrot, zrot
@@ -19,7 +18,7 @@ subroutine mapc2p(xc, yc, zc, xp, yp, zp)
       ls = dabs(zc - center(3))
     end if
 
-    alpha = ls/mindepth
+    alpha = ls/(-center(3))
     xrot = center(1) + dcos(theta)*(xc-center(1)) + dsin(theta)*(zc-center(3))
     zrot = center(3) - dsin(theta)*(xc-center(1)) + dcos(theta)*(zc-center(3))
 

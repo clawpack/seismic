@@ -38,12 +38,13 @@ SEISLIB = $(CLAW)/seismic/src/3d
 MODULES = \
   $(CLAW)/classic/src/utility_module.f90 \
   $(SEISLIB)/amr_module.f90 \
+  $(SEISLIB)/fault_module.f90 \
   $(SEISLIB)/regions_module.f90 \
   $(SEISLIB)/slices_module.f90 \
   $(AMRLIB)/gauges_module.f90
 
 SOURCES = \
-  ./advanc_debug.f \
+  ./advanc_noqad.f \
   ./b4step3.f90 \
   ./bc3amr.f \
   ./mapc2p.f90 \

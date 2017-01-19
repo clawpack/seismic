@@ -17,7 +17,8 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
     integer :: i,j,k
 
     ! Auxiliary variables:
-    !       1 capacity function value
+    !       1 slip
+    !       2 capacity function value
 
     ! Loop over all cells
     do k=1-mbc,mz + mbc
@@ -27,7 +28,7 @@ subroutine setaux(mbc,mx,my,mz,xlower,ylower,zlower,dx,dy,dz,maux,aux)
         do i=1-mbc,mx + mbc
           xcell = xlower + (i-0.5d0)*dx
 
-          ! set slip to zero here... actually set in b4step
+          ! initialize slip to zero
           aux(1,i,j,k) = 0.d0
 
           ! compute capacity function value ( volume = (vol of lower face in y direction)*dy )
