@@ -9,6 +9,9 @@ that will be read in by the Fortran code.
 import os
 import numpy as np
 from clawpack.seismic.data import SliceData
+import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+reload(dtopotools)
+from mapping import Mapping
 
 #------------------------------
 def setrun(claw_pkg='amrclaw'):
@@ -41,18 +44,31 @@ def setrun(claw_pkg='amrclaw'):
     probdata.add_param('domain_depth', 300e3, 'depth of domain')
     probdata.add_param('domain_width', 600e3, 'width of domain (in x direction)')
     probdata.add_param('domain_length', 300e3, 'length of domain (in y direction)')
-    probdata.add_param('fault_xcenter', 25e3, 'centroid of fault (x)')
-    probdata.add_param('fault_ycenter', 0.0, 'centroid of fault (y)')
-    probdata.add_param('fault_width', 50e3, 'width of fault (in x direction)')
-    probdata.add_param('fault_length', 25e3, 'width of fault (in y direction)')
-    probdata.add_param('fault_dip', 0.2, 'angle of fault dip')
-    probdata.add_param('fault_depth', 20e3, 'depth of fault centroid')
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
     #------------------------------------------------------------------
 
     clawdata = rundata.clawdata  # initialized when rundata instantiated
+
+
+    #------------------------------------------------------------------
+    # Read in fault information
+    #------------------------------------------------------------------
+    fault = dtopotools.Fault()
+    fault.read('fault.data')
+
+    mapping = Mapping(fault)
+    fault_length = mapping.fault_length
+    fault_width = mapping.fault_width
+    fault_depth = mapping.fault_depth
+    fault_xcenter = mapping.xcenter
+    fault_ycenter = mapping.ycenter
+
+    rupture_rise_time = 0.0
+    for subfault in fault.subfaults:
+        rupture_rise_time = max(rupture_rise_time,subfault.rupture_time
+                                    + subfault.rise_time)
 
     # ---------------
     # Spatial domain
@@ -64,8 +80,8 @@ def setrun(claw_pkg='amrclaw'):
     # Number of grid cells
     num_cells_fault_width = 10
     num_cells_fault_length = 5
-    dx = probdata.fault_width/num_cells_fault_width
-    dy = probdata.fault_length/num_cells_fault_length
+    dx = fault_width/num_cells_fault_width
+    dy = fault_length/num_cells_fault_length
 
     # determine cell number and set computational boundaries
     target_num_cells = np.rint(probdata.domain_width/dx)    # x direction
@@ -73,8 +89,8 @@ def setrun(claw_pkg='amrclaw'):
     num_cells_above = target_num_cells - num_cells_below - num_cells_fault_width
     if (int(num_cells_below + num_cells_fault_width + num_cells_above) % 2 == 1):
         num_cells_above += 1
-    clawdata.lower[0] = probdata.fault_xcenter-0.5*probdata.fault_width-num_cells_below*dx
-    clawdata.upper[0] = probdata.fault_xcenter+0.5*probdata.fault_width+num_cells_above*dx
+    clawdata.lower[0] = fault_xcenter-0.5*fault_width-num_cells_below*dx
+    clawdata.upper[0] = fault_xcenter+0.5*fault_width+num_cells_above*dx
     clawdata.num_cells[0] = int(num_cells_below + num_cells_fault_width + num_cells_above)
 
     target_num_cells = np.rint(probdata.domain_length/dy)    # y direction
@@ -82,17 +98,17 @@ def setrun(claw_pkg='amrclaw'):
     num_cells_above = target_num_cells - num_cells_below - num_cells_fault_length
     if (int(num_cells_below + num_cells_fault_length + num_cells_above) % 2 == 1):
         num_cells_above += 1
-    clawdata.lower[1] = probdata.fault_ycenter-0.5*probdata.fault_length-num_cells_below*dy
-    clawdata.upper[1] = probdata.fault_ycenter+0.5*probdata.fault_length+num_cells_above*dy
+    clawdata.lower[1] = fault_ycenter-0.5*fault_length-num_cells_below*dy
+    clawdata.upper[1] = fault_ycenter+0.5*fault_length+num_cells_above*dy
     clawdata.num_cells[1] = int(num_cells_below + num_cells_fault_length + num_cells_above)
 
-    num_cells_above = np.rint(probdata.fault_depth/min(dx,dy))    # z direction
-    dz = probdata.fault_depth/num_cells_above
+    num_cells_above = np.rint(fault_depth/min(dx,dy))    # z direction
+    dz = fault_depth/num_cells_above
     target_num_cells = np.rint(probdata.domain_depth/dz)
     num_cells_below = target_num_cells - num_cells_above
     if (int(num_cells_below + num_cells_above) % 2 == 1):
         num_cells_below += 1
-    clawdata.lower[2] = -probdata.fault_depth - num_cells_below*dz
+    clawdata.lower[2] = -fault_depth - num_cells_below*dz
     clawdata.upper[2] = 0.0
     clawdata.num_cells[2] = int(num_cells_below + num_cells_above)
 
@@ -282,7 +298,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [1.0,40.0]
+      clawdata.checkpt_times = [1.0]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)
@@ -356,15 +372,15 @@ def setrun(claw_pkg='amrclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
     zbuffer = dz
-    xcb = [probdata.fault_xcenter-0.5*probdata.fault_width,probdata.fault_ycenter+0.5*probdata.fault_width]
-    ycb = [probdata.fault_ycenter-0.5*probdata.fault_length,probdata.fault_ycenter+0.5*probdata.fault_length]
+    xcb = [fault_xcenter-0.5*fault_width,fault_ycenter+0.5*fault_width]
+    ycb = [fault_ycenter-0.5*fault_length,fault_ycenter+0.5*fault_length]
 
     # high-resolution region to surround the fault during slip
     regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 
                     0,1,
                     xcb[0],xcb[1],
                     ycb[0],ycb[1],
-                    -probdata.fault_depth-dz, -probdata.fault_depth+dz])
+                    -fault_depth-dz, -fault_depth+dz])
 
     # decreasing-resolution for cells further away from fault
     for j in range(amrdata.amr_levels_max-1):
@@ -372,7 +388,7 @@ def setrun(claw_pkg='amrclaw'):
                     0,1e9,
                     -1e9,1e9,
                     -1e9,1e9,
-                    -2.0*probdata.fault_depth-j*zbuffer,0.0])
+                    -2.0*fault_depth-j*zbuffer,0.0])
 
     regions.append([1,1, 0,1e9, -1.e9,1e9, -1e9,1e9,-1e9, 0.])
 
@@ -399,7 +415,7 @@ def setrun(claw_pkg='amrclaw'):
     # by a point (x,y,z) and a normal direction (vx,vy,vz)
     # e.g. slicedata.add([x,y,z],[nx,ny,nz])
 
-    point = [probdata.fault_xcenter,probdata.fault_ycenter,-0.0001]
+    point = [fault_xcenter,fault_ycenter,-0.0001]
     # surface slice:
     slicedata.add(point,[0.0,0.0,1.0])
 

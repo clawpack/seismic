@@ -62,6 +62,7 @@ class Mapping(object):
         xcr = xcenter + 0.5*fault_width
 
         self.fault_width = fault_width
+        self.fault_length = fault_length
         self.fault_depth = -zcenter
         self.xcenter = xcenter
         self.ycenter = ycenter
