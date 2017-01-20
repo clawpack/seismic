@@ -74,8 +74,8 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
 
     ! Variables for the mapping in the xy plane
     double precision :: nx, ny, nz, arearatio
-    real(kind=8) :: tx1, ty1, tz1, tx2, ty2, tz2
-    real(kind=8) :: dsig_n, dsig_t1, dsig_t2, du_n, du_t1, du_t2, slip
+    real(kind=8) :: tx, ty, tz, ttx, tty, ttz
+    real(kind=8) :: dsig_n, dsig_t, dsig_tt, du_n, du_t, du_tt, slip
 
 
 
@@ -114,40 +114,28 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         dv = ql(v,i) - qr(v,i-1)
         dw = ql(w,i) - qr(w,i-1)
 
-        slip = auxl(6,i)
         nx = auxl(7,i)
         ny = auxl(8,i)
         nz = auxl(9,i)
         arearatio = auxl(10,i)
+        slip = auxl(6,i)
 
-        ! Given normal, determine tangent so
-        ! t1 faces in slip direction if ixyz=3 
-        ! or arbitrary otherwise
-
-        ! ***** Note this section makes assumptions *****
-        ! ***** about the grid mapping an should be *****
-        ! ***** generalized eventually.             *****
-        if (ixyz .eq. 1) then
-            tx1 = 0.d0
-            ty1 = 1.d0
-            tz1 = 0.d0
-            slip = 0.d0
-        else if (ixyz .eq. 2) then
-            tx1 = 0.d0
-            ty1 = 0.d0
-            tz1 = 1.d0
-            slip = 0.d0
+        ! ***the remainder only works for y-invariant mapping ***
+        if (ixyz .eq. 2) then
+            tx = 1.d0
+            ty = 0.d0
+            tz = 0.d0
+            ttx = 0.d0
+            tty = 0.d0
+            ttz = 1.d0
         else
-            tx1 = nz
-            ty1 = 0.d0
-            tz1 = -nx
+            tx = -nz
+            ty = 0.d0
+            tz = nx
+            ttx = 0.d0
+            tty = 1.d0
+            ttz = 0.d0
         end if
-        ! ***** the rest of the solver is general  *****
-
-        ! Set t2 = n x t1
-        tx2 = ny*tz1 - nz*ty1
-        ty2 = nz*tx1 - nx*tz1
-        tz2 = nx*ty1 - ny*tx1
 
         ! Compute normal/tangent jumps in stress/velocity
         dsig_n = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*nx &
@@ -155,15 +143,15 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
                 +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*nz
         du_n = du*nx + dv*ny + dw*nz
 
-        dsig_t1 = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*tx1 &
-                 +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*ty1 &
-                 +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*tz1
-        du_t1 = du*tx1 + dv*ty1 + dw*tz1
+        dsig_t = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*tx &
+                 +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*ty &
+                 +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*tz
+        du_t = du*tx + dv*ty + dw*tz
 
-        dsig_t2 = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*tx2 &
-                +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*ty2 &
-                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*tz2
-        du_t2 = du*tx2 + dv*ty2 + dw*tz2
+        dsig_tt = (dsig_xx*nx + dsig_xy*ny + dsig_xz*nz)*ttx &
+                +(dsig_xy*nx + dsig_yy*ny + dsig_yz*nz)*tty &
+                +(dsig_xz*nx + dsig_yz*ny + dsig_zz*nz)*ttz
+        du_tt = du*ttx + dv*tty + dw*ttz
 
         ! material properties in cells i (on right) and i-1 (on left):
         lamr = auxl(2,i)
@@ -188,10 +176,10 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         a2 = (cpl*dsig_n - bulkl*du_n) / det
 
         ! Compute the S-wave strengths depending on if slip is imposed:
-        if (dabs(slip) > 1.d-10) then
-            a3 = -(qr(7,i-1)*tx1 + qr(8,i-1)*ty1 + qr(9,i-1)*tz1 - 0.5d0*slip)/csl
+        if (ixyz == 3 .and. dabs(slip) > 1.d-10) then
+            a3 = (qr(7,i-1)*nz - qr(8,i-1)*nx - 0.5d0*slip)/csl
             a4 = 0.d0
-            a5 = -(ql(7,i)*tx1 + ql(8,i)*ty1 + ql(9,i)*tz1 + 0.5d0*slip)/csr
+            a5 = (ql(7,i)  *nz - ql(8,i)  *nx + 0.5d0*slip)/csr
             a6 = 0.d0
         else
             det = mul*csr + mur*csl
@@ -201,10 +189,10 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
                 a5 = 0.d0
                 a6 = 0.d0
             else
-                a3 = (csr*dsig_t1 + mur*du_t1) / det
-                a4 = (csr*dsig_t2 + mur*du_t2) / det
-                a5 = (csl*dsig_t1 - mul*du_t1) / det
-                a6 = (csl*dsig_t2 - mul*du_t2) / det
+                a3 = (csr*dsig_t + mur*du_t) / det
+                a4 = (csr*dsig_tt + mur*du_tt) / det
+                a5 = (csl*dsig_t - mul*du_t) / det
+                a6 = (csl*dsig_tt - mul*du_tt) / det
             end if
         end if
 
@@ -212,9 +200,7 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         wave(sig_xx,1,i) = a1 * (laml + 2.d0*mul*nx*nx)
         wave(sig_yy,1,i) = a1 * (laml + 2.d0*mul*ny*ny)
         wave(sig_zz,1,i) = a1 * (laml + 2.d0*mul*nz*nz)
-        wave(sig_xy,1,i) = a1 * 2.d0*mul*nx*ny
         wave(sig_xz,1,i) = a1 * 2.d0*mul*nx*nz
-        wave(sig_yz,1,i) = a1 * 2.d0*mul*ny*nz
         wave(u,1,i) = a1 * cpl*nx
         wave(v,1,i) = a1 * cpl*ny
         wave(w,1,i) = a1 * cpl*nz
@@ -224,60 +210,50 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         wave(sig_xx,2,i) = a2 * (lamr + 2.d0*mur*nx*nx)
         wave(sig_yy,2,i) = a2 * (lamr + 2.d0*mur*ny*ny)
         wave(sig_zz,2,i) = a2 * (lamr + 2.d0*mur*nz*nz)
-        wave(sig_xy,2,i) = a2 * 2.d0*mur*nx*ny
         wave(sig_xz,2,i) = a2 * 2.d0*mur*nx*nz
-        wave(sig_yz,2,i) = a2 * 2.d0*mur*ny*nz
         wave(u,2,i) = -a2 * cpr*nx
         wave(v,2,i) = -a2 * cpr*ny
         wave(w,2,i) = -a2 * cpr*nz
         s(2,i) = cpr
 
         wave(:,3,i) = 0.d0
-        wave(sig_xx,3,i) = a3 * 2.d0*mul*nx*tx1
-        wave(sig_yy,3,i) = a3 * 2.d0*mul*ny*ty1
-        wave(sig_zz,3,i) = a3 * 2.d0*mul*nz*tz1
-        wave(sig_xy,3,i) = a3 * mul*(nx*ty1 + ny*tx1)
-        wave(sig_xz,3,i) = a3 * mul*(nx*tz1 + nz*tx1)
-        wave(sig_yz,3,i) = a3 * mul*(ny*tz1 + nz*ty1)
-        wave(u,3,i) = a3 * csl*tx1
-        wave(v,3,i) = a3 * csl*ty1
-        wave(w,3,i) = a3 * csl*tz1
+        wave(sig_xx,3,i) = a3 * 2.d0*mul*nx*tx
+        wave(sig_zz,3,i) = a3 * 2.d0*mul*nz*tz
+        wave(sig_xy,3,i) = a3 * mul*(nx*ty + ny*tx)
+        wave(sig_yz,3,i) = a3 * mul*(ny*tz + nz*ty)
+        wave(sig_xz,3,i) = a3 * mul*(nx*tz + nz*tx)
+        wave(u,3,i) = a3 * csl*tx
+        wave(v,3,i) = a3 * csl*ty
+        wave(w,3,i) = a3 * csl*tz
         s(3,i) = -csl
 
         wave(:,4,i) = 0.d0
-        wave(sig_xx,4,i) = a4 * 2.d0*mul*nx*tx2
-        wave(sig_yy,4,i) = a4 * 2.d0*mul*ny*ty2
-        wave(sig_zz,4,i) = a4 * 2.d0*mul*nz*tz2
-        wave(sig_xy,4,i) = a4 * mul*(nx*ty2 + ny*tx2)
-        wave(sig_xz,4,i) = a4 * mul*(nx*tz2 + nz*tx2)
-        wave(sig_yz,4,i) = a4 * mul*(ny*tz2 + nz*ty2)
-        wave(u,4,i) = a4 * csl*tx2
-        wave(v,4,i) = a4 * csl*ty2
-        wave(w,4,i) = a4 * csl*tz2
+        wave(sig_xy,4,i) = a4 * mul*(nx*tty + ny*ttx)
+        wave(sig_yz,4,i) = a4 * mul*(nz*tty + ny*ttz)
+        wave(sig_xz,4,i) = a4 * mul*(nx*ttz + nz*ttx)
+        wave(u,4,i) = a4 * csl*ttx
+        wave(v,4,i) = a4 * csl*tty
+        wave(w,4,i) = a4 * csl*ttz
         s(4,i) = -csl
 
         wave(:,5,i) = 0.d0
-        wave(sig_xx,5,i) = a5 * 2.d0*mur*nx*tx1
-        wave(sig_yy,5,i) = a5 * 2.d0*mur*ny*ty1
-        wave(sig_zz,5,i) = a5 * 2.d0*mur*nz*tz1
-        wave(sig_xy,5,i) = a5 * mur*(nx*ty1 + ny*tx1)
-        wave(sig_xz,5,i) = a5 * mur*(nx*tz1 + nz*tx1)
-        wave(sig_yz,5,i) = a5 * mur*(ny*tz1 + nz*ty1)
-        wave(u,5,i) = -a5 * csr*tx1
-        wave(v,5,i) = -a5 * csr*ty1
-        wave(w,5,i) = -a5 * csr*tz1
+        wave(sig_xx,5,i) = a5 * 2.d0*mur*nx*tx
+        wave(sig_zz,5,i) = a5 * 2.d0*mur*nz*tz
+        wave(sig_xy,5,i) = a5 * mur*(nx*ty + ny*tx)
+        wave(sig_yz,5,i) = a5 * mur*(ny*tz + nz*ty)
+        wave(sig_xz,5,i) = a5 * mur*(nx*tz + nz*tx)
+        wave(u,5,i) = -a5 * csr*tx
+        wave(v,5,i) = -a5 * csr*ty
+        wave(w,5,i) = -a5 * csr*tz
         s(5,i) = csr
 
         wave(:,6,i) = 0.d0
-        wave(sig_xx,6,i) = a6 * 2.d0*mur*nx*tx2
-        wave(sig_yy,6,i) = a6 * 2.d0*mur*ny*ty2
-        wave(sig_zz,6,i) = a6 * 2.d0*mur*nz*tz2
-        wave(sig_xy,6,i) = a6 * mur*(nx*ty2 + ny*tx2)
-        wave(sig_xz,6,i) = a6 * mur*(nx*tz2 + nz*tx2)
-        wave(sig_yz,6,i) = a6 * mur*(ny*tz2 + nz*ty2)
-        wave(u,6,i) = -a6 * csr*tx2
-        wave(v,6,i) = -a6 * csr*ty2
-        wave(w,6,i) = -a6 * csr*tz2
+        wave(sig_xy,6,i) = a6 * mur*(nx*tty + ny*ttx)
+        wave(sig_yz,6,i) = a6 * mur*(nz*tty + ny*ttz)
+        wave(sig_xz,6,i) = a6 * mur*(nx*ttz + nz*ttx)
+        wave(u,6,i) = -a6 * csr*ttx
+        wave(v,6,i) = -a6 * csr*tty
+        wave(w,6,i) = -a6 * csr*ttz
         s(6,i) = csr
 
 
