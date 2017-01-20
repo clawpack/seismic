@@ -372,7 +372,7 @@ def setrun(claw_pkg='amrclaw'):
     # to specify regions of refinement append lines of the form
     #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
     zbuffer = dz
-    xcb = [fault_xcenter-0.5*fault_width,fault_ycenter+0.5*fault_width]
+    xcb = [fault_xcenter-0.5*fault_width,fault_xcenter+0.5*fault_width]
     ycb = [fault_ycenter-0.5*fault_length,fault_ycenter+0.5*fault_length]
 
     # high-resolution region to surround the fault during slip

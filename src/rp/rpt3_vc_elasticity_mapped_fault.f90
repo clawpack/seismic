@@ -73,12 +73,11 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
     double precision :: lam, mu, bulk, cp, cs, slipb, slipa
     double precision :: det, a1, a2, a3, a4, a5, a6
 
-    ! Variables for the mapping in the xz plane
     double precision :: nxa,nya, nza, nxb, nyb, nzb, arearatioa, arearatiob
-    real(kind=8) :: txa, tya, tza, ttxa, ttya, ttza
-    real(kind=8) :: dsig_na, dsig_ta, dsig_tta, du_na, du_ta, du_tta
-    real(kind=8) :: txb, tyb, tzb, ttxb, ttyb, ttzb
-    real(kind=8) :: dsig_nb, dsig_tb, dsig_ttb, du_nb, du_tb, du_ttb
+    real(kind=8) :: tx1a, ty1a, tz1a, tx2a, ty2a, tz2a
+    real(kind=8) :: dsig_na, dsig_t1a, dsig_t2a, du_na, du_t1a, du_t2a
+    real(kind=8) :: tx1b, ty1b, tz1b, tx2b, ty2b, tz2b
+    real(kind=8) :: dsig_nb, dsig_t1b, dsig_t2b, du_nb, du_t1b, du_t2b
 
 !   These are just for readability
     sig_xx = 1
@@ -188,53 +187,48 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
             csa = aux2(5,iadj,3)
         endif
 
+        ! ***** Note this section makes assumptions *****
+        ! ***** about the grid mapping an should be *****
+        ! ***** generalized eventually.             *****
         if (mod(ixyz+icoor-1,3) == 1) then
             ! transverse direction is x
-            txb = 0.d0
-            tyb = 1.d0
-            tzb = 0.d0
-            ttxb = -nzb
-            ttyb = 0.d0
-            ttzb = nxb
+            tx1b = 0.d0
+            ty1b = 1.d0
+            tz1b = 0.d0
             slipb = 0.d0
-            txa = 0.d0
-            tya = 1.d0
-            tza = 0.d0
-            ttxa = -nza
-            ttya = 0.d0
-            ttza = nxa
+            tx1a = 0.d0
+            ty1a = 1.d0
+            tz1a = 0.d0
             slipa = 0.d0
-        if (mod(ixyz+icoor-1,3) == 2) then
+        else if (mod(ixyz+icoor-1,3) == 2) then
             ! transverse direction is y
-            txb = 1.d0
-            tyb = 0.d0
-            tzb = 0.d0
-            ttxb = 0.d0
-            ttyb = 0.d0
-            ttzb = 1.d0
+            tx1b = 1.d0
+            ty1b = 0.d0
+            tz1b = 0.d0
             slipb = 0.d0
-            txa = 1.d0
-            tya = 0.d0
-            tza = 0.d0
-            ttxa = 0.d0
-            ttya = 0.d0
-            ttza = 1.d0
+            tx1a = 1.d0
+            ty1a = 0.d0
+            tz1a = 0.d0
             slipa = 0.d0
         else
             ! transverse direction is z
-            txb = nzb
-            tyb = 0.d0
-            tzb = -nxb
-            ttxb = 0.d0
-            ttyb = 1.d0
-            ttzb = 0.d0
-            txa = nza
-            tya = 0.d0
-            tza = -nxa
-            ttxa = 0.d0
-            ttya = 1.d0
-            ttza = 0.d0
+            tx1b = -nzb
+            ty1b = 0.d0
+            tz1b = nxb
+            tx1a = -nza
+            ty1a = 0.d0
+            tz1a = nxa
         end if
+        ! ***** the rest of the solver is general  *****
+
+        ! Set t2 = n x t1
+        tx2b = nyb*tz1b - nzb*ty1b
+        ty2b = nzb*tx1b - nxb*tz1b
+        tz2b = nxb*ty1b - nyb*tx1b
+
+        tx2a = nya*tz1a - nza*ty1a
+        ty2a = nza*tx1a - nxa*tz1a
+        tz2a = nxa*ty1a - nya*tx1a
 
         ! Compute normal/tangent jumps in stress/velocity
         dsig_nb = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*nxb &
@@ -242,30 +236,30 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
                 +(dsig_xz*nxb + dsig_yz*nyb + dsig_zz*nzb)*nzb
         du_nb = du*nxb + dv*nyb + dw*nzb
 
-        dsig_tb = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*txb &
-                +(dsig_xy*nxb + dsig_yy*nyb + dsig_yz*nzb)*tyb &
-                +(dsig_xz*nxb + dsig_yz*nyb + dsig_zz*nzb)*tzb
-        du_tb = du*txb + dv*tyb + dw*tzb
+        dsig_t1b = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*tx1b &
+                +(dsig_xy*nxb + dsig_yy*nyb + dsig_yz*nzb)*ty1b &
+                +(dsig_xz*nxb + dsig_yz*nyb + dsig_zz*nzb)*tz1b
+        du_t1b = du*tx1b + dv*ty1b + dw*tz1b
 
-        dsig_ttb = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*ttxb &
-                 +(dsig_xy*nxb + dsig_yy*nyb + dsig_yz*nzb)*ttyb &
-                 +(dsig_xz*nxb + dsig_yz*nyb + dsig_zz*nzb)*ttzb
-        du_ttb = du*ttxb + dv*ttyb + dw*ttzb
+        dsig_t2b = (dsig_xx*nxb + dsig_xy*nyb + dsig_xz*nzb)*tx2b &
+                 +(dsig_xy*nxb + dsig_yy*nyb + dsig_yz*nzb)*ty2b &
+                 +(dsig_xz*nxb + dsig_yz*nyb + dsig_zz*nzb)*tz2b
+        du_t2b = du*tx2b + dv*ty2b + dw*tz2b
 
         dsig_na = (dsig_xx*nxa + dsig_xy*nya + dsig_xz*nza)*nxa &
                 +(dsig_xy*nxa + dsig_yy*nya + dsig_yz*nza)*nya &
                 +(dsig_xz*nxa + dsig_yz*nya + dsig_zz*nza)*nza
         du_na = du*nxa + dv*nya + dw*nza
 
-        dsig_ta = (dsig_xx*nxa + dsig_xy*nya + dsig_xz*nza)*txa &
-                +(dsig_xy*nxa + dsig_yy*nya + dsig_yz*nza)*tya &
-                +(dsig_xz*nxa + dsig_yz*nya + dsig_zz*nza)*tza
-        du_ta = du*txa + dv*tya + dw*tza
+        dsig_t1a = (dsig_xx*nxa + dsig_xy*nya + dsig_xz*nza)*tx1a &
+                +(dsig_xy*nxa + dsig_yy*nya + dsig_yz*nza)*ty1a &
+                +(dsig_xz*nxa + dsig_yz*nya + dsig_zz*nza)*tz1a
+        du_t1a = du*tx1a + dv*ty1a + dw*tz1a
 
-        dsig_tta = (dsig_xx*nxa + dsig_xy*nya + dsig_xz*nza)*ttxa &
-                 +(dsig_xy*nxa + dsig_yy*nya + dsig_yz*nza)*ttya &
-                 +(dsig_xz*nxa + dsig_yz*nya + dsig_zz*nza)*ttza
-        du_tta = du*ttxa + dv*ttya + dw*ttza
+        dsig_t2a = (dsig_xx*nxa + dsig_xy*nya + dsig_xz*nza)*tx2a &
+                 +(dsig_xy*nxa + dsig_yy*nya + dsig_yz*nza)*ty2a &
+                 +(dsig_xz*nxa + dsig_yz*nya + dsig_zz*nza)*tz2a
+        du_t2a = du*tx2a + dv*ty2a + dw*tz2a
 
         ! Compute the P-wave strengths (a1 downward, a2 upward)
         a1 = (cp*dsig_nb + bulk*du_nb) / (bulk*cpb + bulkb*cp)
@@ -273,21 +267,21 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
 
         ! Compute the S-wave strengths depending on slip (a3,a4 downward, a5,a6 upward)
         det = mub*cs + mu*csb
-        if (det < 1.d-10 .or. slipb > 1.d-10)) then
+        if (det < 1.d-10 .or. slipb > 1.d-10) then
           a3 = 0.d0
           a4 = 0.d0
         else
-          a3 = (cs*dsig_tb + mu*du_tb) / det
-          a4 = (cs*dsig_ttb + mu*du_ttb) / det
+          a3 = (cs*dsig_t1b + mu*du_t1b) / det
+          a4 = (cs*dsig_t2b + mu*du_t2b) / det
         end if
 
         det = mua*cs + mu*csa
-        if (det < 1.d-10 .or. slipa > 1.d-10)) then
+        if (det < 1.d-10 .or. slipa > 1.d-10) then
           a5 = 0.d0
           a6 = 0.d0
         else
-          a5 = (cs*dsig_ta - mu*du_ta) / det
-          a6 = (cs*dsig_tta - mu*du_tta) / det
+          a5 = (cs*dsig_t1a - mu*du_t1a) / det
+          a6 = (cs*dsig_t2a - mu*du_t2a) / det
         end if
 
         ! Compute waves
@@ -295,6 +289,7 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         wave(sig_xx,1) = a1 * (lamb + 2.d0*mub*nxb*nxb)
         wave(sig_yy,1) = a1 * (lamb + 2.d0*mub*nyb*nyb)
         wave(sig_zz,1) = a1 * (lamb + 2.d0*mub*nzb*nzb)
+        wave(sig_xy,1) = a1 * 2.d0*mub*nxb*nyb
         wave(sig_xz,1) = a1 * 2.d0*mub*nxb*nzb
         wave(sig_yz,1) = a1 * 2.d0*mub*nyb*nzb
         wave(u,1) = a1 * cpb*nxb
@@ -306,50 +301,60 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
         wave(sig_xx,2) = a2 * (lama + 2.d0*mua*nxa*nxa)
         wave(sig_yy,2) = a2 * (lama + 2.d0*mua*nya*nya)
         wave(sig_zz,2) = a2 * (lama + 2.d0*mua*nza*nza)
+        wave(sig_xy,2) = a2 * 2.d0*mua*nxa*nya
         wave(sig_xz,2) = a2 * 2.d0*mua*nxa*nza
+        wave(sig_yz,2) = a2 * 2.d0*mua*nya*nza
         wave(u,2) = -a2 * cpa*nxa
         wave(v,2) = -a2 * cpa*nya
         wave(w,2) = -a2 * cpa*nza
         s(2) = cpa
 
         wave(:,3) = 0.d0
-        wave(sig_xx,3) = a3 * 2.d0*mub*nxb*txb
-        wave(sig_zz,3) = a3 * 2.d0*mub*nzb*tzb
-        wave(sig_xy,3) = a3 * mub*(nxb*tyb + nyb*txb)
-        wave(sig_yz,3) = a3 * mub*(nyb*tzb + nzb*tyb)
-        wave(sig_xz,3) = a3 * mub*(nxb*tzb + nzb*txb)
-        wave(u,3) = a3 * csb*txb
-        wave(v,3) = a3 * csb*tyb
-        wave(w,3) = a3 * csb*tzb
+        wave(sig_xx,3) = a3 * 2.d0*mub*nxb*tx1b
+        wave(sig_yy,3) = a3 * 2.d0*mub*nyb*ty1b
+        wave(sig_zz,3) = a3 * 2.d0*mub*nzb*tz1b
+        wave(sig_xy,3) = a3 * mub*(nxb*ty1b + nyb*tx1b)
+        wave(sig_xz,3) = a3 * mub*(nxb*tz1b + nzb*tx1b)
+        wave(sig_yz,3) = a3 * mub*(nyb*tz1b + nzb*ty1b)
+        wave(u,3) = a3 * csb*tx1b
+        wave(v,3) = a3 * csb*ty1b
+        wave(w,3) = a3 * csb*tz1b
         s(3) = -csb
 
         wave(:,4) = 0.d0
-        wave(sig_xy,4) = a4 * mub*(nxb*ttyb + nyb*ttxb)
-        wave(sig_yz,4) = a4 * mub*(nzb*ttyb + nyb*ttzb)
-        wave(sig_xz,4) = a4 * mub*(nxb*ttzb + nzb*ttxb)
-        wave(u,4) = a4 * csb*ttxb
-        wave(v,4) = a4 * csb*ttyb
-        wave(w,4) = a4 * csb*ttzb
+        wave(sig_xx,4) = a4 * 2.d0*mub*nxb*tx2b
+        wave(sig_yy,4) = a4 * 2.d0*mub*nyb*ty2b
+        wave(sig_zz,4) = a4 * 2.d0*mub*nzb*tz2b
+        wave(sig_xy,4) = a4 * mub*(nxb*ty2b + nyb*tx2b)
+        wave(sig_xz,4) = a4 * mub*(nxb*tz2b + nzb*tx2b)
+        wave(sig_yz,4) = a4 * mub*(nyb*tz2b + nzb*ty2b)
+        wave(u,4) = a4 * csb*tx2b
+        wave(v,4) = a4 * csb*ty2b
+        wave(w,4) = a4 * csb*tz2b
         s(4) = -csb
 
         wave(:,5) = 0.d0
-        wave(sig_xx,5) = a5 * 2.d0*mua*nxa*txa
-        wave(sig_zz,5) = a5 * 2.d0*mua*nza*tza
-        wave(sig_xy,5) = a5 * mua*(nxa*tya + nya*txa)
-        wave(sig_yz,5) = a5 * mua*(nya*tza + nza*tya)
-        wave(sig_xz,5) = a5 * mua*(nxa*tza + nza*txa)
-        wave(u,5) = -a5 * csa*txa
-        wave(v,5) = -a5 * csa*tya
-        wave(w,5) = -a5 * csa*tza
+        wave(sig_xx,5) = a5 * 2.d0*mua*nxa*tx1a
+        wave(sig_yy,5) = a5 * 2.d0*mua*nya*ty1a
+        wave(sig_zz,5) = a5 * 2.d0*mua*nza*tz1a
+        wave(sig_xy,5) = a5 * mua*(nxa*ty1a + nya*tx1a)
+        wave(sig_xz,5) = a5 * mua*(nxa*tz1a + nza*tx1a)
+        wave(sig_yz,5) = a5 * mua*(nya*tz1a + nza*ty1a)
+        wave(u,5) = -a5 * csa*tx1a
+        wave(v,5) = -a5 * csa*ty1a
+        wave(w,5) = -a5 * csa*tz1a
         s(5) = csa
 
         wave(:,6) = 0.d0
-        wave(sig_xy,6) = a6 * mua*(nxa*ttya + nya*ttxa)
-        wave(sig_yz,6) = a6 * mua*(nza*ttya + nya*ttza)
-        wave(sig_xz,6) = a6 * mua*(nxa*ttza + nza*ttxa)
-        wave(u,6) = -a6 * csa*ttxa
-        wave(v,6) = -a6 * csa*ttya
-        wave(w,6) = -a6 * csa*ttza
+        wave(sig_xx,6) = a6 * 2.d0*mua*nxa*tx2a
+        wave(sig_yy,6) = a6 * 2.d0*mua*nya*ty2a
+        wave(sig_zz,6) = a6 * 2.d0*mua*nza*tz2a
+        wave(sig_xy,6) = a6 * mua*(nxa*ty2a + nya*tx2a)
+        wave(sig_xz,6) = a6 * mua*(nxa*tz2a + nza*tx2a)
+        wave(sig_yz,6) = a6 * mua*(nya*tz2a + nza*ty2a)
+        wave(u,6) = -a6 * csa*tx2a
+        wave(v,6) = -a6 * csa*ty2a
+        wave(w,6) = -a6 * csa*tz2a
         s(6) = csa
 
         ! Scale speeds by appropriate area ratios

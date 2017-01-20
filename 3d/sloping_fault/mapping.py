@@ -45,11 +45,11 @@ class Mapping(object):
         theta = subfaultL.dip/180.0*numpy.pi
 
         xp1 = subfaultF.longitude*LAT2METER
-        yp1 = subfaultF.latitude*LAT2METER - 0.5*subfaultF.length
+        yp1 = subfaultF.latitude - 0.5*subfaultF.length
         zp1 = -subfaultF.depth
  
         xp2 = subfaultL.longitude*LAT2METER + np.cos(theta)*subfaultL.width
-        yp2 = subfaultL.latitude*LAT2METER + 0.5*subfaultL.length
+        yp2 = subfaultL.latitude + 0.5*subfaultL.length
         zp2 = -subfaultL.depth - np.sin(theta)*subfaultL.width
 
         xcenter = 0.5*(xp1 + xp2)
