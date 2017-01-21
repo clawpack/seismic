@@ -187,9 +187,9 @@ subroutine rpt3(ixyz,icoor,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3
             csa = aux2(5,iadj,3)
         endif
 
-        ! ***** Note this section makes assumptions *****
-        ! ***** about the grid mapping an should be *****
-        ! ***** generalized eventually.             *****
+        ! ***** Note this section makes assumptions  *****
+        ! ***** about the grid mapping and should be *****
+        ! ***** generalized eventually.              *****
         if (mod(ixyz+icoor-1,3) == 1) then
             ! transverse direction is x
             tx1b = 0.d0

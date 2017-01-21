@@ -271,9 +271,9 @@ subroutine rptt3(ixyz,icoor,imp,impt,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux
             endif
         endif
 
-        ! ***** Note this section makes assumptions *****
-        ! ***** about the grid mapping an should be *****
-        ! ***** generalized eventually.             *****
+        ! ***** Note this section makes assumptions  *****
+        ! ***** about the grid mapping and should be *****
+        ! ***** generalized eventually.              *****
         if (mod(ixyz+icoor-1,3) == 1) then
             ! double-transverse direction is x
             tx1b = 0.d0

@@ -124,9 +124,9 @@ subroutine rpn3(ixyz,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,ap
         ! t1 faces in slip direction if ixyz=3 
         ! or arbitrary otherwise
 
-        ! ***** Note this section makes assumptions *****
-        ! ***** about the grid mapping an should be *****
-        ! ***** generalized eventually.             *****
+        ! ***** Note this section makes assumptions  *****
+        ! ***** about the grid mapping and should be *****
+        ! ***** generalized eventually.              *****
         if (ixyz .eq. 1) then
             tx1 = 0.d0
             ty1 = 1.d0
