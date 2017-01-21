@@ -5,6 +5,10 @@
 *.data
 .plots
 *.log
+*.pyc
+*.mod
+.output
+.plots
 xclaw
 xamr
 xgeoclaw

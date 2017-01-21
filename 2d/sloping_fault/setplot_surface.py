@@ -11,10 +11,8 @@ import numpy as np
 from mapping import Mapping
 from clawpack.clawutil.data import ClawData
 import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+from clawpack.geoclaw.data import LAT2METER
 reload(dtopotools)
-
-column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
-            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
 
 #--------------------------
 def setplot(plotdata):
@@ -26,8 +24,8 @@ def setplot(plotdata):
     Output: a modified version of plotdata.
 
     """
-    fault = dtopotools.Fault(coordinate_specification='top center')
-    fault.read('fault.data',column_map=column_map,skiprows=4)
+    fault = dtopotools.Fault()
+    fault.read(plotdata.outdir + '/fault.data')
 
     mapping = Mapping(fault)
     fault_width = mapping.fault_width
@@ -55,7 +53,7 @@ def setplot(plotdata):
     for j in range(ngauges):
         g = plotdata.getgauge(j)
         xc[j] = g.location[0]
-    fault.create_dtopography(xc/111.e3,np.array([0.]),[1.0],y_disp=True)
+    fault.create_dtopography(xc/LAT2METER,np.array([0.]),[1.0],y_disp=True)
 
     def plot_vertical_displacement(current_data):
         from pylab import plot,zeros,gca

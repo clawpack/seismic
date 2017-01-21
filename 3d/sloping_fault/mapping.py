@@ -11,16 +11,14 @@ def test(mfault):
     probdata = ClawData()
     probdata.read('setprob.data',force=True)
 
-    fault = dtopotools.Fault()
+    fault = dtopotools.Fault(coordinate_specification='top_center')
     fault.read('fault.data')
 
     mapping = Mapping(fault)
 
     domain_depth = probdata.domain_depth
     domain_width = probdata.domain_width
-
-    # num of cells here determined in an identical fashion to that in setrun.py
-    # additional comments can be found there
+    # num of cells here determined in a similar fashion to that in setrun.py
     dx = mapping.fault_width/mfault
     num_cells_above = numpy.rint(mapping.fault_depth/dx)
     dy = mapping.fault_depth/num_cells_above
@@ -38,7 +36,6 @@ def test(mfault):
     plot((mapping.xp1,mapping.xp2),(mapping.yp1,mapping.yp2),'-g')
     axis('scaled')
 
-
 class Mapping(object):
 
     def __init__(self, fault):
@@ -48,31 +45,46 @@ class Mapping(object):
         theta = subfaultL.dip/180.0*numpy.pi
 
         xp1 = subfaultF.longitude*LAT2METER
-        yp1 = -subfaultF.depth
+        yp1 = subfaultF.latitude - 0.5*subfaultF.length
+        zp1 = -subfaultF.depth
  
         xp2 = subfaultL.longitude*LAT2METER + np.cos(theta)*subfaultL.width
-        yp2 = -subfaultL.depth - np.sin(theta)*subfaultL.width
+        yp2 = subfaultL.latitude + 0.5*subfaultL.length
+        zp2 = -subfaultL.depth - np.sin(theta)*subfaultL.width
 
         xcenter = 0.5*(xp1 + xp2)
         ycenter = 0.5*(yp1 + yp2)
-        fault_width = np.sqrt((xp2-xp1)**2 + (yp2-yp1)**2)
+        zcenter = 0.5*(zp1 + zp2)
+        fault_width = np.sqrt((xp2-xp1)**2 + (zp2-zp1)**2)
+        fault_length = yp2 - yp1
 
         xcl = xcenter - 0.5*fault_width
         xcr = xcenter + 0.5*fault_width
 
         self.fault_width = fault_width
-        self.fault_depth = -ycenter
+        self.fault_length = fault_length
+        self.fault_depth = -zcenter
         self.xcenter = xcenter
         self.ycenter = ycenter
+        self.zcenter = zcenter
         self.theta = theta
         self.xcl = xcl
         self.xcr = xcr
         self.xp1 = xp1
         self.xp2 = xp2
-        self.yp1 = yp1
-        self.yp2 = yp2
+        self.zp1 = zp1
+        self.zp2 = zp2
 
-    def mapc2p(self,xc,yc):
+	self.slice_xval = None
+
+    def set_slice_xval(self,current_xval):
+        self.slice_xval = current_xval
+
+    def mapc2p_xy(self,xc,yc):
+
+        return xc,yc
+
+    def mapc2p_xz(self,xc,zc):
         """
         map computational grid to physical grid that rotates near the fault
         so cell edges match the fault line.  Linear interpolation is used to
@@ -81,20 +93,42 @@ class Mapping(object):
         """
 
         # constucted signed distance function in computational domain
-        ls = numpy.abs(yc - self.ycenter)
-        ls = numpy.where(xc < self.xcl, numpy.sqrt((xc-self.xcl)**2 + (yc-self.ycenter)**2), ls)
-        ls = numpy.where(xc > self.xcr, numpy.sqrt((xc-self.xcr)**2 + (yc-self.ycenter)**2), ls)
+        ls = numpy.abs(zc - self.zcenter)
+        ls = numpy.where(xc < self.xcl, numpy.sqrt((xc-self.xcl)**2 + (zc-self.zcenter)**2), ls)
+        ls = numpy.where(xc > self.xcr, numpy.sqrt((xc-self.xcr)**2 + (zc-self.zcenter)**2), ls)
 
         # define grid that is rotated to line up with fault
-        xrot = self.xcenter + numpy.cos(self.theta)*(xc-self.xcenter) + numpy.sin(self.theta)*(yc-self.ycenter)
-        yrot = self.ycenter - numpy.sin(self.theta)*(xc-self.xcenter) + numpy.cos(self.theta)*(yc-self.ycenter)
+        xrot = self.xcenter + numpy.cos(self.theta)*(xc-self.xcenter) + numpy.sin(self.theta)*(zc-self.zcenter)
+        zrot = self.zcenter - numpy.sin(self.theta)*(xc-self.xcenter) + numpy.cos(self.theta)*(zc-self.zcenter)
 
         # Interpolate between rotated grid and cartesian grid near the fault,
         # using cartesian grid far away from fault.
         tol = self.fault_depth
         xp = xc
-        yp = yc
+        zp = zc
         xp = numpy.where(ls < tol, (tol-ls)/tol*xrot + ls/tol*xc, xp)
-        yp = numpy.where(ls < tol, (tol-ls)/tol*yrot + ls/tol*yc, yp)
+        zp = numpy.where(ls < tol, (tol-ls)/tol*zrot + ls/tol*zc, zp)
 
-        return xp,yp
+        return xp,zp
+
+    def mapc2p_yz(self,yc,zc):
+
+        xc = self.slice_xval
+
+        # constucted signed distance function in computational domain
+        if (xc < self.xcl):
+            ls = numpy.sqrt((xc-self.xcl)**2 + (zc-self.zcenter)**2)
+        elif (xc > self.xcr):
+            ls = numpy.sqrt((xc-self.xcr)**2 + (zc-self.zcenter)**2)
+        else:
+            ls = numpy.abs(zc - self.zcenter)
+
+        zrot = self.zcenter - numpy.sin(self.theta)*(xc-self.xcenter) + numpy.cos(self.theta)*(zc-self.zcenter)
+
+        # Interpolate between rotated grid and cartesian grid near the fault,
+        # using cartesian grid far away from fault.
+        tol = self.fault_depth
+        yp = yc
+        zp = numpy.where(ls < tol, (tol-ls)/tol*zrot + ls/tol*zc, zc)
+
+        return yp,zp

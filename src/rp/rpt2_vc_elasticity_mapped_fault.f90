@@ -1,7 +1,7 @@
 ! =====================================================
 subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,bmasdq,bpasdq)
 ! =====================================================
-      implicit double precision (a-h,o-z)
+  implicit none
 !
 !     # Riemann solver in the transverse direction for the elastic equations
 !     # with varying material properties in a mapped grid
@@ -32,21 +32,32 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
 !
 !     # imp=1  means  asdq=amdq,    imp=2 means asdq=apdq
 !
-      dimension     ql(meqn, 1-mbc:maxm+mbc)
-      dimension     qr(meqn, 1-mbc:maxm+mbc)
-      dimension   asdq(meqn, 1-mbc:maxm+mbc)
-      dimension bmasdq(meqn, 1-mbc:maxm+mbc)
-      dimension bpasdq(meqn, 1-mbc:maxm+mbc)
-      dimension   aux1(maux, 1-mbc:maxm+mbc)
-      dimension   aux2(maux, 1-mbc:maxm+mbc)
-      dimension   aux3(maux, 1-mbc:maxm+mbc)
 
-      ! Variables required for mapped grid version
-      integer :: map, mw
-      double precision :: nxm, nym, nx2m, ny2m, nxym
-      double precision :: nxp, nyp, nx2p, ny2p, nxyp
-      double precision :: cpm_s, cpp_s, csm_s, csp_s
-      double precision :: wave(meqn,mwaves)
+  integer, intent(in) :: ixy, imp, maxm, meqn, mwaves, mbc, mx, maux
+  double precision, intent(in) :: ql, qr, aux1, aux2, aux3, asdq
+  double precision, intent(out) :: bmasdq, bpasdq
+  dimension     ql(meqn, 1-mbc:maxm+mbc)
+  dimension     qr(meqn, 1-mbc:maxm+mbc)
+  dimension   asdq(meqn, 1-mbc:maxm+mbc)
+  dimension bmasdq(meqn, 1-mbc:maxm+mbc)
+  dimension bpasdq(meqn, 1-mbc:maxm+mbc)
+  dimension   aux1(maux, 1-mbc:maxm+mbc)
+  dimension   aux2(maux, 1-mbc:maxm+mbc)
+  dimension   aux3(maux, 1-mbc:maxm+mbc)
+
+  integer :: i, i1
+  double precision :: dsigxx, dsigyy, dsigxy, dux, duy
+  double precision :: alamm, amum, bulkm, cpm, csm
+  double precision :: alam, amu, bulk, cp, cs
+  double precision :: alamp, amup, bulkp, cpp, csp
+  double precision :: det, a1, a2, a3, a4
+
+  ! Variables required for mapped grid version
+  integer :: map, m
+  double precision :: nxm, nym, nx2m, ny2m, nxym, nxp, nyp, nx2p, ny2p, nxyp
+  double precision :: dsignm, dsigtm, dunm, dutm, slipm
+  double precision :: dsignp, dsigtp, dunp, dutp, slipp
+  double precision :: wave(meqn,mwaves), s(mwaves)
 !
 !
 !
@@ -55,182 +66,163 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
 !     # velocity.  Similarly ksig11 and ksig22 point to normal stresses.
 !     # 3rd component is always shear stress sig12.
 !
-!
-      if (ixy.eq.1) then
-         ksig11 = 1
-         ksig22 = 2
-         ku = 4
-         kv = 5
-	 map = 9
-      else
-         ksig11 = 2
-         ksig22 = 1
-         ku = 5
-         kv = 4
-	 map = 6
-      endif
-!
-!
-      do i = 2-mbc, mx+mbc
+  map = 9 - 3*(ixy-1)
+
+  do i = 2-mbc, mx+mbc
 !
 !        # imp is used to flag whether wave is going to left or right,
 !        # since material properties are different on the two sides
 !
-         if (imp.eq.1) then
-!            # asdq = amdq, moving to left
-             i1 = i-1
-         else
-!            # asdq = apdq, moving to right
-             i1 = i
-         endif
+    if (imp.eq.1) then
+    ! # asdq = amdq, moving to left
+      i1 = i-1
+    else
+    ! # asdq = apdq, moving to right
+      i1 = i
+    endif
 
-	 !Define direction of normal to grid edge normals for downgoing fluctuation
-	 nxm = aux2(map,i1)
-	 nym = aux2(map+1,i1)
-	 nx2m = nxm*nxm
-	 ny2m = nym*nym
-	 nxym = nxm*nym
+  ! # jumps in asdq:
+    dsigxx = asdq(1,i)
+    dsigyy = asdq(2,i)
+    dsigxy = asdq(3,i)
+    dux = asdq(4,i)
+    duy = asdq(5,i)
 
-	!Define direction of normal to grid edge normals for upgoing fluctuation
-	 nxp = aux3(map,i1)
-	 nyp = aux3(map+1,i1)
-	 nx2p = nxp*nxp
-	 ny2p = nyp*nyp
-	 nxyp = nxp*nyp
+  ! Define direction of normal to grid edge normals for downgoing fluctuation
+    nxm = aux2(map,i1)
+    nym = aux2(map+1,i1)
+    slipm = aux2(13,i1)
+    nx2m = nxm*nxm
+    ny2m = nym*nym
+    nxym = nxm*nym
 
-!
-!        # The flux difference asdq is split into downward moving parts
-!        # traveling at speeds -cp and -cs relative to the medium below and
-!        # upward moving parts traveling
-!        # at speeds +cp and +cs relative to the medium above.
-!
-!        # Note that the sum of these parts does not give all of asdq
-!        # since there is also reflection at the interfaces which decreases
-!        # the flux.
-!
-!        # jumps in asdq:
-         dsig11  = asdq(1,i)
-         dsig22  = asdq(2,i)
-         dsig12  = asdq(3,i)
-         dup   = asdq(4,i)
-         dum = asdq(4,i)
-         dvp   = asdq(5,i)
-         dvm = asdq(5,i)
-!
-!
-!        # Material parameters in each row of cells:
-         alamm = aux1(2,i1)
-         alam  = aux2(2,i1)
-         alamp = aux3(2,i1)
-         amum  = aux1(3,i1)
-         amu   = aux2(3,i1)
-         amup  = aux3(3,i1)
-         bulkm = alamm + 2.d0*amum
-         bulk  = alam  + 2.d0*amu
-         bulkp = alamp + 2.d0*amup
+  !Define direction of normal to grid edge normals for upgoing fluctuation
+    nxp = aux3(map,i1)
+    nyp = aux3(map+1,i1)
+    slipp = aux3(13,i1)
+    nx2p = nxp*nxp
+    ny2p = nyp*nyp
+    nxyp = nxp*nyp
 
-!        # P-wave and S-wave speeds in each row of cells:
-         cpm = aux1(4,i1)
-         cp  = aux2(4,i1)
-         cpp = aux3(4,i1)
-         csm = aux1(5,i1)
-         cs  = aux2(5,i1)
-         csp = aux3(5,i1)
+    ! Compute jumps in normal/tangential traction/velocity
+    dsignm = dsigxx*nx2m + dsigyy*ny2m + 2.d0*dsigxy*nxym
+    dsigtm = (dsigyy - dsigxx)*nxym + dsigxy*(nx2m-ny2m)
+    dunm = dux*nxm + duy*nym
+    dutm = dux*nym - duy*nxm
 
-!        # transmitted part of down-going P-wave:
-         det = bulkm*cp + bulk*cpm
-         if (det .eq. 0.d0) then
-            write(6,*) 'det1 = 0 in rpt2'
-            stop
-            endif
-         a1 = (cp*(dsig11*nx2m + dsig22*ny2m + 2*nxym*dsig12) + bulk*(nxm*dum + nym*dvm)) / det
+    dsignp = dsigxx*nx2p + dsigyy*ny2p + 2.d0*dsigxy*nxyp
+    dsigtp = (dsigyy - dsigxx)*nxyp + dsigxy*(nx2p-ny2p)
+    dunp = dux*nxp + duy*nyp
+    dutp = dux*nyp - duy*nxp
 
-!        # transmitted part of up-going P-wave:
-         det = bulk*cpp + bulkp*cp
-         if (det .eq. 0.d0) then
-            write(6,*) 'det2 = 0 in rpt2'
-            stop
-            endif
-         a2 = (cp*(dsig11*nx2p + dsig22*ny2p + 2*nxyp*dsig12) - bulk*(nxp*dup + nyp*dvp)) / det
-!
-!        # transmitted part of down-going S-wave:
-         det = amum*cs + amu*csm
-         if (det .eq. 0.d0) then
-             a3 = 0.d0
-         else
-             a3 = (cs*(dsig12*(nx2m - ny2m) + nxym*(dsig22 - dsig11)) + amu*(nxm*dvm - nym*dum)) / det
-         endif
+  !
+  ! # The flux difference asdq is split into downward moving parts
+  ! # traveling at speeds -cp and -cs relative to the medium below and
+  ! # upward moving parts traveling
+  ! # at speeds +cp and +cs relative to the medium above.
+  !
+  ! # Note that the sum of these parts does not give all of asdq
+  ! # since there is also reflection at the interfaces which decreases
+  ! # the flux.
+  !
+  !
+  !
+  ! # Material parameters in each row of cells:
+    alamm = aux1(2,i1)
+    alam  = aux2(2,i1)
+    alamp = aux3(2,i1)
+    amum  = aux1(3,i1)
+    amu   = aux2(3,i1)
+    amup  = aux3(3,i1)
+    bulkm = alamm + 2.d0*amum
+    bulk  = alam  + 2.d0*amu
+    bulkp = alamp + 2.d0*amup
+    cpm = aux1(4,i1)
+    cp = aux2(4,i1)
+    cpp = aux3(4,i1)
+    csm = aux1(5,i1)
+    cs = aux2(5,i1)
+    csp = aux3(5,i1)
 
-!        # transmitted part of up-going S-wave:
-         det = amu*csp + amup*cs
-         if (det .eq. 0.d0) then
-             a4 = 0.d0
-         else
-	     a4 = (cs*(dsig12*(nx2p - ny2p) + nxyp*(dsig22 - dsig11)) + amu*(nyp*dup - nxp*dvp)) / det
-         endif
+    ! P-wave strengths:
+    a1 = (cp*dsignm + bulk*dunm) / (bulkm*cp + bulk*cpm)
+    a2 = (cp*dsignp - bulk*dunp) / (bulkp*cp + bulk*cpp)
 
-         if (ixy == 1) then
-           if (dabs(aux2(13,i1)) > 1.d-10) then
-             a3 = 0.d0
-           end if
-           if (dabs(aux3(13,i1)) > 1.d-10) then
-             a4 = 0.d0
-           end if
-         endif
+    ! S-wave strengths depending on if slip is imposed:
 
+    if (ixy .eq. 1 .and. dabs(slipm) > 1.d-10) then
+      a3 = 0.d0
+    else
+      det = amum*cs + amu*csm
+      if (det.eq.0.d0) then
+        a3 = 0.d0
+      else
+        a3 = (cs*dsigtm - amu*dutm) / det
+      end if
+    end if
 
+    if (ixy .eq. 1 .and. dabs(slipp) > 1.d-10) then
+      a4 = 0.d0
+    else
+      det = amup*cs + amu*csp
+      if (det.eq.0.d0) then
+        a4 = 0.d0
+      else
+        a4 = (cs*dsigtp + amu*dutp) / det
+      end if
+    end if
 
-
-         ! Calculate waves: eigenvector*alphas
-         ! Calculate downgoing P-wave transverse fluctuation (cpm speed)
+    ! Compute the waves.
     wave(:,1) = 0.d0
-	  wave(1,1) = a1 * (alamm + 2*amum*nx2m)
-	  wave(2,1) = a1 * (alamm + 2*amum*ny2m)
-	  wave(3,1) = a1 * (2*amum*nxym)
-	  wave(4,1) = a1 * cpm * nxm
-	  wave(5,1) = a1 * cpm *nym
+    wave(1,1) = a1 * (alamm + 2.d0*amum*nx2m)
+    wave(2,1) = a1 * (alamm + 2.d0*amum*ny2m)
+    wave(3,1) = a1 * (2*amum*nxym)
+    wave(4,1) = a1 * cpm * nxm
+    wave(5,1) = a1 * cpm * nym
+    s(1) = -cpm
 
-	  ! Calculate upgoing P-wave transverse fluctuation (cpp speed)
     wave(:,2) = 0.d0
-	  wave(1,2) = a2 * (alamp + 2*amup*nx2p)
-	  wave(2,2) = a2 * (alamp + 2*amup*ny2p)
-	  wave(3,2) = a2 * (2*amup*nxyp)
-	  wave(4,2) = - a2 * cpp * nxp
-	  wave(5,2) = - a2 * cpp *nyp
+    wave(1,2) = a2 * (alamp + 2.d0*amup*nx2p)
+    wave(2,2) = a2 * (alamp + 2.d0*amup*ny2p)
+    wave(3,2) = a2 * (2*amup*nxyp)
+    wave(4,2) = - a2 * cpp * nxp
+    wave(5,2) = - a2 * cpp * nyp
+    s(2) = cpp
 
-	  ! Calculate downgoing S-wave transverse fluctuation (csm speed)
     wave(:,3) = 0.d0
-	  wave(1,3) = - a3 * (2*nxym*amum)
-	  wave(2,3) = a3 * (2*nxym*amum)
-	  wave(3,3) = a3 * amum*(nx2m - ny2m)
-	  wave(4,3) = - a3 * csm *nym
-	  wave(5,3) = a3 * csm * nxm
+    wave(1,3) = - a3 * (2.d0*nxym*amum)
+    wave(2,3) = a3 * (2.d0*nxym*amum)
+    wave(3,3) = a3 * amum*(nx2m - ny2m)
+    wave(4,3) = - a3 * csm * nym
+    wave(5,3) = a3 * csm * nxm
+    s(3) = -csm
 
-	  ! Calculate upgoing S-wave transverse fluctuation (csp speed)
     wave(:,4) = 0.d0
-	  wave(1,4) = - a4 * (2*nxyp*amup)
-	  wave(2,4) = a4 * (2*nxyp*amup)
-	  wave(3,4) = a4 * amup*(nx2p - ny2p)
-	  wave(4,4) =  a4 * csp * nyp
-	  wave(5,4) = -a4 * csp * nxp
+    wave(1,4) = - a4 * (2.d0*nxyp*amup)
+    wave(2,4) = a4 * (2.d0*nxyp*amup)
+    wave(3,4) = a4 * amup*(nx2p - ny2p)
+    wave(4,4) =  a4 * csp * nyp
+    wave(5,4) = -a4 * csp * nxp
+    s(4) = csp
 
-!        # Scale P-wave and S-wave speeds for mapped grid with corresponding edge scaling and sign
-         cpm_s = -cpm*aux2(map+2,i1)
-         cpp_s = cpp*aux3(map+2,i1)
-         csm_s = -csm*aux2(map+2,i1)
-         csp_s = csp*aux3(map+2,i1)
+    ! # Scale spped by relative length of edge of mapped grid
+    s(1) = s(1)*aux2(map+2,i1)
+    s(2) = s(2)*aux3(map+2,i1)
+    s(3) = s(3)*aux2(map+2,i1)
+    s(4) = s(4)*aux3(map+2,i1)
 !
 !        # The down-going flux difference bmasdq is the product  -c * wave
 !        # summed over down-going P-wave and S-wave:
 !
 	! compute the leftgoing and rightgoing flux differences:
         ! Note cpm_s,csm_s < 0   and   cpp_s, csp_s > 0.
-        do m=1,meqn
-            bmasdq(m,i) = cpm_s*wave(m,1) + csm_s*wave(m,3)
-            bpasdq(m,i) = cpp_s*wave(m,2) + csp_s*wave(m,4)
-        enddo
+    do m=1,meqn
+      bmasdq(m,i) = s(1)*wave(m,1) + s(3)*wave(m,3)
+      bpasdq(m,i) = s(2)*wave(m,2) + s(4)*wave(m,4)
+    enddo
+
+  end do
 !
-      enddo
 !
-      return
-      end
+  return
+end

@@ -45,6 +45,14 @@ from clawpack.geoclaw.data import DEG2RAD, LAT2METER
 # Poisson ratio for Okada
 poisson = 0.25
 
+fault_column_list = ['mu','dip','width','depth','slip','rake','strike','length',
+                'longitude','latitude','rupture_time','rise_time']
+
+fault_column_map = {'mu':0,'dip':1,'width':2,'depth':3,'slip':4,'rake':5,'strike':6,
+            'length':7,'longitude':8,'latitude':9,'rupture_time':10,'rise_time':11}
+fault_coordinate_specification = 'top center'
+
+
 # ==============================================================================
 #  Units dictionaries
 # ==============================================================================
@@ -612,9 +620,8 @@ class Fault(object):
                             "either for fault or for each subfault")
 
 
-    def read(self, path, column_map, coordinate_specification="centroid",
-                                     rupture_type="static", skiprows=0,
-                                     delimiter=None, input_units={}, defaults=None):
+    def read(self, path, column_map=fault_column_map, rupture_type="static", skiprows=4,
+                                     delimiter=None, defaults=None):
         r"""Read in subfault specification at *path*.
 
         Creates a list of subfaults from the subfault specification file at
@@ -629,20 +636,23 @@ class Fault(object):
                 column_map = {"latitude":0, "longitude":1, "depth":2, "slip":3,
                 "rake":4, "strike":5, "dip":6}
 
-          - *coordinate_specification* (str) specifies the location on each
-            subfault that corresponds to the (longitude,latitude) and depth
-            of the subfault.  See the documentation for
-            *SubFault.calculate_geometry*.
           - *rupture_type* (str) either "static" or "dynamic"
           - *skiprows* (int) number of header lines to skip before data
           - *delimiter* (str) e.g. ',' for csv files
-          - *input_units* (dict) indicating units for length, width, slip, depth,
-                           and for rigidity mu as specified in file.  These
-                           will be converted to "standard units".
           - *defaults* (dict) default values for all subfaults, for values not
                        included in subfault file on each line.
 
         """
+
+        # Read in coordinate specification
+        data_file = open(os.path.abspath(path),'r')
+        line = data_file.readline()
+        parts = line.partition(': ')
+        parts = parts[2].partition('\n')
+        coordinate_specification = parts[0]
+
+        # Read in units (needs more implementation here)
+        input_units = {}
 
         # Read in rest of data
         # (Use genfromtxt to deal with files containing strings, e.g. unit
@@ -678,7 +688,7 @@ class Fault(object):
             self.subfaults.append(new_subfault)
 
 
-    def write(self, path, style=None, column_list=None, output_units={},
+    def write(self, path, style=None, column_list=fault_column_list, output_units={},
                     delimiter='  '):
         r"""
         Write subfault format file with one line for each subfault.
@@ -719,18 +729,18 @@ class Fault(object):
             raise Exception("Must specify column_list")
 
         format = {}
-        format['mu'] = '%15.8e'
-        format['longitude'] = '%15.8e'
-        format['latitude'] = '%15.8e'
-        format['strike'] = '%15.8e'
-        format['rake'] = '%15.8e'
-        format['dip'] = '%15.8e'
-        format['depth'] = '%15.8e'
-        format['length'] = '%15.8e'
-        format['width'] = '%15.8e'
-        format['slip'] = '%15.8e'
-        format['rupture_time'] = '%15.8e'
-        format['rise_time'] = '%15.8e'
+        format['mu'] = '%20.14e'
+        format['longitude'] = '%20.14e'
+        format['latitude'] = '%20.14e'
+        format['strike'] = '%20.14e'
+        format['rake'] = '%20.14e'
+        format['dip'] = '%20.14e'
+        format['depth'] = '%20.14e'
+        format['length'] = '%20.14e'
+        format['width'] = '%20.14e'
+        format['slip'] = '%20.14e'
+        format['rupture_time'] = '%20.14e'
+        format['rise_time'] = '%20.14e'
 
         with open(path, 'w') as data_file:
             c_s_list = set([s.coordinate_specification for s in self.subfaults])
@@ -739,13 +749,13 @@ class Fault(object):
                 raise ValueError("Subfaults do not have common " +
                     "coordinate_specification that agrees with fault attribute")
             # write header:
-            data_file.write('Subfaults file with coordinate_specification:  ')
-            data_file.write('%s, \n' % self.coordinate_specification)
-            data_file.write('Units: %s, \n' % str(output_units))
-            data_file.write('%d subfaults \n' % len(self.subfaults))
+            data_file.write('Subfaults file with coordinate_specification: ')
+            data_file.write('%s\n' % self.coordinate_specification)
+            data_file.write('Units: %s\n' % str(output_units))
+            data_file.write('%d subfaults\n' % len(self.subfaults))
             s = ""
             for param in column_list:
-                s = s + param.rjust(15) + delimiter
+                s = s + param.rjust(20) + delimiter
             data_file.write(s + '\n')
             for subfault in self.subfaults:
                 s = ""
@@ -1126,7 +1136,7 @@ class Fault(object):
         for subfault in self.subfaults:
             subfault.slip_at_dynamic_t = subfault.dynamic_slip(t)
 
-    def plot_okada(self, axes=None, displacement='vertical', kwargs={}):
+    def plot_okada(self, axes=None, dim=1, displacement='vertical', kwargs={}):
         if (self.dtopo is None):
 	    raise ValueError("Need to call create_dtopography before plot_okada")
 
@@ -1135,14 +1145,25 @@ class Fault(object):
                 from pylab import figure, subplot
                 figure()
                 axes = subplot(111)
-            axes.plot(self.dtopo.x*111.e3,self.dtopo.dZ[0,0,:],**kwargs)
+            if (dim is 1):
+                axes.plot(self.dtopo.x*LAT2METER,self.dtopo.dZ[0,0,:],**kwargs)
+            elif (dim is 2):
+                X,Y = numpy.meshgrid(self.dtopo.x,self.dtopo.y)
+                axes.pcolormesh(X*LAT2METER,Y*LAT2METER,self.dtopo.dZ[0,:,:],**kwargs)
         elif (displacement is 'horizontal'):
             if axes is None:
                 from pylab import figure, subplot
                 figure()
                 axes = subplot(111)
-            axes.plot(self.dtopo.x*111.e3,self.dtopo.dY[0,0,:],**kwargs)
+            if (dim is 1):
+                axes.plot(self.dtopo.x*LAT2METER,self.dtopo.dY[0,0,:],**kwargs)
 
+    def plot_okada_contour(self, axes=None, kwargs={}):
+        if (self.dtopo is None):
+	    raise ValueError("Need to call create_dtopography before plot_okada_contour")
+
+        X,Y = numpy.meshgrid(self.dtopo.x,self.dtopo.y)
+        axes.contour(X*LAT2METER,Y*LAT2METER,self.dtopo.dZ[0,:,:],**kwargs)
 
 # ==============================================================================
 #  Sub-Fault Class

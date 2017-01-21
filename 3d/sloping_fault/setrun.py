@@ -1,5 +1,5 @@
 """
-Module to set up run time parameters for Clawpack -- amrclaw code.
+Module to set up run time parameters for Clawpack -- classic code.
 
 The values set in the function setrun are then written out to data files
 that will be read in by the Fortran code.
@@ -8,6 +8,10 @@ that will be read in by the Fortran code.
 
 import os
 import numpy as np
+from clawpack.seismic.data import SliceData
+import clawpack.seismic.dtopotools_horiz_okada_and_1d as dtopotools
+reload(dtopotools)
+from mapping import Mapping
 
 #------------------------------
 def setrun(claw_pkg='amrclaw'):
@@ -29,7 +33,7 @@ def setrun(claw_pkg='amrclaw'):
 
     assert claw_pkg.lower() == 'amrclaw',  "Expected claw_pkg = 'amrclaw'"
 
-    num_dim = 2
+    num_dim = 3
     rundata = data.ClawRunData(claw_pkg, num_dim)
 
     #------------------------------------------------------------------
@@ -37,14 +41,9 @@ def setrun(claw_pkg='amrclaw'):
     #------------------------------------------------------------------
     # Sample setup to write one line to setprob.data ...
     probdata = rundata.new_UserData(name='probdata',fname='setprob.data')
-    probdata.add_param('domain_depth', 200e3, 'depth of domain')
-    probdata.add_param('domain_width', 400e3, 'width of domain')
-    probdata.add_param('fault_center', 25e3, 'center of fault')
-    probdata.add_param('fault_width', 50735, 'width of fault')
-    probdata.add_param('fault_dip', 0.17, 'angle of fault dip')
-    probdata.add_param('fault_depth', 19.3e3, 'depth of fault')
-    probdata.add_param('water_depth', 3e3, 'depth of water')
-    probdata.add_param('water_scaling', 0, 'ratio automatically set for mapping')
+    probdata.add_param('domain_depth', 300e3, 'depth of domain')
+    probdata.add_param('domain_width', 600e3, 'width of domain (in x direction)')
+    probdata.add_param('domain_length', 300e3, 'length of domain (in y direction)')
 
     #------------------------------------------------------------------
     # Standard Clawpack parameters to be written to claw.data:
@@ -53,69 +52,101 @@ def setrun(claw_pkg='amrclaw'):
     clawdata = rundata.clawdata  # initialized when rundata instantiated
 
 
+    #------------------------------------------------------------------
+    # Read in fault information
+    #------------------------------------------------------------------
+    fault = dtopotools.Fault()
+    fault.read('fault.data')
+
+    mapping = Mapping(fault)
+    fault_length = mapping.fault_length
+    fault_width = mapping.fault_width
+    fault_depth = mapping.fault_depth
+    fault_xcenter = mapping.xcenter
+    fault_ycenter = mapping.ycenter
+
+    rupture_rise_time = 0.0
+    for subfault in fault.subfaults:
+        rupture_rise_time = max(rupture_rise_time,subfault.rupture_time
+                                    + subfault.rise_time)
+
     # ---------------
-    # Spatial domain:
+    # Spatial domain
     # ---------------
 
     # Number of space dimensions:
     clawdata.num_dim = num_dim
 
-    # Number of grid cells:
-    num_cells_fault = 10
-    dx = probdata.fault_width/num_cells_fault
+    # Number of grid cells
+    num_cells_fault_width = 10
+    num_cells_fault_length = 5
+    dx = fault_width/num_cells_fault_width
+    dy = fault_length/num_cells_fault_length
 
     # determine cell number and set computational boundaries
     target_num_cells = np.rint(probdata.domain_width/dx)    # x direction
-    num_cells_below = np.rint((target_num_cells - num_cells_fault)/2.0)
-    num_cells_above = target_num_cells - num_cells_below - num_cells_fault
-    clawdata.lower[0] = probdata.fault_center-0.5*probdata.fault_width - num_cells_below*dx
-    clawdata.upper[0] = probdata.fault_center+0.5*probdata.fault_width + num_cells_above*dx
-    clawdata.num_cells[0] = int(num_cells_below + num_cells_fault + num_cells_above)
+    num_cells_below = np.rint((target_num_cells - num_cells_fault_width)/2.0)
+    num_cells_above = target_num_cells - num_cells_below - num_cells_fault_width
+    if (int(num_cells_below + num_cells_fault_width + num_cells_above) % 2 == 1):
+        num_cells_above += 1
+    clawdata.lower[0] = fault_xcenter-0.5*fault_width-num_cells_below*dx
+    clawdata.upper[0] = fault_xcenter+0.5*fault_width+num_cells_above*dx
+    clawdata.num_cells[0] = int(num_cells_below + num_cells_fault_width + num_cells_above)
 
-    num_cells_above_fault = np.rint(probdata.fault_depth/dx) # y direction
-    dy = probdata.fault_depth/num_cells_above_fault
-    num_cells_water = np.ceil(probdata.water_depth/dy)
-    target_num_cells_below_floor = np.rint(probdata.domain_depth/dy)
-    num_cells_below_fault = target_num_cells_below_floor - num_cells_above_fault
-    clawdata.lower[1] = -probdata.fault_depth - num_cells_below_fault*dy
-    clawdata.upper[1] = num_cells_water*dy
-    clawdata.num_cells[1] = int(num_cells_below_fault + num_cells_above_fault + num_cells_water)
-    probdata.water_scaling = probdata.water_depth/clawdata.upper[1]
+    target_num_cells = np.rint(probdata.domain_length/dy)    # y direction
+    num_cells_below = np.rint((target_num_cells - num_cells_fault_length)/2.0)
+    num_cells_above = target_num_cells - num_cells_below - num_cells_fault_length
+    if (int(num_cells_below + num_cells_fault_length + num_cells_above) % 2 == 1):
+        num_cells_above += 1
+    clawdata.lower[1] = fault_ycenter-0.5*fault_length-num_cells_below*dy
+    clawdata.upper[1] = fault_ycenter+0.5*fault_length+num_cells_above*dy
+    clawdata.num_cells[1] = int(num_cells_below + num_cells_fault_length + num_cells_above)
 
-    # Note adjustments in computational domain size
+    num_cells_above = np.rint(fault_depth/min(dx,dy))    # z direction
+    dz = fault_depth/num_cells_above
+    target_num_cells = np.rint(probdata.domain_depth/dz)
+    num_cells_below = target_num_cells - num_cells_above
+    if (int(num_cells_below + num_cells_above) % 2 == 1):
+        num_cells_below += 1
+    clawdata.lower[2] = -fault_depth - num_cells_below*dz
+    clawdata.upper[2] = 0.0
+    clawdata.num_cells[2] = int(num_cells_below + num_cells_above)
+
+    # adjust probdata
     probdata.domain_width = clawdata.upper[0] - clawdata.lower[0]
-    probdata.domain_depth = clawdata.upper[1] - clawdata.lower[1]
+    probdata.domain_length = clawdata.upper[1] - clawdata.lower[1]
+    probdata.domain_depth = clawdata.upper[2] - clawdata.lower[2]
 
     # ---------------
     # Size of system:
     # ---------------
 
     # Number of equations in the system:
-    clawdata.num_eqn = 6
+    clawdata.num_eqn = 10
 
     # Number of auxiliary variables in the aux array (initialized in setaux)
-    clawdata.num_aux = 13
+    clawdata.num_aux = 2
 
     # Index of aux array corresponding to capacity function, if there is one:
-    clawdata.capa_index = 12
+    clawdata.capa_index = 2
 
 
     # -------------
     # Initial time:
     # -------------
 
+    # should be set to final time in reload file if reloading
     clawdata.t0 = 0.000000
-
 
     # Restart from checkpoint file of a previous run?
     # Note: If restarting, you must also change the Makefile to set:
     #    RESTART = True
     # If restarting, t0 above should be from original run, and the
-    # restart_file 'fort.qNNNN' specified below should be in
+    # restart_file 'fort.chkNNNNN' specified below should be in
     # the OUTDIR indicated in Makefile.
 
     clawdata.restart = False               # True to restart from prior results
-    clawdata.restart_file = 'fort.q0006'   # File to use for restart data
+    clawdata.restart_file = 'fort.chk00006'  # File to use for restart data
 
 
     # -------------
@@ -125,29 +156,28 @@ def setrun(claw_pkg='amrclaw'):
     # Specify at what times the results should be written to fort.q files.
     # Note that the time integration stops after the final output time.
 
-    clawdata.output_style = 1
+    clawdata.output_style = 2
 
     if clawdata.output_style==1:
         # Output ntimes frames at equally spaced times up to tfinal:
         # Can specify num_output_times = 0 for no output
-        clawdata.num_output_times = 600
-        clawdata.tfinal = 600.0
+        clawdata.num_output_times = 50
+        clawdata.tfinal = 50.0 #6e-5 #0.0001800000 #0.00003
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
     elif clawdata.output_style == 2:
         # Specify a list or numpy array of output times:
         # Include t0 if you want output at the initial time.
-        clawdata.output_times =  list(np.linspace(0,5,11)) + \
-            range(6,61)
+        clawdata.output_times =  [0.0, 4.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0]
 
     elif clawdata.output_style == 3:
         # Output every step_interval timesteps over total_steps timesteps:
         clawdata.output_step_interval = 1
-        clawdata.total_steps = 40
+        clawdata.total_steps = 1
         clawdata.output_t0 = True  # output at initial (or restart) time?
 
 
-    clawdata.output_format = 'binary'      # 'ascii', 'binary', 'netcdf'
+    clawdata.output_format = 'ascii'      # 'ascii' or 'binary'
 
     clawdata.output_q_components = 'all'   # could be list such as [True,True]
     clawdata.output_aux_components = 'none'  # could be list
@@ -160,8 +190,7 @@ def setrun(claw_pkg='amrclaw'):
 
     # The current t, dt, and cfl will be printed every time step
     # at AMR levels <= verbosity.  Set verbosity = 0 for no printing.
-    #   (E.g. verbosity == 2 means print only on levels 1 and 2.)
-    clawdata.verbosity = 0
+    clawdata.verbosity = 1
 
 
 
@@ -175,13 +204,13 @@ def setrun(claw_pkg='amrclaw'):
 
     # Initial time step for variable dt.
     # (If dt_variable==0 then dt=dt_initial for all steps)
-    clawdata.dt_initial = 0.1
+    clawdata.dt_initial = 0.25
 
     # Max time step to be allowed if variable dt used:
     clawdata.dt_max = 1.000000e+99
 
     # Desired Courant number if variable dt used
-    clawdata.cfl_desired = 0.700000
+    clawdata.cfl_desired = 0.900000
     # max Courant number to allow without retaking step with a smaller dt:
     clawdata.cfl_max = 1.000000
 
@@ -196,18 +225,18 @@ def setrun(claw_pkg='amrclaw'):
     # Order of accuracy:  1 => Godunov,  2 => Lax-Wendroff plus limiters
     clawdata.order = 2
 
-    # Use dimensional splitting? (not yet available for AMR)
-    clawdata.dimensional_split = 'unsplit'
+    # Use dimensional splitting?
+    clawdata.dimensional_split = False
 
     # For unsplit method, transverse_waves can be
     #  0 or 'none'      ==> donor cell (only normal solver used)
     #  1 or 'increment' ==> corner transport of waves
     #  2 or 'all'       ==> corner transport of 2nd order corrections too
-    clawdata.transverse_waves = 2
+    clawdata.transverse_waves = 22
 
 
     # Number of waves in the Riemann solution:
-    clawdata.num_waves = 4
+    clawdata.num_waves = 6
 
     # List of limiters to use for each wave family:
     # Required:  len(limiter) == num_waves
@@ -217,7 +246,7 @@ def setrun(claw_pkg='amrclaw'):
     #   2 or 'superbee' ==> superbee
     #   3 or 'vanleer'  ==> van Leer
     #   4 or 'mc'       ==> MC limiter
-    clawdata.limiter = ['mc', 'mc', 'mc', 'mc']
+    clawdata.limiter = ['mc', 'mc', 'mc', 'mc', 'mc','mc']
 
     clawdata.use_fwaves = False    # True ==> use f-wave version of algorithms
 
@@ -245,26 +274,10 @@ def setrun(claw_pkg='amrclaw'):
     clawdata.bc_upper[0] = 'extrap'   # at xupper
 
     clawdata.bc_lower[1] = 'extrap'   # at ylower
-    clawdata.bc_upper[1] = 'user'   # at yupper
+    clawdata.bc_upper[1] = 'extrap'   # at yupper
 
-
-
-    # ---------------
-    # Gauges:
-    # ---------------
-    gauges = rundata.gaugedata.gauges
-    # for gauges append lines of the form  [gaugeno, x, y, t1, t2]
-    ngauges = 100
-
-    # sea floor:
-    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, ngauges)
-    for gaugeno,x in enumerate(xgauges):
-        gauges.append([gaugeno,x,0.0,0,1e10])
-
-    # water_surface:
-    xgauges = np.linspace(clawdata.lower[0]+1, clawdata.upper[0]-1, ngauges)
-    for gaugeno,x in enumerate(xgauges):
-        gauges.append([ngauges+gaugeno,x,clawdata.upper[1]-1,0,1e10])
+    clawdata.bc_lower[2] = 'extrap'   # at zlower
+    clawdata.bc_upper[2] = 'user'   # at zupper
 
     # --------------
     # Checkpointing:
@@ -273,7 +286,7 @@ def setrun(claw_pkg='amrclaw'):
     # Specify when checkpoint files should be created that can be
     # used to restart a computation.
 
-    clawdata.checkpt_style = 1
+    clawdata.checkpt_style = 2
 
     if clawdata.checkpt_style == 0:
       # Do not checkpoint at all
@@ -285,7 +298,7 @@ def setrun(claw_pkg='amrclaw'):
 
     elif clawdata.checkpt_style == 2:
       # Specify a list of checkpoint times.
-      clawdata.checkpt_times = [0.1,0.15]
+      clawdata.checkpt_times = [1.0]
 
     elif clawdata.checkpt_style == 3:
       # Checkpoint every checkpt_interval timesteps (on Level 1)
@@ -293,85 +306,91 @@ def setrun(claw_pkg='amrclaw'):
       clawdata.checkpt_interval = 5
 
 
+    # ---------------
+    # Gauges:
+    # ---------------
+    gauges = rundata.gaugedata.gauges
 
+    # gauges for surface displacement
+    #xgauges = np.linspace(-150e3,200e3,350)
+    #ygauges = np.linspace(-87.5e3,87.5e3,350)
+    #gcount = 0
+    #for x in xgauges:
+    #    for y in ygauges:
+    #        gauges.append([gcount, x, y, clawdata.upper[2]-1, 0.0, 1e9])
+    #        gcount = gcount + 1
+    
     # ---------------
     # AMR parameters:
     # ---------------
     amrdata = rundata.amrdata
 
     # max number of refinement levels:
-    amrdata.amr_levels_max = 5
+    amrdata.amr_levels_max = 4
 
-    # List of refinement ratios at each level (length at least
-    # amr_level_max-1)
-    amrdata.refinement_ratios_x = [4,4,2,2]
-    amrdata.refinement_ratios_y = [4,4,2,2]
-    amrdata.refinement_ratios_t = [4,4,2,2]
-
+    # List of refinement ratios at each level (length at least amr_level_max-1)
+    amrdata.refinement_ratios_x = [2,2,2]
+    amrdata.refinement_ratios_y = [2,2,2]
+    amrdata.refinement_ratios_z = [2,2,2]
+    amrdata.refinement_ratios_t = [2,2,2]
 
     # Specify type of each aux variable in amrdata.auxtype.
     # This must be a list of length num_aux, each element of which is one
     # of:
     #   'center',  'capacity', 'xleft', or 'yleft'  (see documentation).
-    amrdata.aux_type = ['center', 'center', 'center', 'center', 'center', \
-        'center', 'center', 'center', 'center', 'center', 'center', \
-        'capacity','yleft']
-
-
+    amrdata.aux_type = ['zleft','capacity']
 
     # Flag for refinement based on Richardson error estimater:
     amrdata.flag_richardson = False    # use Richardson?
-    amrdata.flag_richardson_tol = 1.  # Richardson tolerance
-
+    amrdata.flag_richardson_tol = 1.000000e+00  # Richardson to
     # Flag for refinement using routine flag2refine:
     amrdata.flag2refine = True      # use this?
-    amrdata.flag2refine_tol = 1.0e-5 # tolerance used in this routine
-    # User can modify flag2refine to change the criterion for flagging.
-    # Default: check maximum absolute difference of first component of q
-    # between a cell and each of its neighbors.
+    amrdata.flag2refine_tol = 1.0e-4  # tolerance used in this routine
+    # Flags regions to be refined where tol is roughly the smallest amplitude of normal velocity to capture
 
     # steps to take on each level L between regriddings of level L+1:
-    amrdata.regrid_interval = 2
+    amrdata.regrid_interval = 4
 
     # width of buffer zone around flagged points:
     # (typically the same as regrid_interval so waves don't escape):
-    amrdata.regrid_buffer_width  = 1
+    amrdata.regrid_buffer_width  = 4
 
     # clustering alg. cutoff for (# flagged pts) / (total # of cells
     # refined)
     # (closer to 1.0 => more small grids may be needed to cover flagged
     # cells)
-    amrdata.clustering_cutoff =0.7
+    amrdata.clustering_cutoff = 0.700000
 
     # print info about each regridding up to this level:
-    amrdata.verbosity_regrid = 0
+    amrdata.verbosity_regrid = 4
 
 
-    # ---------------
-    # Regions:
-    # ---------------
+    # -------------------
+    # Refinement Regions:
+    # -------------------
     regions = rundata.regiondata.regions
     # to specify regions of refinement append lines of the form
-    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2]
+    #  [minlevel,maxlevel,t1,t2,x1,x2,y1,y2,z1,z2]
+    zbuffer = dz
+    xcb = [fault_xcenter-0.5*fault_width,fault_xcenter+0.5*fault_width]
+    ycb = [fault_ycenter-0.5*fault_length,fault_ycenter+0.5*fault_length]
 
-    ## Regions to facilitate outgoing boundary conditions
-    regions.append([1,1, 0,1e9, -1.e9, 1e9, -1e9, 1e9])
-    if (amrdata.amr_levels_max > 2):
-        regions.append([1,2, 0,1e9, -90e3, 140e3, -150e3, 1e9])
-    if (amrdata.amr_levels_max > 3):
-        regions.append([1,3, 0,1e9, -75e3, 125e3, -80e3, 1e9])
-    if (amrdata.amr_levels_max > 4):
-        regions.append([1,4, 0,1e9, -50e3, 105e3, -70e3, 1e9])
+    # high-resolution region to surround the fault during slip
+    regions.append([amrdata.amr_levels_max,amrdata.amr_levels_max, 
+                    0,1,
+                    xcb[0],xcb[1],
+                    ycb[0],ycb[1],
+                    -fault_depth-dz, -fault_depth+dz])
 
-    ## Region for the water
-    regions.append([1,amrdata.amr_levels_max, 0,1e9, -1e9, 1e9, 0, 1e9])
+    # decreasing-resolution for cells further away from fault
+    for j in range(amrdata.amr_levels_max-1):
+        regions.append([1,amrdata.amr_levels_max-j, 
+                    0,1e9,
+                    -1e9,1e9,
+                    -1e9,1e9,
+                    -2.0*fault_depth-j*zbuffer,0.0])
 
-    ## Region for the fault
-    regions.append([amrdata.amr_levels_max-1,amrdata.amr_levels_max-1,
-                    0,1, probdata.fault_center-0.5*probdata.fault_width-2*dx,
-                    probdata.fault_center+0.5*probdata.fault_width+2*dx,
-                    -probdata.fault_depth-2*dx, -probdata.fault_depth+2*dx])
-
+    regions.append([1,1, 0,1e9, -1.e9,1e9, -1e9,1e9,-1e9, 0.])
 
     #  ----- For developers -----
     # Toggle debugging print statements:
@@ -385,6 +404,27 @@ def setrun(claw_pkg='amrclaw'):
     amrdata.sprint = False      # space/memory output
     amrdata.tprint = False      # time step reporting each level
     amrdata.uprint = False      # update/upbnd reporting
+
+
+    # --------------
+    # Output Slices:
+    # --------------
+
+    slicedata = SliceData()
+    # use slicedata.add() to add output slices defined
+    # by a point (x,y,z) and a normal direction (vx,vy,vz)
+    # e.g. slicedata.add([x,y,z],[nx,ny,nz])
+
+    point = [fault_xcenter,fault_ycenter,-0.0001]
+    # surface slice:
+    slicedata.add(point,[0.0,0.0,1.0])
+
+    # cross section slices:
+    slicedata.add(point,[1.0,0.0,0.0])
+    slicedata.add(point,[0.0,1.0,0.0])
+
+    slicedata.write()
+
 
     return rundata
 
